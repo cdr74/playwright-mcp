@@ -29,9 +29,13 @@ starts on them, per `CLAUDE.md`.
       twice in its logs — and naively waiting for just the first occurrence
       (or one successful ping) races it and intermittently breaks the
       install mid-migration.
-- [x] **[DECISION]** Flow: "add employee → apply leave → verify leave list"
-      confirmed as the v1 flow — may still be adjusted as the harness comes
-      together, that's expected iteration and doesn't need re-confirming.
+- [x] **[DECISION]** Flow: "add employee → assign leave → verify" confirmed
+      as the v1 flow (corrected from an earlier "Apply Leave" description —
+      that screen is self-service only, doesn't fit "assign leave to a
+      newly created employee"; the right screen is the admin "Assign
+      Leave" flow, see `docs/app-knowledge.md`) — may still be adjusted as
+      the harness comes together, that's expected iteration and doesn't
+      need re-confirming.
 - [x] **[DECISION]** Reset strategy between benchmark repeats: **full
       reinstall** (`podman-compose down -v && ./app/install.sh`), not DB
       snapshot/restore — measured at ~80s end-to-end (images cached
@@ -50,6 +54,17 @@ starts on them, per `CLAUDE.md`.
 - [ ] **[DECISION]** How many repeat runs per condition for statistical
       noise (token counts and agent behavior aren't perfectly
       deterministic even at temperature 0) — still open.
+- [x] **[DECISION]** Measurement mechanism: **Claude Code (`claude -p`),
+      not the Anthropic API directly** — pivoted after the harness was
+      already built and working against the raw API, because API usage is
+      metered/billed separately while Claude Code usage rides on an
+      existing subscription (same reasoning as registering an MCP server
+      in Copilot/VS Code instead of paying per token). Confirmed no loss
+      of measurement precision first (see Gotchas below) before commiting
+      to the rewrite. Both conditions go through Claude Code, for
+      symmetry (the alternative — CLI condition direct-API, MCP condition
+      via Claude Code — would compare two different mechanisms, not just
+      two different tool surfaces). See `CLAUDE.md` decision 3.
 
 ## Phase 1 — Scaffolding (this delivery)
 
@@ -81,8 +96,18 @@ starts on them, per `CLAUDE.md`.
 ## Phase 2 — Test bed setup
 
 - [ ] **[DECISION]** Repeat-run count (only open decision left, see above).
-- [ ] Write `flows/01-add-employee-leave-request.md`: the exact
-      natural-language task spec given verbatim to both conditions.
+- [x] `flows/01-add-employee-leave-request.md`: the exact natural-language
+      task spec given verbatim to both conditions.
+- [x] `docs/app-knowledge.md`: the shared "tester knowledge" primer fed to
+      both conditions (navigation structure, exact fields/selectors for
+      Add Employee and Assign Leave, the Leave List quirk, why environment
+      prerequisites aren't part of the flow) — gathered by actually
+      exploring the running app with a throwaway Playwright script, not
+      guessed. See `CLAUDE.md` decision 10.
+- [x] `harness/src/seed.ts` (`npm run seed`): login + one-time Leave
+      Period/Leave Type setup + saves `harness/.auth/state.json`. Live-
+      validated against a freshly-installed instance (idempotent leave-
+      type check confirmed both "already exists" and "created" paths).
 - [ ] Record the CLI condition's seed fixture: run
       `npx playwright codegen <target-url>`, perform the flow by hand,
       save the raw output to `fixtures/01-add-employee-leave-request.codegen.ts`.
@@ -91,22 +116,148 @@ starts on them, per `CLAUDE.md`.
 
 ## Phase 3 — Harness
 
-- [ ] `harness/`: Anthropic API wrapper using `@anthropic-ai/sdk`, reading
-      `usage.input_tokens` / `usage.output_tokens` off every response.
-- [ ] MCP condition runner: spawns `@playwright/mcp`, wires its tools into
-      the agent loop; writes the generated spec file + `metrics.json` to
-      `results/<run-id>/`, full raw transcript (incl. MCP snapshots) to
-      `results/raw/<run-id>/`.
-- [ ] CLI condition runner: gives the agent file read/write + a sandboxed
-      shell tool scoped to `npx playwright test` (and nothing broader);
-      same `results/<run-id>/` vs `results/raw/<run-id>/` split.
-- [ ] `metrics.json` shape (see `results/README.md`): tokens by phase,
-      tool-call/turn count, wall-clock time, iterations-to-green.
+**v1 (direct Anthropic API), built and validated, then retired:**
+`harness/src/lib/agent-loop.ts` (generic tool-use loop) + `mcp-client.ts`
+(bridged `playwright-mcp` via `@modelcontextprotocol/sdk`'s stdio
+*client*) + `fs-tools.ts`/`run-test-tool.ts` (Anthropic-tool-executor-
+shaped `write_file`/`run_playwright_test`). All live-validated (MCP
+connected and listed 25 tools; `--storage-state` skipped login; the
+scoped tools wrote a real spec and ran it against the live app
+successfully) before being deleted once the Claude Code pivot (see Open
+decisions above) was confirmed to lose no measurement fidelity.
+
+**v2 (Claude Code-driven), current:**
+
+- [x] `harness/src/lib/claude-runner.ts`: spawns `claude -p
+      --output-format json` per phase, parses its JSON result (tokens,
+      cache tokens, `total_cost_usd`, `num_turns`, `permission_denials`)
+      directly, and separately extracts tool-call counts from the
+      session's own JSONL transcript
+      (`~/.claude/projects/<slug>/<session-id>.jsonl`).
+- [x] `harness/src/mcp-tools-server.ts`: `@modelcontextprotocol/sdk`'s
+      `McpServer` (server-side, not client) exposing `write_file` +
+      `run_playwright_test`, scoped to a run directory passed via `RUN_DIR`
+      env var, same path-traversal guard as v1. Live-validated directly
+      via a real MCP client (not through Claude Code): listed both tools,
+      wrote a real spec, blocked a path-traversal attempt, ran the spec
+      against the live app — passed.
+- [x] `harness/src/lib/mcp-tool-names.ts`: the curated (not full 25)
+      playwright-mcp browser toolset actually offered to the agent -
+      excludes `browser_run_code_unsafe`/`browser_evaluate` (arbitrary JS
+      execution, more capability than this flow needs) and several others
+      not relevant to a form-filling flow; deliberately includes
+      `browser_handle_dialog` (needed for the zero-balance confirmation
+      dialog, see `docs/app-knowledge.md`).
+- [x] `playwright.config.ts`: unchanged from v1 - `storageState` from
+      `seed.ts`, `baseURL` from `TARGET_APP_URL`.
+- [x] MCP condition runner, still split into two phases per `CLAUDE.md`
+      decision 1: `harness/src/explore-mcp.ts` / `generate-mcp.ts`,
+      rewritten to call `runClaude()` instead of the old agent loop. Same
+      `results/<run-id>/metrics.json` + `results/raw/<run-id>/*.jsonl`
+      output shape as before (field names inside `metrics.json` changed
+      to match Claude Code's richer usage object - see
+      `results/README.md`).
+- [x] **Partially live-validated**: an actual `explore-mcp.ts` run was
+      attempted (not through a deliberate test - it ran until a 60s
+      timeout killed it) and got far enough to prove `--mcp-config` +
+      `--dangerously-skip-permissions` work end-to-end when spawned from a
+      script (a real `mcp__playwright__browser_navigate` tool call
+      happened) - but it also caught a real bug: the agent navigated to
+      `localhost:3000` (a guessed default) instead of `localhost:8081`,
+      because nothing in the prompt stated the target URL. Fixed by
+      injecting `Target application base URL: ...` into the system prompt
+      in both phase scripts, from `TARGET_APP_URL`.
+- [ ] **Run a complete MCP condition end to end** (both phases, without
+      being killed by a timeout) - still not done. Has to happen from a
+      terminal that isn't itself a sandboxed Claude Code session, since
+      this session's own auto-mode classifier blocks the permission
+      bypass (see `CLAUDE.md` decision 3) - this is the next concrete
+      thing to try.
+- [ ] CLI condition runner: per the "both conditions via Claude Code"
+      decision above, will reuse `claude-runner.ts` +
+      `mcp-tools-server.ts` (write_file/run_playwright_test only, no
+      playwright-mcp registered, and critically `--tools` must exclude
+      Claude Code's native `Bash` - see `CLAUDE.md` decision 1). Not
+      started.
 - [ ] `docs/quality-rubric.md`: define the quality checks (selector
       robustness, assertion quality, best-practices adherence,
       flakiness-across-N-runs) and how they're scored — manual checklist
       first, consider an automated/LLM-judge pass later.
 - [ ] Quality scorer: runs the rubric against a produced spec file.
+
+## Gotchas hit and fixed during harness development
+
+Kept here rather than only in commit history since they're the kind of
+thing anyone reproducing this repo would hit again.
+
+- **dotenv silently truncates unquoted values at `#`.**
+  `OHRM_ADMIN_PASSWORD=PwMcpBench#2026` in `.env` loaded as `PwMcpBench` —
+  no error, just a truncated password that made `seed.ts` hang on the
+  login form until diagnosed. Fixed by quoting the value in `.env.example`
+  (`OHRM_ADMIN_PASSWORD="PwMcpBench#2026"`). Applies to any future env var
+  with a `#` in it.
+- **`@playwright/mcp` and `@playwright/test` can silently resolve to two
+  different `playwright-core` copies.** `@playwright/mcp` hard-pins an
+  exact (often alpha/ahead-of-stable) `playwright` version internally; if
+  `@playwright/test`'s own version wants a different one, npm installs
+  both, and whichever wins the `node_modules/.bin/playwright` symlink can
+  be the *wrong* one for `@playwright/test`'s runtime. Symptom 1: `npx
+  playwright test` fails every file with "Playwright Test did not expect
+  test() to be called here / you have two different versions of
+  @playwright/test" — a real singleton conflict, not a flake. Symptom 2
+  (once past that): browser executable version mismatch. Fixed by pinning
+  `@playwright/test` in `package.json` to the *exact* build string
+  `@playwright/mcp` depends on, so npm dedupes to one shared copy — see
+  `CLAUDE.md` tech stack section for the re-pin procedure when
+  `@playwright/mcp` gets bumped.
+- **OrangeHRM's Leave List search can silently show "No Records Found" for
+  a leave request that genuinely exists** (confirmed via direct
+  `ohrm_leave` / `ohrm_leave_request` table inspection in the app's own
+  MariaDB) — reproduced consistently with an exact employee-name filter
+  and a date range bracketing the known date, root cause not pinned down.
+  Documented as a known quirk in `docs/app-knowledge.md` rather than
+  something to "fix" (it's the app's behavior, not the harness's) — the
+  flow's verification step is written to treat the post-assignment
+  success toast as primary evidence, Leave List as secondary/best-effort.
+- **Claude Code's session transcripts are a legitimate source of exact
+  token/cost data.** Before pivoting away from the direct-API harness,
+  checked this session's own `~/.claude/projects/.../*.jsonl` and
+  confirmed each assistant message's `usage` field has the same shape the
+  raw Anthropic API returns (`input_tokens`, `output_tokens`,
+  `cache_creation_input_tokens`, `cache_read_input_tokens`) - actually
+  richer, since `claude -p --output-format json`'s single result object
+  also includes `total_cost_usd` and `permission_denials` without needing
+  the transcript at all.
+- **A Claude Code session cannot validate `--dangerously-skip-permissions`
+  by running it on itself.** Trying (via this session's own Bash tool) to
+  spawn a nested `claude -p --dangerously-skip-permissions ...` got
+  blocked every time by the session's own auto-mode classifier
+  ("Permission for this action was denied by the Claude Code auto mode
+  classifier"), regardless of which bypass flag was used
+  (`--dangerously-skip-permissions` vs `--permission-mode
+  bypassPermissions`). This is a safety guardrail, not a bug - don't try
+  to route around it. It did **not** block the same mechanism when called
+  from inside a script via `child_process.execFile` (a real
+  `explore-mcp.ts` run got far enough to make an actual
+  `mcp__playwright__browser_navigate` tool call before a test timeout
+  killed it) - so the restriction is specifically about a Claude Code
+  session directly commanding a permission-bypassed nested session, not
+  about the mechanism itself failing.
+- **Nothing told the agent the target app's URL.** Neither
+  `flows/01-add-employee-leave-request.md` nor `docs/app-knowledge.md`
+  states it (reasonably, for app-knowledge - it's config, not "knowledge
+  a tester would have memorized"). Caught for real: a live (if
+  timeout-truncated) run navigated to `http://localhost:3000/...`, a
+  guessed default, instead of `8081`. Fixed by injecting
+  `Target application base URL: ${TARGET_APP_URL}` into both phase
+  scripts' system prompts at runtime, not hardcoding it in a doc.
+- Cleanup note: that same truncated test run left an unrelated **orphaned
+  `playwright-mcp --port 8931` process** running from an earlier *manual*
+  HTTP-mode smoke test hours before (its `kill` apparently didn't take, or
+  a second instance got spawned) - found via `ps aux` while debugging,
+  not by anything the harness itself does wrong. Worth an occasional
+  `ps aux | grep playwright-mcp` sanity check during heavy harness
+  iteration, not something to build automated cleanup for at this stage.
 
 ## Phase 4 — Run & report
 

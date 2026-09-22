@@ -38,10 +38,10 @@ realistic, best-practice workflows for the same task:
 
 | | MCP condition | CLI condition |
 |---|---|---|
-| Starting point | Natural-language task spec only | Natural-language task spec + a checked-in `playwright codegen` recording |
-| Tools available to the agent | Playwright MCP (browser control + snapshots) + file write | File read/write + shell (`npx playwright test`) — **no** live browser tools |
+| Starting point | Natural-language task spec + app knowledge (see below) | Natural-language task spec + app knowledge + a checked-in `playwright codegen` recording |
+| Tools available to the agent | Playwright MCP (browser control + snapshots) + scoped file write + scoped test runner | File read/write + shell (`npx playwright test`) — **no** live browser tools |
 | How it "sees" the app | Live accessibility-tree snapshots each step | Only the raw codegen recording and terse test-run output |
-| Iteration loop | Explore → act → observe → repeat, then author the test | Rewrite/clean the recording → run tests → read failure output → fix → repeat |
+| Iteration loop | Explore live → write a test plan → author the test → run it → fix → repeat | Rewrite/clean the recording → run tests → read failure output → fix → repeat |
 
 Both conditions get the **exact same task description**. The codegen
 recording step is a deterministic, zero-LLM-token, one-time recording
@@ -49,10 +49,42 @@ recording step is a deterministic, zero-LLM-token, one-time recording
 run) — it models the fact that a human CLI user would record their own
 flow first, the same way an MCP-driven agent gets to look at the live page.
 
+The MCP condition itself runs as two separate agent phases, each its own
+measured phase in `metrics.json`: **explore** (browser tools + a
+`write_file` tool scoped to the run's output directory - produces
+`test-plan.md`, no code yet) and **generate** (same tools, plus a
+`run_playwright_test` tool that runs `npx playwright test <path>` and
+returns condensed pass/fail output - produces and iterates on the actual
+spec file). Splitting it this way mirrors how a tester would actually
+work, and keeps "did it explore effectively" and "did it turn that into a
+working test" separately measurable. See `harness/src/explore-mcp.ts` /
+`harness/src/generate-mcp.ts`.
+
+### The "tester knowledge" assumption
+
+Neither condition starts from zero. A real tester assigned to test an app
+would already have a rough mental model of it - where things live, what
+the modules are called - before writing a single test. Pretending an
+agent should rediscover that from scratch on every run would bias the
+comparison toward whichever condition happens to explore more cheaply,
+which isn't the thing we're trying to measure.
+
+So both conditions are given the same **app knowledge primer**
+(`docs/app-knowledge.md`) verbatim, as part of the system prompt, in
+addition to the task spec (`flows/`). It covers navigation structure,
+where the relevant forms live, and known quirks/gotchas of this specific
+app build - all gathered by actually exploring the running instance during
+harness development, not guessed. This is also where environment-level
+prerequisites the flow itself shouldn't have to deal with are documented
+(see "one-time environment setup" below) - the same way a tester wouldn't
+expect to have to configure basic org settings as part of testing a
+specific feature.
+
 Every run is measured on three axes, not just token count:
 
-1. **Cost** — exact input/output tokens from the Anthropic API's `usage`
-   field on every call.
+1. **Cost** — exact input/output/cache tokens and an implied USD figure,
+   read straight off `claude -p --output-format json`'s own result for
+   every call (see "Measurement mechanism" below).
 2. **Efficiency** — number of tool calls/turns, test-run iterations to
    green, wall-clock time.
 3. **Quality** — a rubric on the resulting test file: selector robustness,
@@ -62,6 +94,22 @@ Every run is measured on three axes, not just token count:
 v1 benchmarks a single model (Claude Sonnet) to keep the first pass simple.
 Broader model coverage, to see whether the MCP/CLI gap is model-dependent,
 is a deliberate later phase — see `TODO.md`.
+
+### Measurement mechanism
+
+The harness drives **Claude Code** (`claude -p`, non-interactive) as the
+agent for each phase, rather than calling the Anthropic API directly —
+this was a real pivot partway through building it, not the original plan.
+Reason: API usage is billed per token on top of whatever you already pay
+for; Claude Code usage rides on an existing subscription, the same
+reasoning as registering an MCP server in Copilot/VS Code instead of
+paying per call. Before committing to the rewrite, confirmed there's no
+loss of measurement precision: Claude Code's own session logs (and
+`claude -p --output-format json`'s result object directly) carry the exact
+same token/cache/cost data the raw API returns. See `CLAUDE.md` decision 3
+for the full mechanics (how the tool surface stays scoped under Claude
+Code, how permission bypass for unattended runs works, what was verified
+before building on top of it).
 
 See `CLAUDE.md` for the full set of confirmed design decisions and
 `TODO.md` for what's built vs. still open.
@@ -73,7 +121,8 @@ MCP accessibility-tree dumps, Playwright screenshots/videos/traces. None of
 that belongs in git. What's actually kept, per run, in `results/<run-id>/`:
 
 - the generated test file itself (the actual deliverable of the run)
-- token usage (input/output, from the API's `usage` field)
+- for the MCP condition, the exploration phase's `test-plan.md`
+- token/cache/cost usage (from `claude -p`'s own result)
 - efficiency counts (tool calls/turns, iterations-to-green, wall-clock time)
 - quality rubric scores
 
@@ -99,23 +148,36 @@ test (multi-page navigation, forms with validation, dropdowns, date
 pickers, data tables) without being a sprawling real-world app that would
 make "one flow" an arbitrary slice.
 
-**Flow (v1): "Add employee, then apply and verify leave"**
+**Flow (v1): "Add employee, then assign and verify leave"** — see
+`flows/01-add-employee-leave-request.md` for the exact task spec given to
+both conditions:
 
-1. Log in.
-2. Go to PIM → Add Employee, create a new employee with a generated unique
-   name/ID.
-3. Go to Leave → Apply, submit a leave request for that employee covering a
-   specific date range.
-4. Go to Leave → My Leave / Leave List, and verify the request appears with
-   the expected employee, dates, and status.
+1. Create a new employee (PIM module) with a generated unique name.
+2. Assign that employee a leave request via the Leave module's
+   **administrative assignment** screen (not the self-service "Apply"
+   screen, which only applies leave for whichever user is logged in - see
+   `docs/app-knowledge.md` for why this distinction matters and tripped up
+   exploration).
+3. Verify the request was recorded.
 
-That's ~8–12 logical steps: login, multi-page navigation, form-filling with
-validation, and reading back a data table to verify state — comparable in
-shape to the "log in, navigate, read a table, click through" example from
-the inspiring post, but concrete and scripted rather than hand-waved.
+That's a non-trivial multi-page, multi-module flow with real form
+validation and state to verify — comparable in shape to the "log in,
+navigate, read a table, click through" example from the inspiring post,
+but concrete and scripted rather than hand-waved. Login itself isn't part
+of the flow given to the agent - see "one-time environment setup" below.
 
 Confirmed as the v1 flow — may be adjusted as the harness comes together
 and we see how it behaves in practice.
+
+**One-time environment setup, not part of the flow:** logging in, and a
+freshly-installed OrangeHRM's Leave module being completely unusable until
+an admin has defined a Leave Period and at least one Leave Type - both
+one-time org configuration a real tester would expect to already be done,
+not something an "add an employee, assign them leave" test should have to
+set up itself. `harness/src/seed.ts` (`npm run seed`) does this once,
+deterministically, outside either condition's token budget, and saves an
+authenticated browser storage state both conditions start from. Full
+details in `docs/app-knowledge.md`.
 
 **Resetting between runs:** a full teardown + reinstall
 (`podman-compose down -v && ./install.sh`) takes about **80 seconds**
@@ -126,32 +188,47 @@ if it turns out to be a bottleneck once the harness is running many repeats.
 
 ## Status
 
-Environment phase done: the target app (self-hosted, scripted install),
-Playwright, and Playwright MCP are all automated and independently
-verified working (see `docs/verify-setup.md`). The measurement harness
-itself doesn't exist yet — no runs, no numbers — see `TODO.md` for the
-build plan.
+Environment phase done (target app, Playwright, Playwright MCP - all
+automated and verified, see `docs/verify-setup.md`). The **MCP condition**
+harness is built (`npm run seed`, `npm run explore:mcp`,
+`npm run generate:mcp`) and its individual pieces are all live-validated
+against the running app - the custom scoped-tools MCP server, the
+Claude-Code-registration mechanism (`--mcp-config` + permission bypass), a
+real (if timeout-truncated) tool call. What hasn't happened yet is one
+complete, uninterrupted run of both phases - no MCP-condition numbers
+exist yet. Has to run from a plain terminal, not from inside another
+Claude Code session (see `harness/README.md`). The **CLI condition**
+harness doesn't exist yet. See `TODO.md`.
 
 ## Getting started
 
 ```bash
 cp .env.example .env
 npm install
-npm run setup          # target app (Docker or Podman both work) + Playwright browser binary
-npm run verify:tools   # sanity-check playwright and playwright-mcp are both runnable
+npm run setup           # target app (Docker or Podman both work) + Playwright browser binary
+npm run verify:tools    # sanity-check playwright and playwright-mcp are both runnable
+npm run seed             # log in once, do one-time env setup, save auth state
 ```
+
+No API key needed - just the `claude` CLI installed and authenticated
+(`claude auth login`).
 
 Then walk through `docs/verify-setup.md` to manually confirm the app,
-Playwright CLI, and Playwright MCP all actually work before anything is
-built on top of them. `npm run cleanup:app` tears the app stack back down.
+Playwright CLI, and Playwright MCP all actually work. `npm run cleanup:app`
+tears the app stack back down (pair with a fresh `npm run setup:app` +
+`npm run seed` to get back to a clean, known state).
 
-The harness itself isn't runnable end-to-end yet — see `TODO.md`. Once it
-lands:
+Run the MCP condition end to end (**from a plain terminal, not from
+inside a Claude Code session** — see `harness/README.md` for why):
 
 ```bash
-npm run bench:mcp      # run the MCP condition
-npm run bench:cli      # run the CLI condition
+npm run explore:mcp     # prints a RUN_ID
+RUN_ID=<id> npm run generate:mcp
 ```
+
+Results land in `results/<run-id>/` (`test-plan.md`, `tests/*.spec.ts`,
+`metrics.json`) and `results/raw/<run-id>/` (full transcripts). The CLI
+condition (`npm run bench:cli`) isn't built yet — see `TODO.md`.
 
 ## License
 

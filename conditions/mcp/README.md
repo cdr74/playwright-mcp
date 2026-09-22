@@ -1,9 +1,19 @@
 # conditions/mcp/
 
-Config and system prompt for the **MCP condition**: the agent gets
-Playwright MCP tools (`browser_navigate`, `browser_snapshot`,
-`browser_click`, etc.) plus a file-write tool, and explores the live target
-app autonomously from a `flows/` task spec to author the final test file.
+Prompts for the **MCP condition**, run as two phases by
+`harness/src/explore-mcp.ts` and `harness/src/generate-mcp.ts`:
 
-`system-prompt.md` (to be written, `TODO.md` Phase 3) is the exact system
-prompt used, checked in so the run is reproducible.
+- `explore-prompt.md` — phase 1: browser tools (Playwright MCP) + a
+  scoped `write_file` tool. Explores the live app, writes `test-plan.md`.
+  No code written in this phase.
+- `generate-prompt.md` — phase 2: same tools + a scoped
+  `run_playwright_test` tool. Turns the test plan into a real spec file
+  and iterates on it until it passes (or gives up honestly).
+
+Both are combined at runtime with the shared `docs/app-knowledge.md`
+primer and the target app's URL (from `TARGET_APP_URL`) as the system
+prompt, passed to Claude Code via `--system-prompt` (a full replace, not
+an append - keeps Claude Code's own default system prompt out of it).
+Checked in as plain files (not embedded in code) so the exact prompt used
+for any run is reviewable/diffable and prompt changes are a deliberate,
+visible edit.

@@ -2,8 +2,12 @@
 
 Everything below is automated (`npm install && npm run setup`), and was
 scripted-and-verified once already during scaffolding. This doc is for
-**you** to independently confirm it actually works on your machine before
-we build anything on top of it — five minutes, no code required.
+**you** to independently confirm it actually works on your machine — five
+minutes, no code required. Sections 1-4 cover the environment (done and
+built on top of already); section 5 covers the MCP condition harness built
+on top of it - it needs the `claude` CLI (installed, authenticated) and,
+critically, **must be run from a plain terminal, not from inside another
+Claude Code session** - see that section for why.
 
 ## 1. The target app
 
@@ -17,8 +21,9 @@ Then open **http://localhost:8081/** in a real browser and log in:
 - Password: `PwMcpBench#2026`
 
 You should land on the OrangeHRM dashboard. Poke around PIM → Employee
-List and Leave → Apply to get a feel for the flow we'll be scripting
-against (see `README.md` "Test bed").
+List and Leave → Assign Leave to get a feel for the flow we'll be
+scripting against (see `README.md` "Test bed"; note it's "Assign Leave",
+not the self-service "Apply" screen - see `docs/app-knowledge.md` for why).
 
 ## 2. Playwright CLI
 
@@ -74,6 +79,35 @@ Stops and removes the app + db containers and their volumes. Confirm
 `http://localhost:8081/` stops responding, then bring it back with
 `npm run setup:app` to confirm the whole cycle is repeatable.
 
+## 5. The MCP condition harness
+
+No API key needed - the harness drives the `claude` CLI (your existing
+Claude Code subscription), not the Anthropic API directly. You do need
+`claude` installed and authenticated (`claude auth login`).
+
+**Run this from a plain terminal, not from inside a Claude Code session.**
+The scripts need `--dangerously-skip-permissions` for unattended tool use,
+and a Claude Code session's own auto-mode classifier blocks it from
+spawning a *nested* permission-bypassed session - confirmed while building
+this (see `TODO.md` Gotchas). It's not blocked when run as a plain
+script/process, just when a Claude Code session tries to command it
+directly.
+
+```bash
+npm run seed           # login + one-time Leave module setup, saves harness/.auth/state.json
+npm run explore:mcp    # prints a RUN_ID when done
+RUN_ID=<id> npm run generate:mcp
+```
+
+Check `results/<run-id>/test-plan.md` and
+`results/<run-id>/tests/add-employee-leave.spec.ts` were produced and make
+sense, and `results/<run-id>/metrics.json` has plausible-looking token
+counts and cost. `results/raw/<run-id>/*-transcript.jsonl` has the full
+detail if something looks off.
+
 ---
 
-If all four sections work, this phase is done and ready to commit.
+If sections 1-4 work, the environment phase is solid. Section 5 is the
+first real end-to-end signal on the harness itself - as of this writing it
+has only been partially exercised (see `TODO.md` Phase 3), not run to full
+completion.

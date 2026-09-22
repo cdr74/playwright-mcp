@@ -9,17 +9,20 @@
     "setup:tools": "playwright install chromium",
     "setup:app": "app/install.sh",
     "setup": "npm run setup:tools && npm run setup:app",
+    "seed": "tsx harness/src/seed.ts",
     "verify:tools": "playwright --version && playwright-mcp --version",
     "cleanup:app": "app/cleanup.sh",
-    "bench:mcp": "echo 'not implemented yet - see TODO.md Phase 3' && exit 1",
+    "explore:mcp": "tsx harness/src/explore-mcp.ts",
+    "generate:mcp": "tsx harness/src/generate-mcp.ts",
     "bench:cli": "echo 'not implemented yet - see TODO.md Phase 3' && exit 1"
   },
   "license": "MIT",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.127.0",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "@playwright/mcp": "^0.0.82",
-    "@playwright/test": "^1.63.0",
-    "dotenv": "^16.4.5"
+    "@playwright/test": "1.64.0-alpha-1789764292000",
+    "dotenv": "^16.4.5",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",

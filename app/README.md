@@ -81,8 +81,14 @@ end-to-end (measured with images already cached locally) — that's the
 confirmed reset strategy between benchmark repeats, see `README.md` "Test
 bed" and `TODO.md`.
 
+## After installing: seed it
+
+`install.sh` only gets OrangeHRM itself running - it doesn't configure the
+Leave module (needs a one-time Leave Period + Leave Type, see
+`docs/app-knowledge.md`) or produce the authenticated session the harness
+conditions use. Run `npm run seed` (from the repo root) after
+`install.sh`/`cleanup.sh` cycles - see `harness/README.md`.
+
 ## Open items
 
-See `TODO.md` Phase 2 — the actual flow spec (`flows/`) to exercise
-against this instance, and the codegen fixture that seeds the CLI
-condition.
+See `TODO.md` Phase 2 — the codegen fixture that seeds the CLI condition.

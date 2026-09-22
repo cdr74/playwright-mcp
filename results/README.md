@@ -1,28 +1,35 @@
 # results/
 
-Output of benchmark runs, split into what's kept and what isn't.
+Output of benchmark runs, split into what's kept and what isn't. Now
+implemented by `harness/src/explore-mcp.ts` / `generate-mcp.ts` (the CLI
+condition will follow the same shape).
 
 ## `results/<run-id>/` — committed-eligible
 
-The defined, lightweight set of facts we keep per run. Not implemented by
-the harness yet (`TODO.md` Phase 3), but the shape is settled:
+- `test-plan.md` — MCP condition only, from the explore phase.
+- `tests/add-employee-leave.spec.ts` (or similar) — the actual
+  generated/healed test file. This is the deliverable of the run, not
+  exhaust.
+- `metrics.json` — `{ runId, condition, phases: [...] }`, one entry per
+  phase (`explore` / `generate` for MCP; a single phase for CLI), each
+  with `model`, `sessionId` (the Claude Code session id - use it to find
+  the full transcript), `inputTokens`, `outputTokens`,
+  `cacheCreationInputTokens`, `cacheReadInputTokens`, `costUsd` (list-price
+  USD equivalent from `claude -p`'s own result, even though it's not
+  billed per-call under a subscription - useful for comparison), `turns`,
+  `toolCallCounts` (`{ toolName: count }`), `permissionDenials` (>0 means
+  the agent got blocked from something - a real signal), `startedAt`,
+  `finishedAt`, `durationMs`. Quality rubric scores will be added once
+  `docs/quality-rubric.md` and the scorer exist (`TODO.md`).
 
-- `spec.ts` (or similar) — the actual generated/healed test file. This is
-  the deliverable of the run, not exhaust.
-- `metrics.json` — structured facts only:
-  - `condition` (`mcp` | `cli`), `model`, `flow`, `runId`, `timestamp`
-  - `tokens`: input/output token counts from the Anthropic API's `usage`
-    field, broken down by phase where possible (e.g. exploration vs
-    authoring for the MCP condition)
-  - `efficiency`: tool-call/turn count, test-run iterations to green,
-    wall-clock time
-  - `quality`: rubric scores (once `docs/quality-rubric.md` and the scorer
-    exist)
+## `results/raw/<run-id>/` — gitignored, local only
 
-## `results/raw/` — gitignored, local only
-
-Everything else a run produces: full agent transcripts (including raw MCP
-accessibility-tree snapshots — these are exactly the bulk this project is
-trying to measure, not something to duplicate into git), and any Playwright
-run artifacts (screenshots, videos, trace files, HTML reports). Useful for
-debugging a specific run locally. Never committed — see `.gitignore`.
+`<phase>-transcript.jsonl` — a copy of that phase's full Claude Code
+session transcript (from `~/.claude/projects/<slug>/<session-id>.jsonl`,
+copied here so it doesn't depend on Claude Code's own session retention).
+Includes raw MCP accessibility-tree snapshots — exactly the bulk this
+project is trying to measure, not something to duplicate into git. Plus
+any Playwright run artifacts (screenshots, videos, trace files, HTML
+reports, under the repo root's own gitignored `test-results/` /
+`playwright-report/`). Useful for debugging a specific run locally. Never
+committed — see `.gitignore`.
