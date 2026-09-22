@@ -1,0 +1,29 @@
+{
+  "name": "playwright-mcp-bench",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Reproducible benchmark of Playwright MCP vs Playwright CLI token cost, efficiency, and test quality for AI-driven test generation.",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "setup:tools": "playwright install chromium",
+    "setup:app": "app/install.sh",
+    "setup": "npm run setup:tools && npm run setup:app",
+    "verify:tools": "playwright --version && playwright-mcp --version",
+    "cleanup:app": "app/cleanup.sh",
+    "bench:mcp": "echo 'not implemented yet - see TODO.md Phase 3' && exit 1",
+    "bench:cli": "echo 'not implemented yet - see TODO.md Phase 3' && exit 1"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.127.0",
+    "@playwright/mcp": "^0.0.82",
+    "@playwright/test": "^1.63.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

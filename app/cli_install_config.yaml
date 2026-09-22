@@ -1,0 +1,38 @@
+# Checked-in, reproducible install config for app/install.sh - copied into
+# the ohrm-bench-app container and run through OrangeHRM's non-interactive
+# CLI installer (installer/cli_install.php). Not a secret: this is a
+# throwaway local benchmarking instance, and the whole point of checking
+# this in is that anyone can reproduce byte-identical credentials/state.
+#
+# hostName/privilegedDatabase* must match app/docker-compose.yml's db
+# service. databaseName is deliberately NOT "orangehrm" (the schema MariaDB
+# pre-creates via MYSQL_DATABASE) because the installer refuses to reuse an
+# already-existing (even empty) database - it creates its own fresh one.
+
+database:
+  hostName: db
+  hostPort: 3306
+  databaseName: orangehrm_app
+  privilegedDatabaseUser: root
+  privilegedDatabasePassword: orangehrm_root
+  useSameDbUserForOrangeHRM: y
+  orangehrmDatabaseUser: ~
+  orangehrmDatabasePassword: ~
+  isExistingDatabase: n
+  enableDataEncryption: n
+
+organization:
+  name: playwright-mcp-bench
+  country: US
+
+admin:
+  adminUserName: Admin
+  adminPassword: PwMcpBench#2026
+  adminEmployeeFirstName: Bench
+  adminEmployeeLastName: Admin
+  workEmail: admin@example.com
+  contactNumber: ~
+  registrationConsent: true
+
+license:
+  agree: y

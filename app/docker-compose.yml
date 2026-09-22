@@ -1,0 +1,38 @@
+# Self-hosted target app: OrangeHRM, pinned to 5.9. Works with either Docker
+# or Podman (validated with podman-compose 1.5.0 / podman 5.7.0, rootless).
+#
+# Don't just `up -d` this and expect a working login - OrangeHRM has no
+# env-var-driven bootstrap. Use app/install.sh instead: it brings this stack
+# up AND runs OrangeHRM's non-interactive CLI installer against it (fully
+# scripted, no manual web wizard click-through). See app/README.md.
+
+services:
+  db:
+    image: docker.io/library/mariadb:10.4
+    container_name: ohrm-bench-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${OHRM_DB_ROOT_PASSWORD:-orangehrm_root}
+      MYSQL_DATABASE: ${OHRM_DB_NAME:-orangehrm}
+      MYSQL_USER: ${OHRM_DB_USER:-orangehrm}
+      MYSQL_PASSWORD: ${OHRM_DB_PASSWORD:-orangehrm}
+    volumes:
+      - ohrm-db-data:/var/lib/mysql
+
+  app:
+    image: docker.io/orangehrm/orangehrm:5.9
+    container_name: ohrm-bench-app
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "${OHRM_PORT:-8081}:80"
+    volumes:
+      # persists the installer's DB connection config (lib/confs) across
+      # container recreation, so the one-time install wizard survives
+      # `down` / `up` cycles as long as the volume isn't removed.
+      - ohrm-app-confs:/var/www/html/lib/confs
+
+volumes:
+  ohrm-db-data:
+  ohrm-app-confs:

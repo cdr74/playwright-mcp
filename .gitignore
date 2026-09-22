@@ -1,0 +1,26 @@
+# Node
+node_modules/
+dist/
+npm-debug.log*
+.npm
+
+# env / secrets
+.env
+.env.local
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# raw per-run traces (large, noisy) - aggregated summaries are committed deliberately, see results/README.md
+results/raw/
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+*.log
