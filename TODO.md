@@ -223,17 +223,42 @@ decisions above) was confirmed to lose no measurement fidelity.
       "first option" could select the re-rendered `-- Select --`
       placeholder rather than a real leave type. Full numbers in
       `results/cli-2026-09-25T08-46-56-590Z/metrics.json`.
-- [ ] `docs/quality-rubric.md`: define the quality checks (selector
-      robustness, assertion quality, best-practices adherence,
-      flakiness-across-N-runs) and how they're scored — manual checklist
-      first, consider an automated/LLM-judge pass later.
-- [ ] Quality scorer: runs the rubric against a produced spec file.
+- [x] `docs/quality-rubric.md`: 6 criteria (the 5 from `CLAUDE.md`
+      decision 2, plus a 6th - task/spec compliance - added and flagged
+      explicitly after the first scoring pass showed a real need for it),
+      0-4 each. Manual for now, per the original plan; automated/LLM-judge
+      pass still a later option, see below.
+- [x] First manual scoring pass, both runs from `docs/results.md`: MCP
+      23/24, CLI 20/24. Criterion 3 (flakiness) was **measured**, not
+      estimated - each test actually re-run 5x (`--repeat-each=5
+      --workers=1`) against a live, re-seeded app: MCP 5/5, CLI 2/5. Root
+      cause of the CLI gap traced to the DB, not guessed: CLI's test
+      hardcodes `firstName = 'Thomas'` (inherited from the codegen
+      fixture) and only generates a unique last name, so its employee-
+      autocomplete search gets less selective every time the test runs -
+      8 "Thomas" employees existed by the time of this scoring pass. A
+      literal criterion-6 gap directly caused the criterion-3 flakiness -
+      see `docs/results.md` "Quality" for the full writeup.
+- [ ] Quality scorer: an automated/LLM-judge pass that runs the rubric
+      against a produced spec file without a human doing it by hand. Not
+      started - the manual pass above is still the only path today.
 
 ## Gotchas hit and fixed during harness development
 
 Kept here rather than only in commit history since they're the kind of
 thing anyone reproducing this repo would hit again.
 
+- **The saved auth session in `harness/.auth/state.json` can expire
+  between when a test was generated and when you come back to run it
+  later.** Hit while manually re-running both conditions' generated tests
+  for `docs/quality-rubric.md` scoring, ~2 hours after the original runs:
+  all 5 repeat runs failed identically at the first form field, timeout
+  waiting for an element that was actually the *login page*, not the
+  form - `storageState` had a stale, expired session cookie.
+  `npm run seed` before scoring/re-running any older generated test fixed
+  it immediately. Not a harness bug - OrangeHRM's session simply times
+  out - but easy to misdiagnose as a test defect if you don't check the
+  actual page snapshot in the failure output first.
 - **`seed.ts`'s Leave Type creation silently no-op'd — logged success,
   created nothing.** Surfaced when a user recording the CLI fixture hit
   "No Records Found" in the Assign Leave Type dropdown on a freshly

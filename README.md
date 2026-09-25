@@ -212,9 +212,19 @@ inspiring post's claim, in `docs/results.md`.
 | Turns | 135 | 9 | ~15x |
 | Test-run iterations to green | 8 | 4 | ~2x |
 | Wall clock | ~9.8 min | ~4.1 min | ~2.4x |
+| **Quality** (`docs/quality-rubric.md`, /24) | **23** | **20** |  |
+| — pass reliability, 5 real repeat runs | 5/5 | **2/5** |  |
 
-Both runs produced a passing test on the first complete attempt. See
-`results/mcp-2026-09-25T06-32-18-639Z/` and
+Both runs produced a passing test on the first complete attempt, and both
+generated tests read as solid on inspection - role-based locators, no hard
+sleeps, real assertions. The quality gap only shows up when you actually
+*run* them repeatedly: the CLI test hardcodes one of the two names the
+flow spec asks to be "unique, generated" (inherited from the codegen
+fixture it started from), so its employee-autocomplete search gets less
+selective every time the test runs and it failed 3 of 5 repeat attempts.
+The MCP test generates both names and passed 5/5. See `docs/results.md`
+"Quality" for the full root-cause writeup, and
+`results/mcp-2026-09-25T06-32-18-639Z/` /
 `results/cli-2026-09-25T08-46-56-590Z/` for the raw `metrics.json` and
 generated spec files.
 

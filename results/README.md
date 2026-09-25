@@ -21,8 +21,11 @@ first aggregated write-up across both.
   billed per-call under a subscription - useful for comparison), `turns`,
   `toolCallCounts` (`{ toolName: count }`), `permissionDenials` (>0 means
   the agent got blocked from something - a real signal), `startedAt`,
-  `finishedAt`, `durationMs`. Quality rubric scores will be added once
-  `docs/quality-rubric.md` and the scorer exist (`TODO.md`).
+  `finishedAt`, `durationMs`. Doesn't hold quality scores yet -
+  `docs/quality-rubric.md` exists and has been applied manually
+  (`docs/results.md`), but wiring scores into `metrics.json` itself is
+  waiting on the automated scorer (`TODO.md` Phase 3) so the field shape
+  is set once, not guessed at now and reshaped later.
 
 ## `results/raw/<run-id>/` — gitignored, local only
 

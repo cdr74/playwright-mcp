@@ -74,38 +74,72 @@ worse than what caching's dollar figure alone suggests.**
   (but cache-discounted, and thus not necessarily slow) context, not by
   proportionally more real work.
 
-## Quality (qualitative, N=1 — not scored against `docs/quality-rubric.md`,
-which doesn't exist yet)
+## Quality — scored against `docs/quality-rubric.md`
 
-Both generated tests are structurally solid: role-based locators
-throughout (no brittle CSS/XPath), no hard sleeps, correct handling of the
-"insufficient leave balance" confirmation dialog and the known Leave List
-search quirk (toast as primary success signal, list search as best-effort
-only — both conditions were given this via `docs/app-knowledge.md`).
+Each criterion is 0-4; criterion 3 (flakiness) is **measured**, not
+estimated: both generated tests were actually re-run 5 times in a row
+(`--repeat-each=5 --workers=1`) against a freshly re-seeded, live app.
 
-Both agents independently caught the same real bug during iteration:
-`Locator.isVisible()` checks state once and doesn't wait, so calling it
-right after triggering the confirmation dialog raced its render and
-silently skipped the required "Ok" click. Both fixed it the same way
-(`locator.waitFor({ state: 'visible' })`). Neither condition was told about
-this bug in advance — it's a genuine, independently-discovered fix on both
-sides, which is a mildly reassuring signal about the flow spec and
-app-knowledge primer being fair to both conditions.
+| Criterion | MCP | CLI |
+|---|---|---|
+| 1. Selector robustness | 4 | 4 |
+| 2. Assertion meaningfulness | 4 | 4 |
+| 3. Pass reliability (5 real repeat runs) | **4** (5/5 passed) | **2** (2/5 passed) |
+| 4. Playwright best practices | 4 | 4 |
+| 5. Line count / structure | 3 | 4 |
+| 6. Task/spec compliance | 4 | 2 |
+| **Total /24** | **23** | **20** |
 
-The CLI condition's agent caught one bug the MCP condition's agent never
-had to: working from the raw codegen recording, blindly picking the Leave
-Type listbox's "first option" could select the re-rendered `-- Select --`
-placeholder instead of a real leave type — an artifact specific to
-starting from an imperfect recording rather than live-observing the
-dropdown, which is exactly the kind of condition-specific failure mode
-this project is trying to surface.
+Both generated tests are structurally solid on inspection: role-based
+locators throughout (no brittle CSS/XPath), no hard sleeps, correct
+handling of the "insufficient leave balance" confirmation dialog and the
+known Leave List search quirk (toast as primary success signal, list
+search as best-effort only — both conditions were given this via
+`docs/app-knowledge.md`). Both agents independently caught the same real
+bug during iteration: `Locator.isVisible()` checks state once and doesn't
+wait, so calling it right after triggering the confirmation dialog raced
+its render and silently skipped the required "Ok" click. Both fixed it
+the same way (`locator.waitFor({ state: 'visible' })`) despite neither
+condition being told about this bug in advance — a mildly reassuring
+signal that the flow spec and app-knowledge primer are fair to both
+conditions. The CLI condition's agent also caught a bug the MCP agent
+never had to: blindly picking the Leave Type listbox's "first option"
+could select the re-rendered `-- Select --` placeholder rather than a
+real leave type — an artifact specific to working from an imperfect
+recording instead of live-observing the dropdown.
+
+**Where the score actually diverges, and why — this is the interesting
+part.** The CLI test failed 3 of 5 repeat runs, always at the same line:
+timing out waiting for the employee autocomplete option to appear. Root
+cause, confirmed against the database rather than guessed: the CLI test
+hardcodes `firstName = 'Thomas'` (inherited literally from the codegen
+fixture — see `fixtures/README.md`) and only generates a unique *last*
+name, then searches the autocomplete by typing just `firstName`. The flow
+spec explicitly asks for "a unique, generated first *and* last name."
+Every run (this scoring pass included) leaves another `Thomas Mueller*`
+row in the database — after the fixture recording, the first CLI run, and
+this 5x scoring pass, there were **8** employees named "Thomas" — so
+searching by "Thomas" alone got steadily less selective, and the
+autocomplete increasingly failed to surface the *new* one inside the
+test's timeout. The MCP test generates both names
+(`TestFN<timestamp>`/`TestLN<timestamp>`), so its search term stays
+unique no matter how many prior runs exist, and it passed 5/5. **A
+literal one-field spec-compliance gap (criterion 6) directly and
+measurably caused the flakiness (criterion 3)** — not a coincidence, not
+two independent weaknesses, the same root cause showing up on two
+criteria. This is exactly the kind of finding a single-pass read
+(without actually re-running the tests) would have missed entirely: both
+files looked equally solid on inspection alone.
 
 One asymmetry worth flagging as a possible confound, not a finding: the
 MCP condition's agent chose to run the test **twice** after first going
 green (to confirm stability) before stopping; the CLI condition's agent
 stopped after the first pass. That's a difference in agent judgment, not
 something either prompt requested — worth watching across more runs before
-reading anything into it.
+reading anything into it. Notably, the CLI agent's choice to stop after
+one pass meant it never had the chance to catch its own flakiness bug the
+way the MCP agent's extra confirmation run might have surfaced an
+equivalent issue, had one existed.
 
 ## How this compares to the inspiring post
 
@@ -127,8 +161,19 @@ this harness instead of trusting either figure blind.
 - **Not a blind/controlled trial** in the stricter sense — both runs used
   the same model, flow, and app-knowledge primer (that symmetry is
   deliberate, see `README.md`), but only one seed/attempt each.
-- **No quality rubric yet** (`docs/quality-rubric.md`, `TODO.md` Phase 3) —
-  the quality comparison above is a manual read, not a scored one.
+- **The flakiness measurement (criterion 3) was run against accumulated,
+  not freshly reset, app state** — by design this time (it's exactly what
+  exposed the CLI test's bug), but it means the 5/5 vs 2/5 pass counts
+  aren't from identical starting conditions each run. A cleaner
+  methodology for future scoring passes would run each repeat against a
+  full app reset, though that would have hidden this specific finding -
+  worth deciding deliberately, not by default, once this becomes a
+  repeated/automated step.
+- **The quality rubric itself is new** (`docs/quality-rubric.md`) and its
+  6th criterion (task/spec compliance) isn't part of the original
+  `CLAUDE.md` decision 2 axis list — added because the first scoring pass
+  showed a direct need for it, flagged explicitly in that doc's own
+  header rather than silently folded in.
 - **App state wasn't pristine for the CLI run** in one sense worth noting:
   the codegen fixture itself (`fixtures/01-add-employee-leave-request.codegen.ts`)
   has two documented deviations from the flow spec (a two-day date range,
