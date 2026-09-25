@@ -212,8 +212,19 @@ inspiring post's claim, in `docs/results.md`.
 | Turns | 135 | 9 | ~15x |
 | Test-run iterations to green | 8 | 4 | ~2x |
 | Wall clock | ~9.8 min | ~4.1 min | ~2.4x |
-| **Quality** (`docs/quality-rubric.md`, /24) | **23** | **20** |  |
-| — pass reliability, 5 real repeat runs | 5/5 | **2/5** |  |
+
+**Quality**, scored against `docs/quality-rubric.md` (0-4 per criterion,
+manual for now — see `TODO.md` for the automated-scorer option):
+
+| Criterion | MCP | CLI |
+|---|---|---|
+| 1. Selector robustness | 4 | 4 |
+| 2. Assertion meaningfulness | 4 | 4 |
+| 3. Pass reliability (5 real repeat runs) | **4** (5/5) | **2** (2/5) |
+| 4. Playwright best practices | 4 | 4 |
+| 5. Line count / structure | 3 | 4 |
+| 6. Task/spec compliance | 4 | 2 |
+| **Total /24** | **23** | **20** |
 
 Both runs produced a passing test on the first complete attempt, and both
 generated tests read as solid on inspection - role-based locators, no hard
