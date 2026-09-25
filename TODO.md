@@ -112,11 +112,12 @@ starts on them, per `CLAUDE.md`.
       Period/Leave Type setup + saves `harness/.auth/state.json`. Live-
       validated against a freshly-installed instance (idempotent leave-
       type check confirmed both "already exists" and "created" paths).
-- [ ] Record the CLI condition's seed fixture: run
-      `npx playwright codegen <target-url>`, perform the flow by hand,
-      save the raw output to `fixtures/01-add-employee-leave-request.codegen.ts`.
-      Document the exact click-by-click steps in `fixtures/README.md` so
-      anyone can re-record it if the app changes.
+- [ ] **Record the CLI condition's codegen fixture** — the one thing
+      currently blocking `npm run bench:cli` from actually running. Needs
+      a human driving a real headed browser (`npx playwright codegen`),
+      so it can't be done from an automated/sandboxed session. Exact
+      steps and the metadata to fill in afterward are in
+      `fixtures/README.md`.
 
 ## Phase 3 — Harness
 
@@ -195,12 +196,15 @@ decisions above) was confirmed to lose no measurement fidelity.
       `--output-dir` in `explore-mcp.ts`/`generate-mcp.ts`; see
       `docs/run-mcp-condition.md` "Gotchas confirmed on the first real
       run".
-- [ ] CLI condition runner: per the "both conditions via Claude Code"
-      decision above, will reuse `claude-runner.ts` +
+- [x] CLI condition runner (`harness/src/run-cli.ts`, `npm run bench:cli`):
+      a single Claude Code phase, reusing `claude-runner.ts` +
       `mcp-tools-server.ts` (write_file/run_playwright_test only, no
-      playwright-mcp registered, and critically `--tools` must exclude
-      Claude Code's native `Bash` - see `CLAUDE.md` decision 1). Not
-      started.
+      playwright-mcp registered, and `--tools` excludes Claude Code's
+      native `Bash` - see `CLAUDE.md` decision 1). System prompt is
+      `conditions/cli/system-prompt.md`, embeds the codegen fixture
+      directly in the user message (no read tool needed). **Not runnable
+      yet** - blocked on the fixture below, fails with a clear error
+      until it exists.
 - [ ] `docs/quality-rubric.md`: define the quality checks (selector
       robustness, assertion quality, best-practices adherence,
       flakiness-across-N-runs) and how they're scored — manual checklist

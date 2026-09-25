@@ -14,7 +14,7 @@
     "cleanup:app": "app/cleanup.sh",
     "explore:mcp": "tsx harness/src/explore-mcp.ts",
     "generate:mcp": "tsx harness/src/generate-mcp.ts",
-    "bench:cli": "echo 'not implemented yet - see TODO.md Phase 3' && exit 1"
+    "bench:cli": "tsx harness/src/run-cli.ts"
   },
   "license": "MIT",
   "dependencies": {
