@@ -62,13 +62,15 @@ Phase 4 for related automation that hasn't been built yet either).
 
 ## Cost and time, roughly
 
-From the first real batch (`docs/results.md`): MCP $0.46–$1.21 and
-2.3–7.3 min per repeat, Codegen $0.56–$0.71 and 6.8–10+ min per repeat,
-plus ~80s of app reset before each run. A full `--condition both
---repeats 3` baseline batch is 6 runs: roughly **~$4 and ~45–55 minutes
-of wall clock**, most of it unattended once started. Variance is large
-(one MCP run in three cost 2.6x the others) and is part of what's being
-measured, not a bug.
+It depends heavily on the app-knowledge primer (`docs/results.md` §A).
+With the current primer (v2): MCP $0.78–$1.15 and 2.9–6.5 min per
+repeat, Codegen $0.09–$0.20 and 1–3 min per repeat, plus ~80s of app
+reset before each run — a full `--condition both --repeats 3` baseline
+batch is roughly **~$3 and ~30 minutes of wall clock**. With primer v1,
+Codegen was ~4x more expensive and 6.8–10+ min per repeat, and the batch
+took ~45–55 minutes. Variance is large either way (MCP has had one
+outlier run per batch) and is part of what's being measured, not a
+bug.
 
 Each `claude -p` phase is capped at **30 minutes** by default
 (`CLAUDE_RUN_TIMEOUT_MS` to change it). The first batch ran with a

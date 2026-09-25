@@ -24,16 +24,16 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
   before *every* individual run, not just once per batch, and logs every
   `RUN_ID` produced. Neither single-run runbook above covers this by
   itself.
-- `results.md` — the current analysis: the first repeat batch (3 MCP +
-  3 Codegen runs, one censored by a since-fixed timeout) — cost anatomy,
-  where each condition spends its effort, variance, 7-criterion quality
-  scoring with measured flakiness, harness findings, and which
-  conclusions of the earlier single-run pair (kept as an appendix) did or
-  didn't survive repetition.
+- `results.md` — the current analysis across two 3-repeat baseline
+  batches that differ only in the app-knowledge primer (v1 vs v2): the
+  before/after (the primer moved the MCP:Codegen cost ratio from ~1.2x to
+  ~6.3x), cost anatomy, where each condition spends its effort, variance,
+  7-criterion quality scoring with measured flakiness, harness findings,
+  and the earlier single-run pair as an appendix.
 - `quality-rubric.md` — 7-criterion manual scoring rubric for a generated
   test file (5 from `CLAUDE.md` decision 2, plus 2 added and flagged after
   real scoring passes showed a need for them - task/spec compliance and
-  config/data separation). Applied to both first runs in `docs/results.md`.
+  config/data separation). Applied to every run in `docs/results.md`.
   Automated/LLM-judge scoring is a later option, see `TODO.md` Phase 3.
 - `testing-best-practices.md` — agent-facing primer mirroring the rubric
   above, one practice per criterion. Wired in (opt-in, symmetric) via

@@ -223,7 +223,9 @@ assume some `.md` file describes it and needs a pass.
     rendered as `"First  Last"` (double space), weekend dates rejected
     server-side — added by user decision, from transcript evidence only.
     All runs up to and including that batch used primer v1; compare
-    before/after deliberately. The primer is fed to the agents verbatim,
+    before/after deliberately. The v2 batch showed the primer is the
+    largest single factor measured so far: Codegen cost −76%,
+    MCP:Codegen cost ratio 1.16x → 6.3x (`docs/results.md` §A). The primer is fed to the agents verbatim,
     so don't add benchmark meta-commentary to it (its existing intro
     paragraph already carries a little — a candidate for trimming, as its
     own deliberate change).

@@ -520,15 +520,29 @@ thing anyone reproducing this repo would hit again.
       `docs/quality-rubric.md` criterion 3).
 - [x] Decided the MCP toolset (full toolset) and added the three app
       traps to the primer (primer v2) - see Open decisions above.
-- [ ] **Next baseline batch on primer v2** (`npm run repeat:baseline`) -
-      doubles as the before/after comparison for the primer change
-      against the first batch (primer v1). Expect the Codegen condition
-      to benefit most: its failure log was dominated by exactly these
-      traps (`docs/results.md` §3).
-- [ ] `npm run repeat:nudged` - wiring done, no data yet.
-- [ ] More repeats, at least for MCP (one run in three cost 2.6x the
-      other two) - n=3 overturned N=1 but doesn't estimate a
-      distribution.
+- [x] **Second baseline batch, on primer v2**
+      (`results/repeat-run-log-20260925T151730Z.txt`, all 6 runs
+      complete). Verified from the transcripts that every session saw v2
+      and none was contaminated. Result, as predicted but much larger:
+      Codegen cost −76% ($0.62 → $0.15), turns 23 → 5.7, test runs to
+      green ~11 → 2.3, wall clock 8.8 → 2.0 min; MCP didn't benefit
+      ($0.71 → $0.91, exploration got *longer* as it verified the
+      documented traps live). MCP:Codegen cost ratio 1.16x → 6.3x.
+      Quality rescored with measured flakiness (5x each, reset per spec).
+      Written up as `docs/results.md` §A.
+- [ ] **[DECISION]** Treat the primer as an explicit experimental
+      variable going forward? It moved results more than anything else
+      so far (batch 2 vs 1). E.g. keep v1 and v2 and report every future
+      result per primer version, rather than treating the primer as fixed
+      setup. See `docs/results.md` §9.
+- [ ] `npm run repeat:nudged` - wiring done, no data yet. Natural test for
+      the one recurring trap left in batch 2: the confirmation dialog
+      appears asynchronously and `isVisible({ timeout })` doesn't wait
+      for it - Playwright-API knowledge, which is what the nudged primer
+      covers, not app knowledge. Needs a decision on which app primer the
+      nudged batch uses (v2 is the obvious choice).
+- [ ] More repeats per cell - n=3 shows a 4x shift but doesn't estimate
+      distributions; MCP has one expensive outlier in each batch.
 
 ## Phase 5 — Test healing (v2, not started)
 

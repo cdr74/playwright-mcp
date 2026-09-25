@@ -207,58 +207,63 @@ the first 3-repeat baseline batch has been run and analysed - see
 "Results" below and `docs/results.md`. `docs/run-mcp-condition.md` /
 `docs/run-codegen-condition.md` / `docs/run-repeats.md` have the exact,
 reproducible steps. Everything has to run from a plain terminal, not from
-inside another Claude Code session (see `harness/README.md`). Next up: a
-second baseline batch on the extended app-knowledge primer (a before/after
-comparison), then the nudged variant — see `TODO.md`.
+inside another Claude Code session (see `harness/README.md`). Two baseline
+batches are done (primer v1 and v2); next up is the nudged variant — see
+`TODO.md`.
 
 ## Results
 
-From the first repeat batch (`npm run repeat:baseline`: 3 MCP + 3 Codegen
-runs, baseline prompts, `sonnet`). One Codegen run was cut off by a
-since-fixed 10-minute harness timeout before it finished; it's reported
-as a censored lower bound (`*`). **Full analysis in `docs/results.md`.**
+Two 3-repeat baseline batches (`npm run repeat:baseline`, model
+`sonnet`), identical except for the **app-knowledge primer** both
+conditions get: batch 1 used primer v1, batch 2 primer v2 (v1 plus three
+short paragraphs on app traps every batch-1 run hit). **Full analysis in
+`docs/results.md`.**
 
-| | MCP (n=3) | Codegen (n=3, 1 censored) |
-|---|---|---|
-| Cost | $0.46–$1.21 · mean $0.71 · median $0.47 | $0.56–$0.71* · mean ≥$0.62 · median ≥$0.58 |
-| Turns | 39–100 · mean 60 | 19–26* · mean ≥23 |
-| Test runs to green | 2, 2, 5 | 9, 13, not green after 11* |
-| Wall clock | 2.3–7.3 min · mean 4.1 | 6.8–≥10.0 min · mean ≥8.8 |
-| Where the cost goes | ~80% context (cache), ~220 output tok/turn | ~53% output, ~1,400 output tok/turn |
-| Quality (`docs/quality-rubric.md`, /28) | 23, 21, 21 · mean 21.7 | 25, 23 · mean 24.0 (unfinished run: 17) |
-| Measured reliability (5 re-runs each) | 5/5, 5/5, 5/5 | 5/5, 5/5 (unfinished run: 0/5) |
+| Means per run | MCP, v1 | Codegen, v1 | MCP, v2 | Codegen, v2 |
+|---|---|---|---|---|
+| Cost | $0.71 | ≥$0.62* | $0.91 | **$0.15** |
+| Turns | 60 | ≥23* | 73 | **5.7** |
+| Test runs to green | 3.0 | ~11* | 2.3 | 2.3 |
+| Wall clock | 4.1 min | ≥8.8 min* | 4.9 min | **2.0 min** |
+| **MCP : Codegen cost** | **1.16x** | | **6.3x** | |
+| Quality (`docs/quality-rubric.md`, /28) | 21.7 | 24.0 (finished runs) | 23.3 | **26.3** |
+| Measured reliability (5 re-runs each) | 3 of 3 specs 5/5 | 2 of 2 finished specs 5/5 | 3 of 3 specs 5/5 | 3 of 3 specs 5/5 |
+
+`*` one batch-1 Codegen run was cut off by a since-fixed timeout; lower
+bounds.
 
 What we learned:
 
-- **Cost is roughly even in this flow** — MCP was cheaper in the typical
-  (median) run; one expensive MCP run pulls its mean above Codegen's.
-  Nowhere near the 4x–10x the [inspiring
-  post](https://dreaming.press/posts/playwright-mcp-vs-cli-token-cost-browser-agents.html)
-  claims; raw token volume is ~2.7x, prompt caching absorbs most of it.
-- **The two conditions spend money in opposite ways.** MCP: many cheap
-  turns, mostly spent re-reading context. Codegen: few expensive turns,
-  because every fix rewrites the whole spec file.
-- **MCP front-loads; Codegen iterates blind.** MCP's exploration is
-  63–82% of its cost, after which its test passed on the 2nd try in 2 of
-  3 runs. Codegen can only see terse test output, so different upstream
-  bugs (placeholder leave type, rejected weekend date, unconfirmed
-  dialog) all look like the same "toast not found" failure — 9 to 13+
-  test runs to green.
-- **Quality doesn't separate the conditions.** Every finished run's test
-  passes 5/5; both make the same mistakes (hardcoded base URL 6/6, CSS
-  locators on OrangeHRM's custom dropdown 5/6).
-- **N=1 was misleading.** The first single-run pair suggested MCP costs
-  7x more, is 2.4x slower and needs more test iterations — all three
-  reversed with repeats (details in `docs/results.md` §6).
-- **Harness findings that matter for reading these numbers:** a curated
-  MCP tool allow-list was never actually enforced — every MCP run had
-  playwright-mcp's full toolset, which has since been decided to *be* the
-  MCP condition — and the old 10-minute run cap was silently cutting off
-  the slowest runs (fixed).
-- **Since this batch, the app-knowledge primer both conditions get was
-  extended** with the three app traps behind most of Codegen's failures.
-  These results used the old primer; the next batch is also a
-  before/after comparison.
+- **What the agent knows about the app matters more than its tooling.**
+  Adding three paragraphs to the primer moved the MCP:Codegen cost ratio
+  from ~1.2x to ~6.3x and flipped which condition is faster.
+- **Codegen's cost is the price of not knowing the app.** Blind to the
+  page, it debugs through terse test output. In batch 1 most of its 29
+  failures traced to three app traps. Once they were documented, it had
+  4 failures and cost dropped 76%.
+- **MCP pays for discovery every run.** Told about the traps, it
+  verifies them live anyway: exploration got *longer*. What it buys is a
+  generate phase that often passes first try.
+- **So the [inspiring
+  post](https://dreaming.press/posts/playwright-mcp-vs-cli-token-cost-browser-agents.html)'s
+  4x–10x is reachable, but only when the non-browsing agent already
+  knows the app.** Without that, the gap nearly disappears. Prompt
+  caching also keeps the dollar gap much smaller than the token gap
+  (6.3x vs 35x).
+- **The two conditions spend money differently in both batches.** MCP:
+  many cheap turns, ~80% of cost is re-read context. Codegen: few
+  expensive turns, ~55% output, because every fix rewrites the whole
+  file.
+- **Quality is high in both, and got better with the primer.** Every
+  spec from a finished run passes 5/5 on re-run (11 of 11 across both
+  batches), and under v2 every spec generates unique names and picks a
+  weekday. Codegen scores ~3 points higher in batch 2 (26.3 vs 23.3 /28),
+  entirely because it respects `baseURL` and leans on the recording's
+  role-based locators, where MCP hardcodes the URL and uses CSS
+  selectors.
+- **Small samples mislead.** The first single-run pair said 7x, batch 1
+  said ~1.2x, batch 2 says 6.3x. The first reversal was run-to-run
+  variance; the second was the primer change.
 
 <details>
 <summary>Original N=1 pair (superseded — kept for the record)</summary>

@@ -1,59 +1,198 @@
 # Results
 
-Last updated after the **first repeat batch** (2026-09-25,
-`results/repeat-run-log-20260925T132116Z.txt`): 3 MCP runs and 3 Codegen
-runs, baseline prompts, model `sonnet`, all on the harness *after* the
-CLAUDE.md-contamination fix (see `TODO.md` Gotchas). One Codegen run was
-killed by a (since-fixed) 10-minute harness timeout **before it had
-finished** — its final spec doesn't pass; its usage was recovered from its
-transcript and it's reported below as a **censored** data point (marked
-`*`), not dropped.
+Last updated after the **second repeat batch** (2026-09-25). Two
+baseline batches exist, identical except for one thing — the
+app-knowledge primer both conditions get (`docs/app-knowledge.md`,
+`CLAUDE.md` decision 10):
 
-The original single-run pair from earlier the same day is kept in the
-appendix. **Most of what it suggested did not survive repetition** - that
-reversal is itself one of the main findings.
+| Batch | Log | Primer | Runs |
+|---|---|---|---|
+| 1 | `results/repeat-run-log-20260925T132116Z.txt` | v1 | 3 MCP + 3 Codegen (1 Codegen censored by a since-fixed timeout, `*`) |
+| 2 | `results/repeat-run-log-20260925T151730Z.txt` | v2 = v1 + three app traps | 3 MCP + 3 Codegen, all complete |
+
+Both batches: baseline prompts (not nudged), model `sonnet`, the
+contamination-fixed harness, playwright-mcp's full toolset for MCP
+(`CLAUDE.md` decision 13), a full app reset before every run. Verified from
+the transcripts themselves (the system prompt is recorded in them): every
+batch-2 session saw primer v2, every earlier session v1, none carries the
+old `CLAUDE.md`/auto-memory contamination.
 
 ## TL;DR
 
-1. **On cost, the two conditions are roughly even in this flow.** Mean
-   $0.71 (MCP) vs ≥$0.62 (Codegen); median $0.47 vs ≥$0.58 — the *typical*
-   MCP run was cheaper, and one expensive MCP run pulls its mean up. Not
-   the 4x–10x gap the inspiring post claims, and not the 7x our own N=1
-   pair showed.
-2. **They spend money in opposite ways.** MCP is *many cheap turns*: ~80%
-   of its cost is context (cache writes/reads), ~220 output tokens per
-   turn. Codegen is *few expensive turns*: ~53% of its cost is output,
-   ~1,400 output tokens per turn, because every iteration rewrites the
-   whole spec file.
-3. **MCP front-loads, Codegen iterates blind.** MCP's explore phase is
-   63–82% of its cost, and in 2 of 3 runs the generate phase then passed
-   on its **second** test run (`FP`). Codegen needed **9 and 13** test
-   runs to reach green, and its third run hadn't got there after 11 when
-   it was cut off: it can only see terse test output, and its
-   dominant failure — "Successfully Saved toast not found" — is where
-   several *different* upstream bugs all surface looking identical.
-4. **MCP was faster, not slower.** 4.1 min mean (2.3–7.3) vs ≥8.8 min for
-   Codegen (6.8–≥10.0). The N=1 pair said the opposite.
-5. **Variance is large, and N=1 was misleading.** MCP's most expensive
-   run cost 2.6x its cheapest out of just three. Cost ratio, iteration
-   ratio, wall-clock ratio, and two of the N=1 "quality" conclusions all
-   **reversed** once repeats existed.
-6. **Quality converges; neither condition "wins" it.** Every run that
-   finished produced a test that passes **5/5** from a clean reset (3 MCP,
-   2 Codegen); both fall into the same traps (hardcoded base URL 6/6, CSS
-   locators for OrangeHRM's custom dropdown 5/6). Rubric means are 21.7
-   (MCP) vs 24.0 (Codegen, finished runs) out of 28 — within the spread
-   between runs of the *same* condition. The "hardcoded first name"
-   defect the N=1 pair pinned on Codegen showed up in **2 of 3 MCP**
-   specs and **0 of 3 Codegen** specs this time.
-7. **Two harness findings change how to read the data** (§7): the
-   curated MCP tool allow-list was **never enforced** (every MCP run had
-   playwright-mcp's full toolset, 3 of 4 used "excluded" tools) — since
-   decided to *be* the MCP condition — and a 10-minute timeout was
-   silently censoring the slowest runs (fixed).
-8. **The app-knowledge primer has since been extended** with the three
-   traps behind most of Codegen's failures (§9). Everything above used the
-   old primer; the next batch doubles as a before/after comparison.
+1. **The app-knowledge primer, not the tooling, decides the size of the
+   gap.** Same tools, same flow, same model — adding three short
+   paragraphs about app traps moved the MCP:Codegen **cost ratio from
+   1.16x to 6.3x**, turns from 2.6x to 12.9x, raw token volume from 2.7x
+   to 35x, and **flipped wall clock** (MCP from ~2x faster to ~2.4x
+   slower).
+2. **Codegen's cost is the price of not knowing the app.** Primer v1 → v2:
+   cost **$0.62 → $0.15** (−76%), turns 23 → 5.7, test runs to green
+   ~11 → 2.3, wall clock 8.8 → 2.0 min. Most of its batch-1 failures
+   traced back to exactly the traps v2 documents (§3); with them written
+   down, it mostly writes a working test on the first or third try.
+3. **MCP pays for discovery every run, whether or not it needs to.**
+   Primer v1 → v2: cost $0.71 → $0.91, explore turns 44 → 56. Given the
+   traps up front, MCP's explore phase engages with each of them live
+   (and writes them into a longer test plan) rather than trusting the
+   primer. What it *does* buy: the generate phase passed on its **first**
+   test run in 2 of 3 batch-2 runs (3 turns, ~$0.06).
+4. **The post's 4x–10x is reachable — but it's a statement about context,
+   not just tooling.** Batch 2 lands at 6.3x cost / 35x tokens, in or above
+   the [inspiring post](https://dreaming.press/posts/playwright-mcp-vs-cli-token-cost-browser-agents.html)'s
+   range. Batch 1 was ~1.2x. The same MCP-vs-CLI claim is true or false
+   depending on how much the non-browsing agent already knows.
+5. **The cost anatomy holds in both batches.** MCP: many cheap turns,
+   ~80% of cost is context. Codegen: few expensive turns, ~55% output
+   (every fix rewrites the whole file).
+6. **Quality improved in both conditions under v2, and Codegen now
+   scores higher.** Every batch-2 spec generates both names uniquely and
+   picks a weekday; Codegen's specs now also respect `baseURL` (3/3, vs
+   0/3 MCP). All six batch-2 specs pass 5/5 on re-run. Rubric
+   means: **Codegen 26.3 vs MCP 23.3** (/28) — a real gap this time, but
+   it comes *entirely* from two criteria: Codegen uses relative URLs where
+   MCP hardcodes the base URL (config, #7), and two of its specs use no
+   CSS locators at all (#1). On reliability, spec compliance and best
+   practices the conditions are identical.
+7. **One recurring trap is left, and it's not an app quirk:** the
+   confirmation dialog appears asynchronously, and code like
+   `isVisible({ timeout })` doesn't wait for it, so the "Ok" click is
+   silently skipped and nothing saves. Both conditions have hit it in
+   every batch. It's a Playwright-API gotcha, which is what the (still
+   unrun) nudged primer's guidance targets, not the app primer.
+8. **Small samples mislead, twice over.** The original N=1 pair suggested
+   7x; batch 1 (n=3) said ~1.2x; batch 2 says 6.3x. The first reversal was
+   variance, the second a controlled change. Neither single number is
+   "the" answer without saying what the agent was told about the app.
+
+## A. Batch 2 (primer v2): what the primer changed
+
+### Per run
+
+| Run | Cost | Turns | Test runs | Wall clock | Total tokens | Output share | Context share |
+|---|---|---|---|---|---|---|---|
+| MCP r1 `mcp-…15-18-56-657Z` | $0.82 (explore $0.76 + gen $0.06) | 64 (61+3) | `P` | 2.9 min | 2.33M | 15% | 85% |
+| MCP r2 `mcp-…15-27-17-187Z` | $1.15 ($0.49 + $0.66) | 89 (45+44) | `FFFPP` | 6.5 min | 2.74M | 23% | 77% |
+| MCP r3 `mcp-…15-39-25-865Z` | $0.78 ($0.72 + $0.06) | 66 (63+3) | `P` | 5.4 min | 2.24M | 17% | 83% |
+| Codegen r1 `codegen-…15-23-31-133Z` | $0.15 | 7 | `FFP` | 2.2 min | 0.08M | 54% | 46% |
+| Codegen r2 `codegen-…15-36-21-741Z` | $0.09 | 3 | `P` | 1.0 min | 0.03M | 63% | 37% |
+| Codegen r3 `codegen-…15-47-05-687Z` | $0.20 | 7 | `FFP` | 2.9 min | 0.10M | 62% | 38% |
+
+### Before / after (means, primer v1 → v2)
+
+| | MCP v1 | MCP v2 | Codegen v1 | Codegen v2 | MCP:Codegen v1 → v2 |
+|---|---|---|---|---|---|
+| Cost | $0.71 | $0.91 | ≥$0.62 | $0.15 | 1.16x → **6.3x** |
+| Turns | 60 | 73 | ≥23 | 5.7 | 2.6x → **12.9x** |
+| Test runs to green | 3.0 | 2.3 | 11 (n=2) | 2.3 | ~0.27x → 1.0x |
+| Wall clock | 4.1 min | 4.9 min | ≥8.8 min | 2.0 min | 0.47x → **2.4x** |
+| Total tokens | 1.73M | 2.44M | ≥0.65M | 0.07M | 2.7x → **35x** |
+| MCP explore turns / cost | 44 / $0.50 | 56 / $0.66 | — | — | — |
+
+### Why Codegen gained so much
+
+In batch 1, 29 Codegen test failures were dominated by "Successfully Saved
+toast not found" — a symptom several different upstream bugs share (§3).
+Three of those bugs are exactly what v2 documents: the `-- Select --`
+placeholder picked as a leave type, a weekend date silently rejected, and
+an autocomplete value asserted with one space instead of two. With them
+written down, batch 2's Codegen runs had **4 failures in total**, not 29,
+and every spec shows the primer's influence directly: weekday logic in 3/3,
+and one spec asserts the double-space value verbatim. Shorter runs also
+mean shorter context: cache-read per turn fell from 22–27K to 6–11K.
+
+The remaining failures were the async confirmation dialog (TL;DR 7) and,
+once, a 30s click timeout on a selector carried over from the raw
+recording. Codegen r2 wrote a passing test on its first try — 3 turns,
+$0.09, one minute.
+
+### Why MCP didn't
+
+MCP's exploration doesn't shrink when it's told more — it grows. In
+batch 2 its assistant messages during explore refer to the documented
+traps several times per run, and all three test plans now spell out
+weekday selection (two also spell out the double-space value) — so it is
+reading the primer, and then *confirming* it in the browser. Explore
+turns rose from 44 to 56 on average and explore cost from $0.50 to $0.66.
+The payoff shows in generate: two of three runs passed on their very
+first test run (3 turns, ~$0.06 each). MCP r2 is the exception again —
+its generate phase failed three times, went back to the browser
+(including `browser_evaluate` x3 and `browser_run_code_unsafe` x4, both
+part of the full toolset per decision 13), and cost $0.66 on its own.
+
+Put differently: MCP's cost is mostly a **fixed cost of looking**; the
+primer barely changes it. Codegen's cost is mostly a **variable cost of
+not knowing**; the primer removes most of it.
+
+### Quality (batch 2)
+
+Same rubric and protocol as batch 1 (§5): 7 criteria, 0–4 each; criterion
+3 measured by re-running each spec 5x after a full app reset + seed.
+
+| Criterion | MCP r1 | MCP r2 | MCP r3 | CG r1 | CG r2 | CG r3 |
+|---|---|---|---|---|---|---|
+| 1. Selector robustness | 2 | 3 | 3 | 4 | 4 | 2 |
+| 2. Assertions (fail-fast + diagnostics) | 3 | 3 | 4 | 3 | 3 | 4 |
+| 3. Pass reliability, 5 measured runs | 4 (5/5) | 4 (5/5) | 4 (5/5) | 4 (5/5) | 4 (5/5) | 4 (5/5) |
+| 4. Playwright best practices | 4 | 4 | 4 | 4 | 4 | 4 |
+| 5. Line count / structure | 4 | 3 | 3 | 4 | 4 | 3 |
+| 6. Task/spec compliance | 4 | 4 | 4 | 4 | 4 | 4 |
+| 7. Config/data separation | 2 | 2 | 2 | 4 | 4 | 4 |
+| **Total /28** | **23** | **23** | **24** | **27** | **27** | **25** |
+
+| Signal | MCP r1 | MCP r2 | MCP r3 | CG r1 | CG r2 | CG r3 |
+|---|---|---|---|---|---|---|
+| Lines | 83 | 120 | 139 | 100 | 95 | 136 |
+| CSS class locators | 3 | 2 | 2 | 0 | 0 | 3 |
+| `waitForTimeout` | 0 | 0 | 0 | 0 | 0 | 0 |
+| Absolute base URL | 1 | 1 | 1 | **0** (relative) | **0** | **0** |
+| Both names generated | yes | yes | yes | yes | yes | yes |
+| Weekday-date logic | yes | yes | yes | yes | yes | yes |
+| Autocomplete search term | first name (unique) | first name (unique) | first name (unique) | **`firstName.slice(0, 5)`** | first name (unique) | **`firstName.slice(0, 5)`** |
+| `expect()` calls | 3 | 9 | 4 | 4 | 4 | 12 |
+| Diagnostics | — | — | API status + 1 log | — | — | API status w/ response body in message + 1 log |
+
+**Measured reliability: all six specs pass 5/5.** Across both batches,
+every spec from a run that finished — 11 of 11 — passes 5/5 from a clean
+reset. Codegen r3's five runs took 2.3 min against ~38s for the others:
+reliable, but noticeably slower per run (its defensive response waits),
+which the rubric doesn't currently score.
+
+**Totals: MCP 23.3 / 28, Codegen 26.3 / 28** (batch 1: 21.7 vs 24.0 for
+finished runs). Both conditions improved under v2 — every spec now
+generates both names and picks a weekday (criterion 6 is 4 across the
+board; in batch 1, two MCP specs hardcoded a first name). Unlike batch 1,
+the gap between conditions now exceeds the spread within either one, and
+it has two identifiable sources:
+
+- **Criterion 7 (config):** all three Codegen specs navigate with
+  relative paths, respecting `playwright.config.ts`'s `baseURL`; all
+  three MCP specs hardcode the absolute URL once (a `goto` or a
+  `BASE_URL` constant). In batch 1, *all six* specs hardcoded it — so
+  this is new, and Codegen-specific. A plausible reason: the recording it
+  starts from opens with an absolute URL inside the login step its prompt
+  tells it not to write, so rewriting navigation is already on its plate;
+  MCP only ever sees full URLs in its browser snapshots. That's a
+  hypothesis, not tested.
+- **Criterion 1 (selectors):** Codegen r1/r2 use no CSS class locators
+  at all — the raw recording it starts from is built on `getByRole`, and
+  those survive the cleanup. Every MCP spec uses some CSS: `.oxd-select-*`
+  on the custom dropdown in two, and `input[placeholder=…]` attribute
+  selectors (where `getByPlaceholder` would do) in the third.
+
+One latent risk the 5x protocol doesn't catch: **Codegen r1 and r3 search
+the employee autocomplete by `firstName.slice(0, 5)`** — `"Thoma"`, shared
+by every Codegen employee (all keep the recording's "Thomas" as a name
+prefix). From a clean reset that's fine (5/5); in a shared, long-lived
+environment it's the same shape as the original N=1 "Thomas" flakiness
+bug (appendix). Criterion 6 doesn't flag it — the names *are* unique;
+only the search term isn't.
+
+---
+
+# Batch 1 in detail (primer v1)
+
+Sections 1–7 below are the full analysis of batch 1, written before primer
+v2 existed. Their numbers are batch-1 numbers; see §A above for batch 2.
 
 ## 1. Cost & efficiency
 
@@ -304,60 +443,83 @@ quantified from this data.
 3. **Contamination fix confirmed working.** None of the six batch
    transcripts carries a `CLAUDE.md`/auto-memory attachment.
 
+---
+
+# Across both batches
+
 ## 8. Compared to the inspiring post
 
 The [post](https://dreaming.press/posts/playwright-mcp-vs-cli-token-cost-browser-agents.html)
 claims ~114K vs ~27K tokens (~4.2x, "up to 10x") for MCP vs CLI on a
 ~10-step task, attributed to MCP re-injecting page state every step.
 
-- **Token volume:** this batch shows **~2.7x** — the same direction and
-  order of magnitude as the post, far from our own N=1 pair's 29x.
-- **Dollar cost:** **~1.15x** (mean), MCP cheaper at the median. Prompt
-  caching turns most of MCP's extra context into cheap cache reads; the
-  post doesn't say whether it accounts for caching.
-- **Mechanism:** partially supported — MCP context does grow with run
-  length (§2) — but in this flow the bigger cost driver on the *other*
-  side is Codegen rewriting whole files blind, which a token-count-only
-  comparison doesn't surface.
-- Caveat: our "Codegen" condition isn't what the post calls CLI — the
+| | Token volume ratio | Dollar cost ratio |
+|---|---|---|
+| Post | ~4.2x (up to 10x) | not stated |
+| Our N=1 pair (appendix) | ~29x | ~7x |
+| Batch 1 (primer v1) | ~2.7x | ~1.2x (MCP cheaper at the median) |
+| Batch 2 (primer v2) | **~35x** | **~6.3x** |
+
+- **The post's range is reachable — under specific conditions.** With a
+  primer that covers the app's traps, we land in or above it. Without,
+  the gap nearly vanishes. The post doesn't say what its CLI agent knew
+  about the app beforehand, and that turns out to be the largest single
+  factor we've measured.
+- **Dollar cost ≠ token volume.** Prompt caching turns most of MCP's
+  extra context into $0.20/M cache reads; the dollar gap is always much
+  smaller than the token gap. The post doesn't say whether it accounts
+  for caching.
+- **Mechanism:** supported — MCP context grows with run length, and MCP
+  keeps paying for exploration even when told what it'll find (§A). But
+  the *other* side's cost is driven by what that agent doesn't know, not
+  by its tooling per se.
+- Our "Codegen" condition isn't exactly what the post calls CLI — the
   agent never gets a shell (see `README.md` "How the comparison works").
 
 ## 9. Recommendations and open questions
 
-Decided after this analysis:
+Decided so far:
 
 - **MCP toolset** (§7.1): the full playwright-mcp toolset is the MCP
   condition (`CLAUDE.md` decision 13).
-- **The three recurring traps are now in `docs/app-knowledge.md`**
-  ("primer v2", `CLAUDE.md` decision 10): the `-- Select --` placeholder
-  rendered as an option, the selected employee shown as `"First  Last"`
-  (double space), and weekend dates rejected server-side. **Every run in
-  this doc used primer v1**, so the next batch is also a before/after
-  comparison. Prediction to check it against: Codegen should gain the
-  most — most of its 29 failures (§3) trace back to these traps — which
-  would narrow or flip the iterations-to-green and wall-clock gaps.
+- **Primer v2** (`CLAUDE.md` decision 10): the three recurring traps are
+  in `docs/app-knowledge.md`. Batch 1's prediction — "Codegen should gain
+  the most, narrowing or flipping the iterations-to-green and wall-clock
+  gaps" — **held, and understated it**: Codegen's cost fell 76%, the
+  iterations gap closed completely, wall clock flipped, and the cost gap
+  widened from 1.2x to 6.3x.
 
 Still open (each touches the experiment's design, so proposals only):
 
-- **An edit-style tool for Codegen** would test whether its cost is
-  mostly an artifact of whole-file `write_file`. Changes the tool surface
-  of a condition — design decision.
-- **Run the nudged variant** (`npm run repeat:nudged`) — the wiring is
-  done; no data yet.
-- **Get to a real n** before drawing quantitative conclusions — at least
-  for the MCP condition, where one run in three tripled the cost.
+- **Report the primer as an explicit experimental variable**, not a
+  fixed setup detail — it moved results more than anything else so far.
+  One option: keep both primer versions and report every future result
+  per primer version.
+- **Run the nudged variant** (`npm run repeat:nudged`) — wired, no data
+  yet. It's the natural test for the one remaining recurring trap (the
+  async confirmation dialog, TL;DR 7), which is Playwright-API knowledge,
+  not app knowledge.
+- **An edit-style tool for Codegen** would test how much of its
+  (now small) cost is whole-file rewrites. Changes a condition's tool
+  surface — design decision.
+- **More repeats**: n=3 per cell is enough to see a 4x shift, not to
+  estimate distributions. MCP in particular has one expensive outlier in
+  each batch (batch 1 r3, batch 2 r2).
+- **Model coverage** (`CLAUDE.md` decision 7) — does a stronger or weaker
+  model need the primer less or more? Given how much the primer matters,
+  this interacts with it directly.
 
 ## Caveats
 
-- n=3 per condition, one Codegen point censored. Directional only.
+- n=3 per condition per batch; batch 1 has one censored Codegen point.
+  Directional only.
 - Single model (`sonnet`), single flow, single app build.
-- The MCP condition measured here had the full playwright-mcp toolset —
-  not what the docs described at the time, but what was then decided
-  to be the MCP condition (§7.1).
-- All runs here used app-knowledge primer v1; later batches use v2 (§9)
-  and aren't directly poolable with these.
+- Batches are **not poolable**: they differ in the primer (by design) and
+  were run a couple of hours apart on the same machine.
+- The MCP condition had playwright-mcp's full toolset in every run —
+  first by accident, then by decision (§7.1).
 - Quality criteria 2 and 5 involve judgement; 1, 3, 4, 6 and 7 are backed
-  by the objective signals in §5.
+  by objective signals (§5, §A).
 - Runs were sequential on one machine; OrangeHRM was fully reset before
   each run by `harness/run-repeats.sh`.
 

@@ -1,0 +1,26 @@
+{
+  "runId": "codegen-2026-09-25T15-36-21-741Z",
+  "condition": "codegen",
+  "promptVariant": "baseline",
+  "phases": [
+    {
+      "phase": "generate",
+      "model": "sonnet",
+      "sessionId": "20aad739-e185-4a50-ac91-eb8408bb4275",
+      "inputTokens": 6,
+      "outputTokens": 5404,
+      "cacheCreationInputTokens": 7001,
+      "cacheReadInputTokens": 19165,
+      "costUsd": 0.085889,
+      "turns": 3,
+      "toolCallCounts": {
+        "mcp__tools__write_file": 1,
+        "mcp__tools__run_playwright_test": 1
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-25T15:36:21.743Z",
+      "finishedAt": "2026-09-25T15:37:24.414Z",
+      "durationMs": 58584
+    }
+  ]
+}
