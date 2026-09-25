@@ -34,12 +34,17 @@ treat this file the same way as `docs/run-mcp-condition.md`.
 ```bash
 npm run cleanup:app     # tear down app + volumes
 npm run setup:app       # fresh OrangeHRM 5.9 install, ~80s end-to-end
-npm run seed             # login + one-time Leave module setup, saves harness/.auth/state.json
 ```
 
-Skip this step only if you deliberately want to run against non-fresh app
-state — otherwise always reset first so runs are comparable, including
-against the MCP condition's runs.
+No separate seed step needed here - `bench:cli` runs it itself as its
+first move (login + one-time Leave module setup, saves
+`harness/.auth/state.json`), since the saved session can expire between
+runs (see `TODO.md` Gotchas). `npm run seed` is still available standalone
+if you want to warm that state without spinning up Claude Code.
+
+Skip the reset above only if you deliberately want to run against
+non-fresh app state — otherwise always reset first so runs are comparable,
+including against the MCP condition's runs.
 
 ## 2. Run it
 
@@ -47,7 +52,11 @@ against the MCP condition's runs.
 npm run bench:cli
 ```
 
-What this invokes, in `claude -p --output-format json` terms:
+First move, before anything else: re-runs the seed logic, unconditionally
+(same reasoning as the MCP condition, see `docs/run-mcp-condition.md`
+§2) - zero-LLM-token, doesn't count toward this run's measured cost.
+
+Then, what this invokes in `claude -p --output-format json` terms:
 
 - **Model**: `sonnet` (or `$CLAUDE_MODEL`)
 - **Tools**: exactly `mcp__tools__write_file` and

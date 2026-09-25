@@ -98,8 +98,7 @@ script/process, just when a Claude Code session tries to command it
 directly.
 
 ```bash
-npm run seed           # login + one-time Leave module setup, saves harness/.auth/state.json
-npm run explore:mcp    # prints a RUN_ID when done
+npm run explore:mcp    # prints a RUN_ID when done; re-seeds itself first
 RUN_ID=<id> npm run generate:mcp
 ```
 

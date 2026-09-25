@@ -258,7 +258,13 @@ thing anyone reproducing this repo would hit again.
   `npm run seed` before scoring/re-running any older generated test fixed
   it immediately. Not a harness bug - OrangeHRM's session simply times
   out - but easy to misdiagnose as a test defect if you don't check the
-  actual page snapshot in the failure output first.
+  actual page snapshot in the failure output first. **Fixed properly**,
+  not just noted: `seed()` is now exported from `seed.ts` and called
+  unconditionally as the first step of `explore-mcp.ts`/`generate-mcp.ts`/
+  `run-cli.ts`, so freshness is no longer the operator's problem for a
+  fresh run (still worth knowing if you manually re-run an *old*
+  `results/<run-id>/tests/*.spec.ts` directly with `npx playwright test`,
+  which doesn't go through any of those scripts).
 - **`seed.ts`'s Leave Type creation silently no-op'd — logged success,
   created nothing.** Surfaced when a user recording the CLI fixture hit
   "No Records Found" in the Assign Leave Type dropdown on a freshly

@@ -186,12 +186,18 @@ assume some `.md` file describes it and needs a pass.
     unreliably surfacing a just-assigned leave request in this OrangeHRM
     build — confirmed via direct DB inspection to be a real app quirk, not
     a test-authoring bug).
-11. **The seed step (`harness/src/seed.ts`, `npm run seed`) covers more
-    than login**: it also does the one-time org setup a fresh OrangeHRM
-    install needs before the Leave module works at all (Leave Period,
-    one Leave Type) — deterministic, zero-LLM-token, same reasoning as
-    #10: this is environment setup a tester wouldn't expect to have to do
-    as part of testing a specific feature. It saves an authenticated
+11. **The seed step (`harness/src/seed.ts`) covers more than login**: it
+    also does the one-time org setup a fresh OrangeHRM install needs
+    before the Leave module works at all (Leave Period, one Leave Type)
+    — deterministic, zero-LLM-token, same reasoning as #10: this is
+    environment setup a tester wouldn't expect to have to do as part of
+    testing a specific feature. Exported as a `seed()` function that
+    `explore-mcp.ts`/`generate-mcp.ts`/`run-cli.ts` each call
+    unconditionally as their first move, not a manual prerequisite the
+    operator has to remember — the saved session can expire between runs
+    (confirmed for real, see `TODO.md` Gotchas) and re-seeding is cheap
+    enough that checking staleness first isn't worth the extra code.
+    Still runnable standalone (`npm run seed`). It saves an authenticated
     Playwright storage state (`harness/.auth/state.json`, gitignored) that
     both the MCP condition (via `playwright-mcp --storage-state`) and
     generated test files (via `playwright.config.ts`'s `use.storageState`)

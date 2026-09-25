@@ -15,6 +15,7 @@ import path from 'node:path';
 import { runClaude } from './lib/claude-runner.js';
 import { recordPhaseMetrics, summarizePhase } from './lib/metrics.js';
 import { newRunId } from './lib/run-id.js';
+import { seed } from './seed.js';
 
 const MODEL = process.env.CLAUDE_MODEL ?? 'sonnet';
 const TARGET_APP_URL = process.env.TARGET_APP_URL ?? 'http://localhost:8081/';
@@ -23,6 +24,9 @@ const FLOW_PATH = process.argv[2] ?? 'flows/01-add-employee-leave-request.md';
 const FIXTURE_PATH = process.env.CODEGEN_FIXTURE ?? 'fixtures/01-add-employee-leave-request.codegen.ts';
 
 async function main(): Promise<void> {
+  console.log('==> Refreshing auth state (session may have expired since last run)');
+  await seed();
+
   const runId = process.env.RUN_ID ?? newRunId('cli');
   const runDir = path.resolve('results', runId);
   const rawDir = path.resolve('results/raw', runId);

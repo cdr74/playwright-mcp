@@ -15,6 +15,7 @@ import { runClaude } from './lib/claude-runner.js';
 import { PLAYWRIGHT_MCP_TOOLS, withServerPrefix } from './lib/mcp-tool-names.js';
 import { recordPhaseMetrics, summarizePhase } from './lib/metrics.js';
 import { newRunId } from './lib/run-id.js';
+import { seed } from './seed.js';
 
 const MODEL = process.env.CLAUDE_MODEL ?? 'sonnet';
 const TARGET_APP_URL = process.env.TARGET_APP_URL ?? 'http://localhost:8081/';
@@ -23,6 +24,9 @@ const REPO_ROOT = process.cwd();
 const FLOW_PATH = process.argv[2] ?? 'flows/01-add-employee-leave-request.md';
 
 async function main(): Promise<void> {
+  console.log('==> Refreshing auth state (session may have expired since last run)');
+  await seed();
+
   const runId = process.env.RUN_ID ?? newRunId('mcp');
   const runDir = path.resolve('results', runId);
   const rawDir = path.resolve('results/raw', runId);

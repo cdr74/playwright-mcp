@@ -13,6 +13,7 @@ import path from 'node:path';
 import { runClaude } from './lib/claude-runner.js';
 import { PLAYWRIGHT_MCP_TOOLS, withServerPrefix } from './lib/mcp-tool-names.js';
 import { recordPhaseMetrics, summarizePhase } from './lib/metrics.js';
+import { seed } from './seed.js';
 
 const MODEL = process.env.CLAUDE_MODEL ?? 'sonnet';
 const TARGET_APP_URL = process.env.TARGET_APP_URL ?? 'http://localhost:8081/';
@@ -26,6 +27,9 @@ async function main(): Promise<void> {
     console.error('RUN_ID is not set. Run `npm run explore:mcp` first, then `RUN_ID=<id> npm run generate:mcp`.');
     process.exit(1);
   }
+
+  console.log('==> Refreshing auth state (session may have expired since explore:mcp ran)');
+  await seed();
 
   const runDir = path.resolve('results', runId);
   const rawDir = path.resolve('results/raw', runId);

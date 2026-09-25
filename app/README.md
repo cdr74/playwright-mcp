@@ -81,13 +81,15 @@ end-to-end (measured with images already cached locally) — that's the
 confirmed reset strategy between benchmark repeats, see `README.md` "Test
 bed" and `TODO.md`.
 
-## After installing: seed it
+## After installing: it seeds itself
 
 `install.sh` only gets OrangeHRM itself running - it doesn't configure the
 Leave module (needs a one-time Leave Period + Leave Type, see
 `docs/app-knowledge.md`) or produce the authenticated session the harness
-conditions use. Run `npm run seed` (from the repo root) after
-`install.sh`/`cleanup.sh` cycles - see `harness/README.md`.
+conditions use. You don't need a separate step for that though -
+`explore:mcp`/`generate:mcp`/`bench:cli` each do it themselves as their
+first move (`npm run seed`'s logic, still available standalone too) - see
+`harness/README.md`.
 
 ## Open items
 

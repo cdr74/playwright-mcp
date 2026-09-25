@@ -190,8 +190,8 @@ if it turns out to be a bottleneck once the harness is running many repeats.
 
 Environment phase done (target app, Playwright, Playwright MCP - all
 automated and verified, see `docs/verify-setup.md`). Both the **MCP
-condition** (`npm run seed`, `npm run explore:mcp`, `npm run generate:mcp`)
-and the **CLI condition** (`npm run bench:cli`) harnesses are built and
+condition** (`npm run explore:mcp`, `npm run generate:mcp`) and the
+**CLI condition** (`npm run bench:cli`) harnesses are built and
 have each completed one full, uninterrupted run end to end - see "Results"
 below for the numbers and `docs/run-mcp-condition.md` /
 `docs/run-cli-condition.md` for the exact, reproducible steps. Both have
@@ -235,7 +235,6 @@ cp .env.example .env
 npm install
 npm run setup           # target app (Docker or Podman both work) + Playwright browser binary
 npm run verify:tools    # sanity-check playwright and playwright-mcp are both runnable
-npm run seed             # log in once, do one-time env setup, save auth state
 ```
 
 No API key needed - just the `claude` CLI installed and authenticated
@@ -243,8 +242,8 @@ No API key needed - just the `claude` CLI installed and authenticated
 
 Then walk through `docs/verify-setup.md` to manually confirm the app,
 Playwright CLI, and Playwright MCP all actually work. `npm run cleanup:app`
-tears the app stack back down (pair with a fresh `npm run setup:app` +
-`npm run seed` to get back to a clean, known state).
+tears the app stack back down (pair with a fresh `npm run setup:app` to
+get back to a clean, known state).
 
 Run the MCP condition end to end (**from a plain terminal, not from
 inside a Claude Code session** — see `harness/README.md` for why):
@@ -261,6 +260,11 @@ condition is ready to run the same way:
 ```bash
 npm run bench:cli        # prints a RUN_ID
 ```
+
+Neither command needs a separate login step first - both refresh the
+authenticated session and one-time Leave module setup themselves as their
+first move (`npm run seed`, still available standalone if you want to warm
+that state without spinning up Claude Code - see `harness/README.md`).
 
 ## License
 

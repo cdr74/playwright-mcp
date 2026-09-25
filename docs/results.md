@@ -190,7 +190,7 @@ exact commands and prompts. Short version, from a plain terminal (not from
 inside a Claude Code session — see those docs for why):
 
 ```bash
-npm run cleanup:app && npm run setup:app && npm run seed
-npm run explore:mcp && RUN_ID=<id> npm run generate:mcp   # MCP condition
-npm run bench:cli                                          # CLI condition
+npm run cleanup:app && npm run setup:app
+npm run explore:mcp && RUN_ID=<id> npm run generate:mcp   # MCP condition (re-seeds itself)
+npm run bench:cli                                          # CLI condition (re-seeds itself)
 ```

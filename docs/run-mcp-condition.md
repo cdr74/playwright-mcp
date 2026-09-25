@@ -35,12 +35,20 @@ one place a stale copy would actually mislead someone.
 ```bash
 npm run cleanup:app     # tear down app + volumes
 npm run setup:app       # fresh OrangeHRM 5.9 install, ~80s end-to-end
-npm run seed             # login + one-time Leave module setup, saves harness/.auth/state.json
 ```
 
-Skip this step only if you deliberately want to run against non-fresh app
-state (e.g. re-running `generate:mcp` against an existing `RUN_ID` after
-fixing a harness bug) — otherwise always reset first so runs are comparable.
+No separate seed step needed here - `explore:mcp` and `generate:mcp` each
+run it themselves as their first move (login + one-time Leave module
+setup, saves `harness/.auth/state.json`), since the saved session can
+expire between runs and there's no reason to make freshness the
+operator's problem (see `TODO.md` Gotchas). `npm run seed` is still
+available standalone if you want to warm that state without spinning up
+Claude Code.
+
+Skip the reset above only if you deliberately want to run against
+non-fresh app state (e.g. re-running `generate:mcp` against an existing
+`RUN_ID` after fixing a harness bug) — otherwise always reset first so
+runs are comparable.
 
 ## 2. Phase 1 — explore
 
@@ -48,7 +56,14 @@ fixing a harness bug) — otherwise always reset first so runs are comparable.
 npm run explore:mcp
 ```
 
-What this invokes, in `claude -p --output-format json` terms:
+First move, before anything else: re-runs the seed logic (login + Leave
+Period/Type check, overwrites `harness/.auth/state.json`) — always, not
+conditionally, since checking staleness is more code than just refreshing
+unconditionally. This is zero-LLM-token setup, same as a standalone
+`npm run seed` (see `CLAUDE.md` decision 11) — it doesn't count toward
+this phase's measured cost/turns.
+
+Then, what this invokes in `claude -p --output-format json` terms:
 
 - **Model**: `sonnet` (or `$CLAUDE_MODEL`)
 - **Tools**: the curated Playwright MCP browser tools
@@ -226,8 +241,10 @@ Prints a `RUN_ID` when done. Produces `results/<run-id>/test-plan.md`.
 RUN_ID=<id-from-step-2> npm run generate:mcp
 ```
 
-Same model, MCP servers, and browser tools as phase 1, plus
-`mcp__tools__run_playwright_test`.
+Also re-seeds first, same as phase 1 - there's no guarantee this runs
+right after `explore:mcp`, so it can't assume that phase's fresh session
+is still fresh. Otherwise: same model, MCP servers, and browser tools as
+phase 1, plus `mcp__tools__run_playwright_test`.
 
 - **System prompt** (`conditions/mcp/generate-prompt.md` + target URL +
   `docs/app-knowledge.md` — the app-knowledge block is identical to phase

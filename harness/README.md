@@ -9,9 +9,15 @@ decision 3 for the full reasoning and mechanics.
 
 ## Layout
 
-- `src/seed.ts` (`npm run seed`) — logs in once, does one-time OrangeHRM
-  Leave module setup, saves an authenticated storage state to `.auth/`
-  (gitignored). Both conditions and generated test files start from this.
+- `src/seed.ts` — logs in, does the one-time OrangeHRM Leave module setup,
+  saves an authenticated storage state to `.auth/` (gitignored). Exports a
+  `seed()` function that `explore-mcp.ts`/`generate-mcp.ts`/`run-cli.ts`
+  each call unconditionally as their first move - the saved session can
+  expire between runs (confirmed for real, see `TODO.md` Gotchas), and
+  re-seeding is cheap, deterministic, zero-LLM-token either way, so
+  there's no reason to make freshness the operator's problem. Still
+  runnable standalone (`npm run seed`) to warm that state without
+  spinning up Claude Code.
 - `src/lib/claude-runner.ts` — spawns `claude -p --output-format json` for
   one phase, parses its JSON result (tokens, cost, turns, permission
   denials) directly, and extracts tool-call counts from that session's own
@@ -36,8 +42,6 @@ decision 3 for the full reasoning and mechanics.
   excluded from `--tools` (see `CLAUDE.md` decision 1). Runnable now -
   `fixtures/01-add-employee-leave-request.codegen.ts` is recorded, see
   `fixtures/README.md`.
-
-Run `npm run seed` once per fresh app install before either condition.
 
 ## A known limitation of testing this from inside Claude Code
 
