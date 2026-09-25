@@ -76,29 +76,30 @@ starts on them, per `CLAUDE.md`.
       - **Not yet run.** No nudged runs exist yet. Tracked with the rest
         of the actual-run work in Phase 4 below ("Run both conditions
         3 repeats each").
-- [ ] **[DECISION]** MCP tool allow-list isn't enforced - what should
-      "the MCP condition" actually be? Found in the first repeat batch
-      analysis: `claude -p --tools` only restricts Claude Code's
-      *built-in* tools, so the curated 13-tool list in
-      `harness/src/lib/mcp-tool-names.ts` has never applied; every MCP run
-      had playwright-mcp's full toolset, and 3 of 4 runs called excluded
-      tools (`browser_run_code_unsafe` x3, `browser_evaluate`,
+- [x] **[DECISION]** MCP toolset: **the full playwright-mcp toolset *is*
+      the MCP condition** (`CLAUDE.md` decision 13). Found in the first
+      repeat batch analysis that `claude -p --tools` only restricts
+      Claude Code's *built-in* tools, so a curated 13-tool list had never
+      applied - every MCP run had all ~25 tools, and 3 of 4 runs called
+      "excluded" ones (`browser_run_code_unsafe` x3, `browser_evaluate`,
       `browser_network_requests` x3, `browser_network_request`,
-      `browser_console_messages`). playwright-mcp itself has no per-tool
-      filter flag (only `--caps` to *add* capabilities). Options:
-      (a) **accept the full toolset as the MCP condition** - arguably the
-      more realistic "MCP out of the box" setup, and it's what all
-      existing MCP data actually measured; just correct the docs and drop
-      the curated list; (b) **deny excluded tools via
-      `--disallowedTools`** - blocks calls (would show up as
-      `permission_denials`) but their definitions likely still occupy
-      context every turn, so it changes capability without fully changing
-      cost; (c) **a thin proxy MCP server** re-exposing only the curated
-      tools - fully honors the original design (capability *and* context
-      footprint) but is real extra harness code and invalidates
-      comparability with all MCP data collected so far. Docs have already
-      been corrected to stop claiming (a)-isn't-true; needs a call before
-      the next MCP batch.
+      `browser_console_messages`). Options were (a) accept the full
+      toolset, (b) deny extras via `--disallowedTools` (blocks calls, but
+      definitions likely still cost context), (c) a filtering proxy MCP
+      server (honors the original design, invalidates existing MCP data).
+      Chose (a): keeps all MCP data so far valid, and "MCP out of the box"
+      is arguably the more realistic thing to measure. Verified the switch
+      is behavior-preserving before making it (with `--tools` naming only
+      `mcp__tools__write_file`, the agent still listed the full toolset
+      and no `Bash`), then removed `harness/src/lib/mcp-tool-names.ts`.
+- [x] **[DECISION]** Add the three recurring app traps to
+      `docs/app-knowledge.md` ("primer v2", `CLAUDE.md` decision 10): the
+      `-- Select --` placeholder rendered as a `role="option"` (hit in
+      every run), the selected employee rendered as `"First  Last"` with a
+      double space (3 runs), and weekend dates rejected server-side with
+      `400 "No Working Days Selected"` (3 runs). Written from transcript
+      evidence only. **Every run so far used primer v1** - the next batch
+      is also the before/after comparison for this change.
 - [x] **[DECISION]** Measurement mechanism: **Claude Code (`claude -p`),
       not the Anthropic API directly** — pivoted after the harness was
       already built and working against the raw API, because API usage is
@@ -191,10 +192,10 @@ decisions above) was confirmed to lose no measurement fidelity.
       via a real MCP client (not through Claude Code): listed both tools,
       wrote a real spec, blocked a path-traversal attempt, ran the spec
       against the live app — passed.
-- [x] `harness/src/lib/mcp-tool-names.ts`: the curated (not full 25)
-      playwright-mcp browser toolset *intended* for the agent (**never
-      actually enforced** - see the tool allow-list [DECISION] under Open
-      decisions) -
+- [x] ~~`harness/src/lib/mcp-tool-names.ts`~~ (removed - see the MCP
+      toolset [DECISION]): the curated (not full 25) playwright-mcp
+      browser toolset once *intended* for the agent, never actually
+      enforced -
       excludes `browser_run_code_unsafe`/`browser_evaluate` (arbitrary JS
       execution, more capability than this flow needs) and several others
       not relevant to a form-filling flow; deliberately includes
@@ -517,15 +518,13 @@ thing anyone reproducing this repo would hit again.
 - [x] **Rescored quality for all 6 batch specs** with measured flakiness
       (5x each, app reset before each spec - convention now written into
       `docs/quality-rubric.md` criterion 3).
-- [ ] **Decide the MCP tool allow-list question** (Open decisions above)
-      - it changes what the MCP numbers mean; any re-run of MCP should
-      come after it.
-- [ ] **Decide whether to add the three recurring app traps to
-      `docs/app-knowledge.md`** (`-- Select --` rendered as an option,
-      double-space `"First  Last"` in the autocomplete, weekend dates
-      rejected) - every run of both conditions hit at least one. See
-      `docs/results.md` §9. Would change the primer both conditions get,
-      so it's a design call, and worth a before/after comparison.
+- [x] Decided the MCP toolset (full toolset) and added the three app
+      traps to the primer (primer v2) - see Open decisions above.
+- [ ] **Next baseline batch on primer v2** (`npm run repeat:baseline`) -
+      doubles as the before/after comparison for the primer change
+      against the first batch (primer v1). Expect the Codegen condition
+      to benefit most: its failure log was dominated by exactly these
+      traps (`docs/results.md` §3).
 - [ ] `npm run repeat:nudged` - wiring done, no data yet.
 - [ ] More repeats, at least for MCP (one run in three cost 2.6x the
       other two) - n=3 overturned N=1 but doesn't estimate a

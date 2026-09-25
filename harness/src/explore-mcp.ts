@@ -13,7 +13,6 @@ import 'dotenv/config';
 import { readFile, mkdir, copyFile } from 'node:fs/promises';
 import path from 'node:path';
 import { runClaude } from './lib/claude-runner.js';
-import { PLAYWRIGHT_MCP_TOOLS, withServerPrefix } from './lib/mcp-tool-names.js';
 import { recordPhaseMetrics, summarizePhase } from './lib/metrics.js';
 import { newRunId } from './lib/run-id.js';
 import { seed } from './seed.js';
@@ -55,7 +54,10 @@ async function main(): Promise<void> {
     systemPrompt,
     userMessage: flowSpec,
     model: MODEL,
-    tools: [...withServerPrefix('playwright', PLAYWRIGHT_MCP_TOOLS), 'mcp__tools__write_file'],
+    // --tools only governs Claude Code's built-in tools (naming none of them
+    // here excludes Bash/Write/etc.); every tool of every registered MCP
+    // server is offered regardless - by decision, see CLAUDE.md decision 13.
+    tools: ['mcp__tools__write_file'],
     mcpServers: {
       playwright: {
         command: bin(REPO_ROOT, 'playwright-mcp'),

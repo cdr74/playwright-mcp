@@ -50,9 +50,15 @@ account), not an arbitrary employee.
 
 - **Employee Name** — autocomplete, type a few letters then click the
   matching `role="option"` (placeholder text is `Type for hints...`).
+  Once an employee is selected, the input's value is rendered as
+  **`"First  Last"` — two spaces**, where the (empty) middle name would
+  go. Don't assert the selected value as `"First Last"` with one space.
 - **Leave Type** — a custom dropdown (not a native `<select>`); click the
   closed control (shows `-- Select --` until chosen), then click the
-  `role="option"` with the leave type name.
+  `role="option"` with the leave type name. **The `-- Select --`
+  placeholder is itself rendered as one of the `role="option"` entries**
+  in the open list — "click the first option" picks the placeholder, the
+  form then fails validation with "Required", and nothing is saved.
 - **Leave Balance** — read-only, updates once employee + leave type are
   both chosen.
 - **From Date** / **To Date** — text inputs with placeholder `yyyy-mm-dd`
@@ -62,6 +68,12 @@ account), not an arbitrary employee.
   Click the field, select-all, then type the date character-by-character
   (e.g. Playwright's `pressSequentially`), then dismiss the popup (e.g.
   `Escape`).
+  **Weekend dates are rejected**: the default work week has Saturday and
+  Sunday off, and a leave request covering only non-working days fails
+  server-side (`POST .../leave-requests` → 400, "Failed to Submit: No
+  Working Days Selected") with no success toast. Pick a weekday — a
+  fixed "today + N days" offset will land on a weekend some days of the
+  week.
 - **Assign** button submits.
 
 **A brand-new employee has no leave entitlement/balance yet, and that's

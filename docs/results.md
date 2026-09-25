@@ -46,10 +46,14 @@ reversal is itself one of the main findings.
    between runs of the *same* condition. The "hardcoded first name"
    defect the N=1 pair pinned on Codegen showed up in **2 of 3 MCP**
    specs and **0 of 3 Codegen** specs this time.
-7. **Two harness findings change how to read the MCP data** (§7): the
+7. **Two harness findings change how to read the data** (§7): the
    curated MCP tool allow-list was **never enforced** (every MCP run had
-   playwright-mcp's full toolset, 3 of 4 used excluded tools), and a
-   10-minute timeout was silently censoring the slowest runs (fixed).
+   playwright-mcp's full toolset, 3 of 4 used "excluded" tools) — since
+   decided to *be* the MCP condition — and a 10-minute timeout was
+   silently censoring the slowest runs (fixed).
+8. **The app-knowledge primer has since been extended** with the three
+   traps behind most of Codegen's failures (§9). Everything above used the
+   old primer; the next batch doubles as a before/after comparison.
 
 ## 1. Cost & efficiency
 
@@ -277,7 +281,7 @@ quantified from this data.
 
 1. **The MCP tool allow-list was never enforced.** `claude -p --tools`
    only restricts Claude Code's *built-in* tools. The curated 13-tool list
-   in `harness/src/lib/mcp-tool-names.ts` was passed but ignored for
+   in `harness/src/lib/mcp-tool-names.ts` (since removed) was passed but ignored for
    MCP-server tools, so every MCP run had playwright-mcp's full toolset.
    3 of 4 MCP runs so far called tools the design deliberately excluded
    (`browser_run_code_unsafe` x3 — arbitrary JS — `browser_evaluate`,
@@ -287,9 +291,10 @@ quantified from this data.
    debugging; (b) its context carried all ~25 tool definitions every
    turn, not 13, so MCP cost figures include that overhead. The Codegen
    condition is unaffected (its only MCP server is ours, and `Bash` is a
-   built-in, so that exclusion does hold). **Open decision** in `TODO.md`:
-   accept the full toolset as "the MCP condition", deny extras via
-   `--disallowedTools`, or add a filtering proxy.
+   built-in, so that exclusion does hold). **Decided** (`CLAUDE.md`
+   decision 13): the full toolset *is* the MCP condition from now on —
+   which also means every MCP number in this doc stays valid as-is, now
+   measuring the intended thing rather than an accident.
 2. **A 10-minute timeout censored the slowest run.** `claude-runner.ts`
    killed Codegen r3 at exactly 10:00, mid-debugging and before it had a
    passing real test (its one PASS was a debug probe). Fixed: default
@@ -319,19 +324,21 @@ claims ~114K vs ~27K tokens (~4.2x, "up to 10x") for MCP vs CLI on a
 
 ## 9. Recommendations and open questions
 
-These are proposals, not changes — each touches the experiment's design
-(`CLAUDE.md` collaboration model):
+Decided after this analysis:
 
-- **Decide the MCP toolset question first** (§7.1), since it changes what
-  the MCP numbers mean. Re-run MCP after deciding if (b) or (c).
-- **Consider adding three recurring traps to `docs/app-knowledge.md`**:
-  the `-- Select --` placeholder is rendered as an option; the employee
-  autocomplete shows `"First  Last"` (double space) for an empty middle
-  name; the Assign Leave API rejects non-working days (weekends). Every
-  run of *both* conditions tripped over at least one. This is exactly the
-  kind of "tester would already know it" context decision 10 is for — but
-  it will narrow the gap between conditions, so it's worth deciding
-  deliberately, and running before/after.
+- **MCP toolset** (§7.1): the full playwright-mcp toolset is the MCP
+  condition (`CLAUDE.md` decision 13).
+- **The three recurring traps are now in `docs/app-knowledge.md`**
+  ("primer v2", `CLAUDE.md` decision 10): the `-- Select --` placeholder
+  rendered as an option, the selected employee shown as `"First  Last"`
+  (double space), and weekend dates rejected server-side. **Every run in
+  this doc used primer v1**, so the next batch is also a before/after
+  comparison. Prediction to check it against: Codegen should gain the
+  most — most of its 29 failures (§3) trace back to these traps — which
+  would narrow or flip the iterations-to-green and wall-clock gaps.
+
+Still open (each touches the experiment's design, so proposals only):
+
 - **An edit-style tool for Codegen** would test whether its cost is
   mostly an artifact of whole-file `write_file`. Changes the tool surface
   of a condition — design decision.
@@ -344,8 +351,11 @@ These are proposals, not changes — each touches the experiment's design
 
 - n=3 per condition, one Codegen point censored. Directional only.
 - Single model (`sonnet`), single flow, single app build.
-- The MCP condition measured here had the full playwright-mcp toolset,
-  not the curated one the docs described until now (§7.1).
+- The MCP condition measured here had the full playwright-mcp toolset —
+  not what the docs described at the time, but what was then decided
+  to be the MCP condition (§7.1).
+- All runs here used app-knowledge primer v1; later batches use v2 (§9)
+  and aren't directly poolable with these.
 - Quality criteria 2 and 5 involve judgement; 1, 3, 4, 6 and 7 are backed
   by the objective signals in §5.
 - Runs were sequential on one machine; OrangeHRM was fully reset before

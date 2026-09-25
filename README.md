@@ -207,9 +207,9 @@ the first 3-repeat baseline batch has been run and analysed - see
 "Results" below and `docs/results.md`. `docs/run-mcp-condition.md` /
 `docs/run-codegen-condition.md` / `docs/run-repeats.md` have the exact,
 reproducible steps. Everything has to run from a plain terminal, not from
-inside another Claude Code session (see `harness/README.md`). Open before
-the next batch: how to handle the unenforced MCP tool allow-list, and
-whether to extend the app-knowledge primer — see `TODO.md`.
+inside another Claude Code session (see `harness/README.md`). Next up: a
+second baseline batch on the extended app-knowledge primer (a before/after
+comparison), then the nudged variant — see `TODO.md`.
 
 ## Results
 
@@ -250,10 +250,15 @@ What we learned:
 - **N=1 was misleading.** The first single-run pair suggested MCP costs
   7x more, is 2.4x slower and needs more test iterations — all three
   reversed with repeats (details in `docs/results.md` §6).
-- **Harness findings that matter for reading these numbers:** the curated
-  MCP tool allow-list was never actually enforced (every MCP run had
-  playwright-mcp's full toolset — open decision in `TODO.md`), and the
-  old 10-minute run cap was silently cutting off the slowest runs (fixed).
+- **Harness findings that matter for reading these numbers:** a curated
+  MCP tool allow-list was never actually enforced — every MCP run had
+  playwright-mcp's full toolset, which has since been decided to *be* the
+  MCP condition — and the old 10-minute run cap was silently cutting off
+  the slowest runs (fixed).
+- **Since this batch, the app-knowledge primer both conditions get was
+  extended** with the three app traps behind most of Codegen's failures.
+  These results used the old primer; the next batch is also a
+  before/after comparison.
 
 <details>
 <summary>Original N=1 pair (superseded — kept for the record)</summary>

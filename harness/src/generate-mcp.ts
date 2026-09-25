@@ -15,7 +15,6 @@ import 'dotenv/config';
 import { readFile, mkdir, copyFile } from 'node:fs/promises';
 import path from 'node:path';
 import { runClaude } from './lib/claude-runner.js';
-import { PLAYWRIGHT_MCP_TOOLS, withServerPrefix } from './lib/mcp-tool-names.js';
 import { recordPhaseMetrics, summarizePhase } from './lib/metrics.js';
 import { seed } from './seed.js';
 import { isolatedCwd, bin } from './lib/isolated-session.js';
@@ -77,11 +76,9 @@ async function main(): Promise<void> {
     systemPrompt,
     userMessage,
     model: MODEL,
-    tools: [
-      ...withServerPrefix('playwright', PLAYWRIGHT_MCP_TOOLS),
-      'mcp__tools__write_file',
-      'mcp__tools__run_playwright_test',
-    ],
+    // See explore-mcp.ts: this only excludes built-ins; the full
+    // playwright-mcp toolset is offered by decision (CLAUDE.md decision 13).
+    tools: ['mcp__tools__write_file', 'mcp__tools__run_playwright_test'],
     mcpServers: {
       playwright: {
         command: bin(REPO_ROOT, 'playwright-mcp'),

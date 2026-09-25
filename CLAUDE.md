@@ -60,8 +60,9 @@ assume some `.md` file describes it and needs a pass.
      writes and iterates on the actual spec file). Splitting it this way
      mirrors how a tester actually works and keeps "explored well" and
      "produced a working test" separately measurable — this refines the
-     original one-continuous-loop idea; the tool surface (browser + scoped
-     file write + scoped test runner) is still MCP's defining shape vs the
+     original one-continuous-loop idea; the tool surface (playwright-mcp's
+     full browser toolset — see decision 13 — + scoped file write + scoped
+     test runner) is still MCP's defining shape vs the
      Codegen condition's file-only approach.
    - **Codegen condition** (named for `playwright codegen`, not "CLI" — see
      `README.md` "How the comparison works" for why): modeled on how a
@@ -133,13 +134,13 @@ assume some `.md` file describes it and needs a pass.
      `--help`: "available tools from the built-in set"). It *does* keep
      `Bash`/`Write`/etc. away from both conditions (the Codegen
      condition's "no raw shell" guarantee holds — confirmed from tool
-     counts). It does **not** restrict tools exposed by an MCP server:
-     the curated 13-tool list in `harness/src/lib/mcp-tool-names.ts` was
-     never enforced, every MCP-condition run had playwright-mcp's full
-     toolset, and 3 of the 4 MCP runs so far called excluded tools
-     (`browser_run_code_unsafe`, `browser_evaluate`,
-     `browser_network_requests`, ...). Found in the first repeat batch
-     analysis; how to handle it is an open **[DECISION]** in `TODO.md`.
+     counts). It does **not** restrict tools exposed by an MCP server —
+     every tool of every registered server is offered (verified directly:
+     with `--tools` naming only `mcp__tools__write_file`, the agent listed
+     the whole playwright-mcp toolset plus `run_playwright_test`, and no
+     `Bash`). A curated 13-tool playwright-mcp list existed early on and
+     was passed to `--tools`, but never had any effect; it was removed
+     once decision 13 made the full toolset the MCP condition on purpose.
      `--mcp-config` (inline
      JSON, always paired with `--strict-mcp-config` so no project/user
      `.mcp.json` leaks in) registers `playwright-mcp` (MCP condition only)
@@ -215,7 +216,17 @@ assume some `.md` file describes it and needs a pass.
     also where known app-level quirks live (e.g. Leave List search
     unreliably surfacing a just-assigned leave request in this OrangeHRM
     build — confirmed via direct DB inspection to be a real app quirk, not
-    a test-authoring bug).
+    a test-authoring bug). **Revised 2026-09-25 ("primer v2")** after the
+    first repeat batch showed every run of both conditions tripping over
+    at least one of three undocumented traps — the `-- Select --`
+    placeholder rendered as a `role="option"`, the selected employee
+    rendered as `"First  Last"` (double space), weekend dates rejected
+    server-side — added by user decision, from transcript evidence only.
+    All runs up to and including that batch used primer v1; compare
+    before/after deliberately. The primer is fed to the agents verbatim,
+    so don't add benchmark meta-commentary to it (its existing intro
+    paragraph already carries a little — a candidate for trimming, as its
+    own deliberate change).
 11. **The seed step (`harness/src/seed.ts`) covers more than login**: it
     also does the one-time org setup a fresh OrangeHRM install needs
     before the Leave module works at all (Leave Period, one Leave Type)
@@ -239,6 +250,16 @@ assume some `.md` file describes it and needs a pass.
     Applies per prompt variant if/when the baseline-vs-nudged comparison
     (`TODO.md`) also gets built — 3 repeats × 2 conditions × 2 variants,
     not 3 repeats total.
+13. **The MCP condition gets playwright-mcp's full toolset** (~25 browser
+    tools, including `browser_evaluate` / `browser_run_code_unsafe`), not
+    a curated subset. Decided 2026-09-25 after finding the curated list
+    had never been enforced (see decision 3): accepting the full toolset
+    keeps every MCP run collected so far valid as-is, and "MCP as it comes
+    out of the box" is arguably the more realistic thing to measure. The
+    cost of this — all ~25 tool definitions in context every turn, and
+    more capability than a form-filling flow strictly needs — is part of
+    what the MCP condition's numbers now knowingly include. Built-in
+    tools (`Bash`, `Write`, ...) stay excluded for both conditions.
 
 ## Tech stack
 

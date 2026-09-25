@@ -27,12 +27,6 @@ decision 3 for the full reasoning and mechanics.
   run's output directory with a path-traversal guard. Registered via
   `--mcp-config` for every phase of both conditions — never give an agent
   Claude Code's native, unscoped `Write`/`Bash` instead.
-- `src/lib/mcp-tool-names.ts` — the *intended* curated playwright-mcp
-  browser toolset for the MCP condition (not all ~25 - see the file for
-  what's excluded and why). **Not actually enforced**: `--tools` only
-  restricts Claude Code's built-in tools, so every MCP run so far had
-  playwright-mcp's full toolset, and 3 of 4 runs used excluded tools. See
-  `TODO.md` (open decision) before relying on this list meaning anything.
 - `src/lib/metrics.ts`, `src/lib/run-id.ts` — per-run `metrics.json`
   bookkeeping and run-id generation.
 - `src/lib/isolated-session.ts` — `isolatedCwd(runId)` /

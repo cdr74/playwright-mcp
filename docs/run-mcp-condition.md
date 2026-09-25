@@ -66,18 +66,15 @@ this phase's measured cost/turns.
 Then, what this invokes in `claude -p --output-format json` terms:
 
 - **Model**: `sonnet` (or `$CLAUDE_MODEL`)
-- **Tools**: `--tools` is passed the curated Playwright MCP browser tools
-  (`harness/src/lib/mcp-tool-names.ts`: `browser_navigate`,
-  `browser_navigate_back`, `browser_snapshot`, `browser_click`,
-  `browser_type`, `browser_fill_form`, `browser_press_key`,
-  `browser_select_option`, `browser_hover`, `browser_wait_for`,
-  `browser_handle_dialog`, `browser_find`, `browser_take_screenshot`) +
-  `mcp__tools__write_file` — **but in practice the agent gets
-  playwright-mcp's full toolset**, because `--tools` only restricts
-  Claude Code's *built-in* tools, not MCP-server tools. Confirmed from
-  real runs calling excluded tools (`browser_run_code_unsafe`,
-  `browser_evaluate`, `browser_network_requests`, ...). Built-ins like
-  `Bash` *are* excluded. See `TODO.md` for the open decision on this.
+- **Tools**: playwright-mcp's **full toolset** (~25 browser tools,
+  including `browser_evaluate` / `browser_run_code_unsafe`) plus the
+  scoped `tools` server's `write_file` (and, technically,
+  `run_playwright_test` — every tool of every registered MCP server is
+  offered; explore agents haven't used it). By decision: `CLAUDE.md`
+  decision 13. `--tools` is passed only `mcp__tools__write_file`, which
+  matters for one reason: it names no built-in tools, so `Bash`, `Write`
+  etc. are excluded. It does not filter MCP tools at all (`CLAUDE.md`
+  decision 3).
 - **Process `cwd`**: a scratch directory outside this repo entirely
   (`os.tmpdir()/playwright-mcp-bench/<run-id>`, via
   `harness/src/lib/isolated-session.ts`), not the repo root - Claude Code
@@ -172,9 +169,15 @@ Then, what this invokes in `claude -p --output-format json` terms:
 
   - **Employee Name** — autocomplete, type a few letters then click the
     matching `role="option"` (placeholder text is `Type for hints...`).
+    Once an employee is selected, the input's value is rendered as
+    **`"First  Last"` — two spaces**, where the (empty) middle name would
+    go. Don't assert the selected value as `"First Last"` with one space.
   - **Leave Type** — a custom dropdown (not a native `<select>`); click the
     closed control (shows `-- Select --` until chosen), then click the
-    `role="option"` with the leave type name.
+    `role="option"` with the leave type name. **The `-- Select --`
+    placeholder is itself rendered as one of the `role="option"` entries**
+    in the open list — "click the first option" picks the placeholder, the
+    form then fails validation with "Required", and nothing is saved.
   - **Leave Balance** — read-only, updates once employee + leave type are
     both chosen.
   - **From Date** / **To Date** — text inputs with placeholder `yyyy-mm-dd`
@@ -184,6 +187,12 @@ Then, what this invokes in `claude -p --output-format json` terms:
     Click the field, select-all, then type the date character-by-character
     (e.g. Playwright's `pressSequentially`), then dismiss the popup (e.g.
     `Escape`).
+    **Weekend dates are rejected**: the default work week has Saturday and
+    Sunday off, and a leave request covering only non-working days fails
+    server-side (`POST .../leave-requests` → 400, "Failed to Submit: No
+    Working Days Selected") with no success toast. Pick a weekday — a
+    fixed "today + N days" offset will land on a weekend some days of the
+    week.
   - **Assign** button submits.
 
   **A brand-new employee has no leave entitlement/balance yet, and that's
