@@ -1,4 +1,4 @@
-# playwright-mcp: MCP vs CLI token cost & quality benchmark
+# playwright-mcp: MCP vs Codegen token cost & quality benchmark
 
 A reproducible testbed for measuring what it actually costs — in tokens,
 iterations, and resulting test quality — to have an AI agent generate (and
@@ -7,9 +7,11 @@ eventually heal) Playwright end-to-end tests two different ways:
 - **Playwright MCP**: the agent drives a live browser through the Model
   Context Protocol, seeing accessibility-tree snapshots and calling tools
   like `browser_navigate` / `browser_click` step by step.
-- **Playwright CLI**: the agent works from a `playwright codegen` recording
-  plus terse `npx playwright test` output — no live page visibility — the
-  way a developer using the CLI directly would.
+- **Codegen flow**: the agent works from a `playwright codegen` recording
+  plus terse `npx playwright test` output — no live page visibility —
+  cleaning up and extending a human's own CLI recording, not driving a
+  live browser step by step itself. (Called the "Codegen" condition
+  throughout, not "CLI" — see "How the comparison works" for why.)
 
 ## Why
 
@@ -36,12 +38,21 @@ MCP and Playwright CLI don't offer symmetric capabilities, so this isn't a
 same-tools-different-labels comparison — it's a comparison of two
 realistic, best-practice workflows for the same task:
 
-| | MCP condition | CLI condition |
+| | MCP condition | Codegen condition |
 |---|---|---|
 | Starting point | Natural-language task spec + app knowledge (see below) | Natural-language task spec + app knowledge + a checked-in `playwright codegen` recording |
-| Tools available to the agent | Playwright MCP (browser control + snapshots) + scoped file write + scoped test runner | File read/write + shell (`npx playwright test`) — **no** live browser tools |
+| Tools available to the agent | Playwright MCP (browser control + snapshots) + scoped file write + scoped test runner | Scoped file write + a scoped test-runner tool that wraps `npx playwright test` — **no** raw shell, **no** live browser tools (see `CLAUDE.md` decision 1) |
 | How it "sees" the app | Live accessibility-tree snapshots each step | Only the raw codegen recording and terse test-run output |
 | Iteration loop | Explore live → write a test plan → author the test → run it → fix → repeat | Rewrite/clean the recording → run tests → read failure output → fix → repeat |
+
+We call this the **Codegen condition**, not "CLI" — despite the name, the
+agent itself never gets a real command line. A human runs
+`playwright codegen` once, up front, to produce the raw recording
+(deterministic, zero LLM tokens); from there the agent only gets a
+scoped `run_playwright_test` tool, not actual shell access to `npx`. This
+project doesn't currently test what an agent with genuine, unscoped CLI
+access would do differently - that's a real, separate question, not
+answered here.
 
 Both conditions get the **exact same task description**. The codegen
 recording step is a deterministic, zero-LLM-token, one-time recording
@@ -92,7 +103,7 @@ Every run is measured on three axes, not just token count:
    best practices.
 
 v1 benchmarks a single model (Claude Sonnet) to keep the first pass simple.
-Broader model coverage, to see whether the MCP/CLI gap is model-dependent,
+Broader model coverage, to see whether the MCP/Codegen gap is model-dependent,
 is a deliberate later phase — see `TODO.md`.
 
 ### Measurement mechanism
@@ -191,7 +202,7 @@ if it turns out to be a bottleneck once the harness is running many repeats.
 Environment phase done (target app, Playwright, Playwright MCP - all
 automated and verified, see `docs/verify-setup.md`). Both the **MCP
 condition** (`npm run explore:mcp`, `npm run generate:mcp`) and the
-**CLI condition** (`npm run bench:cli`) harnesses are built and
+**Codegen condition** (`npm run bench:cli`) harnesses are built and
 have each completed one full, uninterrupted run end to end - see "Results"
 below for the numbers and `docs/run-mcp-condition.md` /
 `docs/run-cli-condition.md` for the exact, reproducible steps. Both have
@@ -205,7 +216,7 @@ repeat-run count needed for that is still an open decision, see `TODO.md`).
 Full write-up, including where these numbers do and don't line up with the
 inspiring post's claim, in `docs/results.md`.
 
-| | MCP | CLI | Ratio |
+| | MCP | Codegen | Ratio |
 |---|---|---|---|
 | Cost (list-price, cache-discounted) | $2.00 | $0.28 | ~7.0x |
 | Total tokens (incl. uncached cache-read volume) | 5.63M | 196K | ~28.7x |
@@ -216,7 +227,7 @@ inspiring post's claim, in `docs/results.md`.
 **Quality**, scored against `docs/quality-rubric.md` (0-4 per criterion,
 manual for now — see `TODO.md` for the automated-scorer option):
 
-| Criterion | MCP | CLI |
+| Criterion | MCP | Codegen |
 |---|---|---|
 | 1. Selector robustness | 4 | 4 |
 | 2. Assertion meaningfulness (fail-fast + diagnostics) | 3 | 4 |
@@ -229,14 +240,15 @@ manual for now — see `TODO.md` for the automated-scorer option):
 
 Both runs produced a passing test on the first complete attempt, and both
 generated tests read as solid on inspection - role-based locators, no hard
-sleeps, real assertions. The two biggest, most concrete gaps: (1) CLI's
-test hardcodes one of the two names the flow spec asks to be "unique,
-generated" (inherited from the codegen fixture it started from), so its
-employee-autocomplete search gets less selective every time the test runs
-and it failed 3 of 5 repeat attempts, while MCP generates both names and
-passed 5/5; (2) MCP hardcodes the full absolute base URL in three separate
-`page.goto()` calls instead of using `playwright.config.ts`'s `baseURL`,
-which CLI's link-clicking navigation never has to. Different failure mode,
+sleeps, real assertions. The two biggest, most concrete gaps: (1) the
+Codegen condition's test hardcodes one of the two names the flow spec
+asks to be "unique, generated" (inherited from the codegen fixture it
+started from), so its employee-autocomplete search gets less selective
+every time the test runs and it failed 3 of 5 repeat attempts, while MCP
+generates both names and passed 5/5; (2) MCP hardcodes the full absolute
+base URL in three separate `page.goto()` calls instead of using
+`playwright.config.ts`'s `baseURL`, which the Codegen condition's
+link-clicking navigation never has to. Different failure mode,
 same underlying lesson - a rubric that only checks the happy path misses
 both of these. See `docs/results.md` "Quality" for the full writeup, and
 `results/mcp-2026-09-25T06-32-18-639Z/` /
@@ -269,8 +281,8 @@ RUN_ID=<id> npm run generate:mcp
 ```
 
 Results land in `results/<run-id>/` (`test-plan.md`, `tests/*.spec.ts`,
-`metrics.json`) and `results/raw/<run-id>/` (full transcripts). The CLI
-condition is ready to run the same way:
+`metrics.json`) and `results/raw/<run-id>/` (full transcripts). The
+Codegen condition is ready to run the same way:
 
 ```bash
 npm run bench:cli        # prints a RUN_ID
