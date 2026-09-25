@@ -12,8 +12,11 @@ condition, one phase named `"generate"` for comparability). See
 - `tests/add-employee-leave.spec.ts` (or similar) — the actual
   generated/healed test file. This is the deliverable of the run, not
   exhaust.
-- `metrics.json` — `{ runId, condition, promptVariant, phases: [...] }`
-  (`promptVariant`: `"baseline"` or `"nudged"` - see `TODO.md`
+- `metrics.json` — `{ runId, condition, promptVariant, primerVersion, phases: [...] }`
+  (`primerVersion`: which `docs/app-knowledge/<version>.md` the run's
+  agents got - `"v1"` or `"v2"`, backfilled for earlier runs from
+  transcript evidence, `CLAUDE.md` decision 14; never pool results across
+  versions. `promptVariant`: `"baseline"` or `"nudged"` - see `TODO.md`
   baseline-vs-nudged decision), one entry per phase (`explore` /
   `generate` for MCP; a single phase for Codegen), each
   with `model`, `sessionId` (the Claude Code session id - use it to find

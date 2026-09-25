@@ -14,7 +14,7 @@ Playwright code - `generate-mcp.ts` and `run-codegen.ts`, not
 `explore-mcp.ts`, since that phase only writes a prose test plan and this
 guidance is entirely about code craftsmanship. Applied identically to
 both conditions' code-writing phase, the same symmetry
-`docs/app-knowledge.md` already relies on (`CLAUDE.md` decision 1).
+`docs/app-knowledge/` already relies on (`CLAUDE.md` decision 1).
 `explore-mcp.ts` still needs `NUDGE_QUALITY` set too, purely to mint a
 `RUN_ID` with the matching `mcp-nudged-` prefix that `generate-mcp.ts`
 later reuses - `generate-mcp.ts` warns loudly if the two ever disagree.

@@ -62,7 +62,7 @@ without re-running?
   `expect()` tied to that specific outcome, placed right after that step
   (not deferred to one giant assertion at the end) so a failure points at
   its actual cause; the primary success signal is asserted correctly per
-  `docs/app-knowledge.md` guidance (toast, not Leave List search);
+  `docs/app-knowledge/` guidance (toast, not Leave List search);
   secondary/best-effort checks are present and informative without being
   treated as failure conditions; failure paths leave real diagnostic
   context (a custom assertion message, a `console.log` at a meaningful

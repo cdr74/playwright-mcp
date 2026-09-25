@@ -31,7 +31,7 @@ material, not the final test), then perform the same flow
    with anything (e.g. `CodegenFN` / `CodegenLN` — the agent will
    generalize this into a unique generated name later, don't worry about
    collisions) → **Save**.
-2. **Leave → Assign Leave** (not **Apply** — see `docs/app-knowledge.md`
+2. **Leave → Assign Leave** (not **Apply** — see `docs/app-knowledge/`
    for why that distinction matters) → type the employee's name into
    **Employee Name** and click the matching autocomplete option → open
    the **Leave Type** dropdown and pick any option → click **From Date**
@@ -42,7 +42,7 @@ material, not the final test), then perform the same flow
    confirmation dialog (expected for a zero-balance employee).
 3. Optionally also record checking **Leave → Leave List** for the new
    entry, matching the flow spec's verification step — but per the known
-   quirk in `docs/app-knowledge.md`, don't worry if it doesn't show up.
+   quirk in `docs/app-knowledge/`, don't worry if it doesn't show up.
 
 Close the codegen window when done. Save the generated script, unedited,
 to `fixtures/01-add-employee-leave-request.codegen.ts`, then fill in below.
@@ -75,4 +75,4 @@ to `fixtures/01-add-employee-leave-request.codegen.ts`, then fill in below.
     comparable data point (see `README.md` "How the comparison works" —
     Codegen's `-- Select --`
     handling for this same custom dropdown was a documented hurdle for the
-    MCP condition too, in `docs/app-knowledge.md`).
+    MCP condition too, in `docs/app-knowledge/`).

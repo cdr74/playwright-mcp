@@ -1,6 +1,7 @@
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { ClaudeRunResult } from './claude-runner.js';
+import type { PrimerVersion } from './primer.js';
 
 export interface PhaseMetrics {
   phase: string;
@@ -19,10 +20,14 @@ export interface PhaseMetrics {
   durationMs: number;
 }
 
-interface RunMetrics {
+export interface RunMeta {
   runId: string;
   condition: 'mcp' | 'codegen';
   promptVariant: 'baseline' | 'nudged';
+  primerVersion: PrimerVersion;
+}
+
+interface RunMetrics extends RunMeta {
   phases: PhaseMetrics[];
 }
 
@@ -54,22 +59,20 @@ export function summarizePhase(
   };
 }
 
-export async function recordPhaseMetrics(
-  runDir: string,
-  runId: string,
-  condition: 'mcp' | 'codegen',
-  phase: PhaseMetrics,
-  promptVariant: 'baseline' | 'nudged' = 'baseline',
-): Promise<void> {
-  const metricsPath = path.join(runDir, 'metrics.json');
-  await mkdir(runDir, { recursive: true });
-
-  let existing: RunMetrics = { runId, condition, promptVariant, phases: [] };
+export async function readRunMetrics(runDir: string): Promise<RunMetrics | null> {
   try {
-    existing = JSON.parse(await readFile(metricsPath, 'utf-8')) as RunMetrics;
+    return JSON.parse(await readFile(path.join(runDir, 'metrics.json'), 'utf-8')) as RunMetrics;
   } catch {
-    // no existing metrics.json for this run yet - start fresh
+    return null;
   }
+}
+
+export async function recordPhaseMetrics(runDir: string, meta: RunMeta, phase: PhaseMetrics): Promise<void> {
+  await mkdir(runDir, { recursive: true });
+  // A later phase of the same run (generate-mcp.ts) appends to what the
+  // first phase wrote; run-level fields stay as the first phase recorded
+  // them - callers check for mismatches before getting here.
+  const existing: RunMetrics = (await readRunMetrics(runDir)) ?? { ...meta, phases: [] };
   existing.phases.push(phase);
-  await writeFile(metricsPath, JSON.stringify(existing, null, 2), 'utf-8');
+  await writeFile(path.join(runDir, 'metrics.json'), JSON.stringify(existing, null, 2), 'utf-8');
 }

@@ -2,12 +2,15 @@
 
 Longer-form write-ups that don't belong in the top-level `README.md`:
 
-- `app-knowledge.md` — the "tester knowledge" primer fed to both
-  conditions' prompts: app navigation structure, exact fields/selectors
-  for the flow's screens, and known app-level quirks. Gathered by actually
-  exploring the running app, not guessed. See `README.md` "The tester
-  knowledge assumption" for why this is fed in rather than left for the
-  agent to discover.
+- `app-knowledge/` — the "tester knowledge" primer fed to both
+  conditions' prompts (app navigation, exact fields/selectors for the
+  flow's screens, known app-level quirks — gathered by exploring the
+  running app, not guessed). **Versioned** (`v1.md`, `v2.md`; default v2):
+  the primer is an explicit experimental variable, since v1 → v2 moved
+  results more than anything else measured (`CLAUDE.md` decision 14). Its
+  `README.md` has the version table and the rules (never edit a published
+  version). See `README.md` "The tester knowledge assumption" for why a
+  primer exists at all.
 - `verify-setup.md` — step-by-step manual check that the app + Playwright
   + Playwright MCP setup actually works, before building anything on top
   of it.
@@ -15,7 +18,7 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
   runbooks for each condition: every command plus the exact composed
   system/user prompts sent to Claude Code, so different people running
   them get comparable results. Must be resynced whenever
-  `conditions/{mcp,codegen}/*.md`, `docs/app-knowledge.md`, the flow spec,
+  `conditions/{mcp,codegen}/*.md`, `docs/app-knowledge/`, the flow spec,
   or (for the Codegen one) the codegen fixture change — see each file's
   own header.
 - `run-repeats.md` — how to actually produce the 3-repeats-per-condition

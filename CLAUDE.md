@@ -117,7 +117,8 @@ assume some `.md` file describes it and needs a pass.
    - Each phase is one `claude -p --output-format json` invocation with a
      fresh `--session-id` (a generated UUID) and **`--system-prompt`**
      (full replace, not `--append-system-prompt`) set to the phase prompt
-     + `docs/app-knowledge.md` + the target app URL — this avoids Claude
+     + the app-knowledge primer (`docs/app-knowledge/<version>.md`) + the
+     target app URL — this avoids Claude
      Code's own default identity/tool-guidance system prompt, keeping the
      prompt close to what a bare API harness would have sent. **Not
      sufficient on its own**, confirmed empirically: Claude Code
@@ -208,7 +209,8 @@ assume some `.md` file describes it and needs a pass.
    `cdr74` GitHub handle as a placeholder — trivial to swap for a full
    legal name later, not worth blocking on.
 10. **Both conditions get a shared "tester knowledge" primer**
-    (`docs/app-knowledge.md`), fed into their system prompts alongside the
+    (`docs/app-knowledge/<version>.md`, versioned — decision 14), fed into
+    their system prompts alongside the
     task spec. Rationale: a real tester wouldn't start from zero either;
     letting an agent rediscover basic app structure from scratch on every
     run would bias the comparison rather than measure it. The primer is
@@ -262,6 +264,18 @@ assume some `.md` file describes it and needs a pass.
     more capability than a form-filling flow strictly needs — is part of
     what the MCP condition's numbers now knowingly include. Built-in
     tools (`Bash`, `Write`, ...) stay excluded for both conditions.
+14. **The app-knowledge primer is an explicit experimental variable, not
+    fixed setup.** Decided 2026-09-25 after the v1 → v2 change moved the
+    MCP:Codegen cost ratio from ~1.2x to ~6.3x — more than anything else
+    measured. Each version is a frozen file under `docs/app-knowledge/`
+    (`v1.md`, `v2.md`; never edit a published version, add a new one and
+    register it in `harness/src/lib/primer.ts`). Runs pick one with
+    `PRIMER=<version>` (default `v2`) or `run-repeats.sh --primer`, and
+    record it as `primerVersion` in `metrics.json` (backfilled for every
+    earlier run from transcript evidence). **Report every result per
+    primer version**; never pool across versions. The nudged batch uses
+    `v2` (user decision). See `docs/app-knowledge/README.md` for the
+    version table and rules.
 
 ## Tech stack
 

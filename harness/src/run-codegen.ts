@@ -20,6 +20,7 @@ import { runClaude } from './lib/claude-runner.js';
 import { recordPhaseMetrics, summarizePhase } from './lib/metrics.js';
 import { newRunId } from './lib/run-id.js';
 import { seed } from './seed.js';
+import { loadPrimer } from './lib/primer.js';
 import { isolatedCwd, bin } from './lib/isolated-session.js';
 
 const MODEL = process.env.CLAUDE_MODEL ?? 'sonnet';
@@ -39,8 +40,8 @@ async function main(): Promise<void> {
   await mkdir(runDir, { recursive: true });
   await mkdir(rawDir, { recursive: true });
 
-  const [appKnowledge, systemPromptBase, flowSpec, codegenRecording, testingBestPractices] = await Promise.all([
-    readFile('docs/app-knowledge.md', 'utf-8'),
+  const [primer, systemPromptBase, flowSpec, codegenRecording, testingBestPractices] = await Promise.all([
+    loadPrimer(),
     readFile('conditions/codegen/system-prompt.md', 'utf-8'),
     readFile(FLOW_PATH, 'utf-8'),
     readFile(FIXTURE_PATH, 'utf-8').catch(() => {
@@ -51,10 +52,10 @@ async function main(): Promise<void> {
     NUDGE_QUALITY ? readFile('docs/testing-best-practices.md', 'utf-8') : Promise.resolve(null),
   ]);
   const nudgeBlock = testingBestPractices ? `\n\n## Testing best practices\n\n${testingBestPractices}` : '';
-  const systemPrompt = `${systemPromptBase}\n\nTarget application base URL: ${TARGET_APP_URL}\n\n## App knowledge\n\n${appKnowledge}${nudgeBlock}`;
+  const systemPrompt = `${systemPromptBase}\n\nTarget application base URL: ${TARGET_APP_URL}\n\n## App knowledge\n\n${primer.text}${nudgeBlock}`;
   const userMessage = `## Flow\n\n${flowSpec}\n\n## Raw codegen recording (starting point - clean this up, don't just wrap it)\n\n\`\`\`typescript\n${codegenRecording}\n\`\`\``;
 
-  console.log(`==> Run ${runId}: Codegen condition via Claude Code (no browser tools, no shell)`);
+  console.log(`==> Run ${runId}: Codegen condition via Claude Code (no browser tools, no shell) (primer ${primer.version})`);
   const startedAt = new Date().toISOString();
 
   const result = await runClaude({
@@ -77,7 +78,11 @@ async function main(): Promise<void> {
   });
 
   const phase = summarizePhase('generate', MODEL, result, startedAt);
-  await recordPhaseMetrics(runDir, runId, 'codegen', phase, NUDGE_QUALITY ? 'nudged' : 'baseline');
+  await recordPhaseMetrics(
+    runDir,
+    { runId, condition: 'codegen', promptVariant: NUDGE_QUALITY ? 'nudged' : 'baseline', primerVersion: primer.version },
+    phase,
+  );
 
   console.log(`\n==> Done: ${runId}`);
   console.log(`    tokens: ${result.inputTokens} in / ${result.outputTokens} out (+${result.cacheCreationInputTokens} cache-write / ${result.cacheReadInputTokens} cache-read) - $${result.costUsd.toFixed(4)}, ${result.turns} turns`);

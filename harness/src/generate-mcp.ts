@@ -15,8 +15,9 @@ import 'dotenv/config';
 import { readFile, mkdir, copyFile } from 'node:fs/promises';
 import path from 'node:path';
 import { runClaude } from './lib/claude-runner.js';
-import { recordPhaseMetrics, summarizePhase } from './lib/metrics.js';
+import { readRunMetrics, recordPhaseMetrics, summarizePhase } from './lib/metrics.js';
 import { seed } from './seed.js';
+import { loadPrimer } from './lib/primer.js';
 import { isolatedCwd, bin } from './lib/isolated-session.js';
 
 const MODEL = process.env.CLAUDE_MODEL ?? 'sonnet';
@@ -58,17 +59,26 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const [appKnowledge, generatePrompt, flowSpec, testingBestPractices] = await Promise.all([
-    readFile('docs/app-knowledge.md', 'utf-8'),
+  const [primer, generatePrompt, flowSpec, testingBestPractices] = await Promise.all([
+    loadPrimer(),
     readFile('conditions/mcp/generate-prompt.md', 'utf-8'),
     readFile(FLOW_PATH, 'utf-8'),
     NUDGE_QUALITY ? readFile('docs/testing-best-practices.md', 'utf-8') : Promise.resolve(null),
   ]);
+  // explore-mcp.ts already recorded this run's primer; a mismatch here would
+  // mean the two phases saw different app knowledge.
+  const recordedPrimer = (await readRunMetrics(runDir))?.primerVersion;
+  if (recordedPrimer && recordedPrimer !== primer.version) {
+    console.warn(
+      `    WARNING: explore:mcp ran this RUN_ID with primer ${recordedPrimer}, but PRIMER is ${primer.version} now - ` +
+      `rerun with PRIMER=${recordedPrimer} to keep both phases on the same primer.`,
+    );
+  }
   const nudgeBlock = testingBestPractices ? `\n\n## Testing best practices\n\n${testingBestPractices}` : '';
-  const systemPrompt = `${generatePrompt}\n\nTarget application base URL: ${TARGET_APP_URL}\n\n## App knowledge\n\n${appKnowledge}${nudgeBlock}`;
+  const systemPrompt = `${generatePrompt}\n\nTarget application base URL: ${TARGET_APP_URL}\n\n## App knowledge\n\n${primer.text}${nudgeBlock}`;
   const userMessage = `## Flow\n\n${flowSpec}\n\n## Test plan (from exploration)\n\n${testPlan}`;
 
-  console.log(`==> Run ${runId}: generating and running the test via Claude Code + Playwright MCP`);
+  console.log(`==> Run ${runId}: generating and running the test via Claude Code + Playwright MCP (primer ${primer.version})`);
   const startedAt = new Date().toISOString();
   await mkdir(rawDir, { recursive: true });
 
@@ -98,7 +108,11 @@ async function main(): Promise<void> {
   });
 
   const phase = summarizePhase('generate', MODEL, result, startedAt);
-  await recordPhaseMetrics(runDir, runId, 'mcp', phase, NUDGE_QUALITY ? 'nudged' : 'baseline');
+  await recordPhaseMetrics(
+    runDir,
+    { runId, condition: 'mcp', promptVariant: NUDGE_QUALITY ? 'nudged' : 'baseline', primerVersion: primer.version },
+    phase,
+  );
 
   console.log(`\n==> Done: ${runId}`);
   console.log(`    tokens: ${result.inputTokens} in / ${result.outputTokens} out (+${result.cacheCreationInputTokens} cache-write / ${result.cacheReadInputTokens} cache-read) - $${result.costUsd.toFixed(4)}, ${result.turns} turns`);

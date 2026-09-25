@@ -8,7 +8,7 @@
  * Leave Type) exists - a completely fresh OrangeHRM install can't use
  * Leave at all otherwise. This is deterministic environment setup, not
  * part of the "add employee, assign leave" flow under test - see
- * docs/app-knowledge.md.
+ * docs/app-knowledge/.
  *
  * Exported as `seed()` so every run script (explore-mcp.ts,
  * generate-mcp.ts, run-codegen.ts) can call it unconditionally as its first

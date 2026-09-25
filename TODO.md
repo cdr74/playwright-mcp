@@ -33,7 +33,7 @@ starts on them, per `CLAUDE.md`.
       as the v1 flow (corrected from an earlier "Apply Leave" description —
       that screen is self-service only, doesn't fit "assign leave to a
       newly created employee"; the right screen is the admin "Assign
-      Leave" flow, see `docs/app-knowledge.md`) — may still be adjusted as
+      Leave" flow, see `docs/app-knowledge/`) — may still be adjusted as
       the harness comes together, that's expected iteration and doesn't
       need re-confirming.
 - [x] **[DECISION]** Reset strategy between benchmark repeats: **full
@@ -93,7 +93,7 @@ starts on them, per `CLAUDE.md`.
       `mcp__tools__write_file`, the agent still listed the full toolset
       and no `Bash`), then removed `harness/src/lib/mcp-tool-names.ts`.
 - [x] **[DECISION]** Add the three recurring app traps to
-      `docs/app-knowledge.md` ("primer v2", `CLAUDE.md` decision 10): the
+      `docs/app-knowledge/` ("primer v2", `CLAUDE.md` decision 10): the
       `-- Select --` placeholder rendered as a `role="option"` (hit in
       every run), the selected employee rendered as `"First  Last"` with a
       double space (3 runs), and weekend dates rejected server-side with
@@ -144,7 +144,7 @@ starts on them, per `CLAUDE.md`.
 - [x] **[DECISION]** Repeat-run count: **3** — see Open decisions above.
 - [x] `flows/01-add-employee-leave-request.md`: the exact natural-language
       task spec given verbatim to both conditions.
-- [x] `docs/app-knowledge.md`: the shared "tester knowledge" primer fed to
+- [x] `docs/app-knowledge/`: the shared "tester knowledge" primer fed to
       both conditions (navigation structure, exact fields/selectors for
       Add Employee and Assign Leave, the Leave List quirk, why environment
       prerequisites aren't part of the flow) — gathered by actually
@@ -200,7 +200,7 @@ decisions above) was confirmed to lose no measurement fidelity.
       execution, more capability than this flow needs) and several others
       not relevant to a form-filling flow; deliberately includes
       `browser_handle_dialog` (needed for the zero-balance confirmation
-      dialog, see `docs/app-knowledge.md`).
+      dialog, see `docs/app-knowledge/`).
 - [x] `playwright.config.ts`: unchanged from v1 - `storageState` from
       `seed.ts`, `baseURL` from `TARGET_APP_URL`.
 - [x] MCP condition runner, still split into two phases per `CLAUDE.md`
@@ -224,7 +224,7 @@ decisions above) was confirmed to lose no measurement fidelity.
       condition - every command plus the exact composed system/user
       prompts sent to Claude Code for each phase, so different people
       running it get comparable results. Must be resynced whenever
-      `conditions/mcp/*.md`, `docs/app-knowledge.md`, or the flow spec
+      `conditions/mcp/*.md`, `docs/app-knowledge/`, or the flow spec
       change (covered by the standing "sync all .md before commit" rule).
 - [x] **Ran a complete MCP condition end to end** for the first time
       (`mcp-2026-09-25T06-32-18-639Z`, both phases, no timeout): explore
@@ -410,7 +410,7 @@ thing anyone reproducing this repo would hit again.
   actually has the row (`ohrm_leave_type`), and a second `npm run seed`
   correctly takes the idempotent "already exists" path. Confined to
   `seed.ts`'s own one-time setup action, not the flow either condition's
-  agent is scored on — no `docs/app-knowledge.md` change needed.
+  agent is scored on — no `docs/app-knowledge/` change needed.
 - **dotenv silently truncates unquoted values at `#`.**
   `OHRM_ADMIN_PASSWORD=PwMcpBench#2026` in `.env` loaded as `PwMcpBench` —
   no error, just a truncated password that made `seed.ts` hang on the
@@ -436,7 +436,7 @@ thing anyone reproducing this repo would hit again.
   `ohrm_leave` / `ohrm_leave_request` table inspection in the app's own
   MariaDB) — reproduced consistently with an exact employee-name filter
   and a date range bracketing the known date, root cause not pinned down.
-  Documented as a known quirk in `docs/app-knowledge.md` rather than
+  Documented as a known quirk in `docs/app-knowledge/` rather than
   something to "fix" (it's the app's behavior, not the harness's) — the
   flow's verification step is written to treat the post-assignment
   success toast as primary evidence, Leave List as secondary/best-effort.
@@ -465,7 +465,7 @@ thing anyone reproducing this repo would hit again.
   session directly commanding a permission-bypassed nested session, not
   about the mechanism itself failing.
 - **Nothing told the agent the target app's URL.** Neither
-  `flows/01-add-employee-leave-request.md` nor `docs/app-knowledge.md`
+  `flows/01-add-employee-leave-request.md` nor `docs/app-knowledge/`
   states it (reasonably, for app-knowledge - it's config, not "knowledge
   a tester would have memorized"). Caught for real: a live (if
   timeout-truncated) run navigated to `http://localhost:3000/...`, a
@@ -530,17 +530,22 @@ thing anyone reproducing this repo would hit again.
       documented traps live). MCP:Codegen cost ratio 1.16x → 6.3x.
       Quality rescored with measured flakiness (5x each, reset per spec).
       Written up as `docs/results.md` §A.
-- [ ] **[DECISION]** Treat the primer as an explicit experimental
-      variable going forward? It moved results more than anything else
-      so far (batch 2 vs 1). E.g. keep v1 and v2 and report every future
-      result per primer version, rather than treating the primer as fixed
-      setup. See `docs/results.md` §9.
-- [ ] `npm run repeat:nudged` - wiring done, no data yet. Natural test for
-      the one recurring trap left in batch 2: the confirmation dialog
-      appears asynchronously and `isVisible({ timeout })` doesn't wait
-      for it - Playwright-API knowledge, which is what the nudged primer
-      covers, not app knowledge. Needs a decision on which app primer the
-      nudged batch uses (v2 is the obvious choice).
+- [x] **[DECISION]** The primer is an explicit experimental variable
+      (`CLAUDE.md` decision 14). v1 and v2 are frozen files in
+      `docs/app-knowledge/` (never edited, new versions get new files),
+      selected per run with `PRIMER=` / `run-repeats.sh --primer` (default
+      v2), recorded as `primerVersion` in every `metrics.json`. Backfilled
+      for all 13 earlier runs from transcript evidence (each session's
+      recorded system prompt matched v1 or v2 byte-for-byte; the N=1 pair
+      matched v1 except one pre-rename path). Results are reported per
+      version, never pooled.
+- [ ] `npm run repeat:nudged` - wiring done, no data yet; **uses app
+      primer v2** (user decision; v2 is the default, so no flag needed).
+      Natural test for the one recurring trap left in batch 2: the
+      confirmation dialog appears asynchronously and
+      `isVisible({ timeout })` doesn't wait for it - Playwright-API
+      knowledge, which is what the nudged primer covers, not app
+      knowledge. Compare against batch 2 (same app primer), not batch 1.
 - [ ] More repeats per cell - n=3 shows a 4x shift but doesn't estimate
       distributions; MCP has one expensive outlier in each batch.
 

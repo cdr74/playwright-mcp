@@ -2,7 +2,7 @@
 
 Last updated after the **second repeat batch** (2026-09-25). Two
 baseline batches exist, identical except for one thing — the
-app-knowledge primer both conditions get (`docs/app-knowledge.md`,
+app-knowledge primer both conditions get (`docs/app-knowledge/`,
 `CLAUDE.md` decision 10):
 
 | Batch | Log | Primer | Runs |
@@ -274,7 +274,7 @@ browser (27 browser tool calls, including `browser_run_code_unsafe` —
 see §7) to debug, costing 37 turns and $0.44 in generate alone.
 
 MCP r1 is worth noting for a different reason: it dropped the toast (the
-success signal `docs/app-knowledge.md` recommends) and asserted on the
+success signal `docs/app-knowledge/` recommends) and asserted on the
 actual `POST .../leave-requests` API response instead — arguably a
 stronger, less timing-sensitive signal, found through live exploration.
 
@@ -483,22 +483,24 @@ Decided so far:
 - **MCP toolset** (§7.1): the full playwright-mcp toolset is the MCP
   condition (`CLAUDE.md` decision 13).
 - **Primer v2** (`CLAUDE.md` decision 10): the three recurring traps are
-  in `docs/app-knowledge.md`. Batch 1's prediction — "Codegen should gain
+  in `docs/app-knowledge/`. Batch 1's prediction — "Codegen should gain
   the most, narrowing or flipping the iterations-to-green and wall-clock
   gaps" — **held, and understated it**: Codegen's cost fell 76%, the
   iterations gap closed completely, wall clock flipped, and the cost gap
   widened from 1.2x to 6.3x.
+- **The primer is now an explicit experimental variable** (`CLAUDE.md`
+  decision 14): v1 and v2 are frozen in `docs/app-knowledge/`, selected
+  per run, recorded as `primerVersion` in every `metrics.json`
+  (backfilled for all earlier runs from transcript evidence). This doc
+  reports per version; don't pool across them.
 
 Still open (each touches the experiment's design, so proposals only):
 
-- **Report the primer as an explicit experimental variable**, not a
-  fixed setup detail — it moved results more than anything else so far.
-  One option: keep both primer versions and report every future result
-  per primer version.
 - **Run the nudged variant** (`npm run repeat:nudged`) — wired, no data
-  yet. It's the natural test for the one remaining recurring trap (the
-  async confirmation dialog, TL;DR 7), which is Playwright-API knowledge,
-  not app knowledge.
+  yet, and decided to use app primer v2, so it compares against batch 2.
+  It's the natural test for the one remaining recurring trap (the async
+  confirmation dialog, TL;DR 7), which is Playwright-API knowledge, not
+  app knowledge.
 - **An edit-style tool for Codegen** would test how much of its
   (now small) cost is whole-file rewrites. Changes a condition's tool
   surface — design decision.

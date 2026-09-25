@@ -29,6 +29,11 @@ decision 3 for the full reasoning and mechanics.
   Claude Code's native, unscoped `Write`/`Bash` instead.
 - `src/lib/metrics.ts`, `src/lib/run-id.ts` — per-run `metrics.json`
   bookkeeping and run-id generation.
+- `src/lib/primer.ts` — `loadPrimer()`: reads the app-knowledge primer
+  version named by `PRIMER` (default `v2`) from `docs/app-knowledge/`,
+  rejecting unknown versions. Used by all three run scripts; the version
+  goes into the system prompt and into `metrics.json` as
+  `primerVersion` (`CLAUDE.md` decision 14).
 - `src/lib/isolated-session.ts` — `isolatedCwd(runId)` /
   `bin(repoRoot, name)`, used by all three run scripts to run `claude -p`
   from outside this repo entirely. Not cosmetic: Claude Code auto-attaches

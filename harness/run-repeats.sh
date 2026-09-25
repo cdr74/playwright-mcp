@@ -15,12 +15,15 @@
 # limitation of testing this from inside Claude Code").
 #
 # Usage:
-#   harness/run-repeats.sh [--condition mcp|codegen|both] [--repeats N] [--nudged]
+#   harness/run-repeats.sh [--condition mcp|codegen|both] [--repeats N] [--nudged] [--primer v1|v2]
 #
 # Defaults: --condition both --repeats 3 (the confirmed count, see
 # CLAUDE.md decision 12). --nudged runs the baseline-vs-nudged variant
 # (docs/testing-best-practices.md appended - see TODO.md) instead of the
-# unguided baseline.
+# unguided baseline. --primer picks the app-knowledge primer version
+# (docs/app-knowledge/<version>.md, default v2 - an explicit experimental
+# variable, CLAUDE.md decision 14); it's recorded in every run's
+# metrics.json and in this script's RUN_ID log.
 #
 # See docs/run-repeats.md for the full writeup.
 set -euo pipefail
@@ -32,14 +35,16 @@ cd "$REPO_ROOT"
 CONDITION="both"
 REPEATS=3
 SUFFIX=""
+PRIMER="${PRIMER:-v2}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --condition) CONDITION="$2"; shift 2 ;;
     --repeats) REPEATS="$2"; shift 2 ;;
     --nudged) SUFFIX=":nudged"; shift ;;
+    --primer) PRIMER="$2"; shift 2 ;;
     -h|--help)
-      echo "Usage: $0 [--condition mcp|codegen|both] [--repeats N] [--nudged]"
+      echo "Usage: $0 [--condition mcp|codegen|both] [--repeats N] [--nudged] [--primer v1|v2]"
       exit 0 ;;
     *) echo "Unknown argument: $1" >&2; exit 1 ;;
   esac
@@ -50,10 +55,16 @@ if [[ "$CONDITION" != "mcp" && "$CONDITION" != "codegen" && "$CONDITION" != "bot
   exit 1
 fi
 
+if [[ ! -f "docs/app-knowledge/$PRIMER.md" ]]; then
+  echo "Unknown --primer: $PRIMER (no docs/app-knowledge/$PRIMER.md)" >&2
+  exit 1
+fi
+export PRIMER
+
 LOG_FILE="results/repeat-run-log-$(date -u +%Y%m%dT%H%M%SZ).txt"
-echo "run_id repeat condition variant" > "$LOG_FILE"
+echo "run_id repeat condition variant primer" > "$LOG_FILE"
 echo "==> Logging RUN_IDs to $LOG_FILE"
-echo "==> Condition: $CONDITION, repeats: $REPEATS, variant: ${SUFFIX:+nudged}${SUFFIX:-baseline}"
+echo "==> Condition: $CONDITION, repeats: $REPEATS, variant: ${SUFFIX:+nudged}${SUFFIX:-baseline}, primer: $PRIMER"
 
 reset_app() {
   echo "==> Resetting app to a clean, known state"
@@ -81,7 +92,7 @@ run_mcp() {
     echo "!! Could not parse a RUN_ID from explore:mcp${SUFFIX}'s output - skipping generate for this repeat." >&2
     return 1
   fi
-  echo "$run_id $i mcp ${SUFFIX:+nudged}${SUFFIX:-baseline}" >> "$LOG_FILE"
+  echo "$run_id $i mcp ${SUFFIX:+nudged}${SUFFIX:-baseline} $PRIMER" >> "$LOG_FILE"
   RUN_ID="$run_id" npm run "generate:mcp${SUFFIX}"
 }
 
@@ -93,7 +104,7 @@ run_codegen() {
   npm run "bench:codegen${SUFFIX}" 2>&1 | tee "$out_log"
   local run_id; run_id="$(extract_run_id "$out_log")"
   rm -f "$out_log"
-  echo "$run_id $i codegen ${SUFFIX:+nudged}${SUFFIX:-baseline}" >> "$LOG_FILE"
+  echo "$run_id $i codegen ${SUFFIX:+nudged}${SUFFIX:-baseline} $PRIMER" >> "$LOG_FILE"
 }
 
 for i in $(seq 1 "$REPEATS"); do

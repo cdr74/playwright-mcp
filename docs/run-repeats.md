@@ -19,7 +19,15 @@ harness/run-repeats.sh                                # both conditions, 3 repea
 harness/run-repeats.sh --condition mcp                 # MCP only
 harness/run-repeats.sh --condition codegen --repeats 5  # Codegen only, 5 repeats
 harness/run-repeats.sh --nudged                         # the nudged variant instead (docs/testing-best-practices.md)
+harness/run-repeats.sh --primer v1                      # an older app-knowledge primer (default: v2)
 ```
+
+`--primer` selects the app-knowledge primer version
+(`docs/app-knowledge/<version>.md`) both conditions get. It's an explicit
+experimental variable — v1 → v2 moved the MCP:Codegen cost ratio from
+~1.2x to ~6.3x (`docs/results.md` §A) — so it's recorded in every run's
+`metrics.json` (`primerVersion`) and in the log below, and results should
+only ever be compared within one version (`CLAUDE.md` decision 14).
 
 For each repeat, for each requested condition, in order: reset the app
 (`npm run cleanup:app && npm run setup:app`), then run that condition.
@@ -38,10 +46,10 @@ as it completes, so you can find every run afterward without hunting
 through terminal scrollback:
 
 ```
-run_id repeat condition variant
-mcp-2026-... 1 mcp baseline
-codegen-2026-... 1 codegen baseline
-mcp-2026-... 2 mcp baseline
+run_id repeat condition variant primer
+mcp-2026-... 1 mcp baseline v2
+codegen-2026-... 1 codegen baseline v2
+mcp-2026-... 2 mcp baseline v2
 ...
 ```
 

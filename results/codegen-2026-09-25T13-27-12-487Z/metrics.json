@@ -2,6 +2,7 @@
   "runId": "codegen-2026-09-25T13-27-12-487Z",
   "condition": "codegen",
   "promptVariant": "baseline",
+  "primerVersion": "v1",
   "phases": [
     {
       "phase": "generate",

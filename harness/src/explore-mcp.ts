@@ -16,6 +16,7 @@ import { runClaude } from './lib/claude-runner.js';
 import { recordPhaseMetrics, summarizePhase } from './lib/metrics.js';
 import { newRunId } from './lib/run-id.js';
 import { seed } from './seed.js';
+import { DEFAULT_PRIMER, loadPrimer } from './lib/primer.js';
 import { isolatedCwd, bin } from './lib/isolated-session.js';
 
 const MODEL = process.env.CLAUDE_MODEL ?? 'sonnet';
@@ -40,14 +41,14 @@ async function main(): Promise<void> {
   await mkdir(runDir, { recursive: true });
   await mkdir(rawDir, { recursive: true });
 
-  const [appKnowledge, explorePrompt, flowSpec] = await Promise.all([
-    readFile('docs/app-knowledge.md', 'utf-8'),
+  const [primer, explorePrompt, flowSpec] = await Promise.all([
+    loadPrimer(),
     readFile('conditions/mcp/explore-prompt.md', 'utf-8'),
     readFile(FLOW_PATH, 'utf-8'),
   ]);
-  const systemPrompt = `${explorePrompt}\n\nTarget application base URL: ${TARGET_APP_URL}\n\n## App knowledge\n\n${appKnowledge}`;
+  const systemPrompt = `${explorePrompt}\n\nTarget application base URL: ${TARGET_APP_URL}\n\n## App knowledge\n\n${primer.text}`;
 
-  console.log(`==> Run ${runId}: exploring via Claude Code + Playwright MCP`);
+  console.log(`==> Run ${runId}: exploring via Claude Code + Playwright MCP (primer ${primer.version})`);
   const startedAt = new Date().toISOString();
 
   const result = await runClaude({
@@ -77,7 +78,11 @@ async function main(): Promise<void> {
   });
 
   const phase = summarizePhase('explore', MODEL, result, startedAt);
-  await recordPhaseMetrics(runDir, runId, 'mcp', phase, NUDGE_QUALITY ? 'nudged' : 'baseline');
+  await recordPhaseMetrics(
+    runDir,
+    { runId, condition: 'mcp', promptVariant: NUDGE_QUALITY ? 'nudged' : 'baseline', primerVersion: primer.version },
+    phase,
+  );
 
   console.log(`\n==> Done: ${runId}`);
   console.log(`    tokens: ${result.inputTokens} in / ${result.outputTokens} out (+${result.cacheCreationInputTokens} cache-write / ${result.cacheReadInputTokens} cache-read) - $${result.costUsd.toFixed(4)}, ${result.turns} turns`);
@@ -87,7 +92,8 @@ async function main(): Promise<void> {
   }
   console.log(`    test plan: results/${runId}/test-plan.md`);
   console.log(`    agent's final message: ${result.resultText.slice(0, 300)}`);
-  console.log(`\nNext: RUN_ID=${runId} npm run ${NUDGE_QUALITY ? 'generate:mcp:nudged' : 'generate:mcp'}`);
+  const primerEnv = primer.version === DEFAULT_PRIMER ? '' : `PRIMER=${primer.version} `;
+  console.log(`\nNext: RUN_ID=${runId} ${primerEnv}npm run ${NUDGE_QUALITY ? 'generate:mcp:nudged' : 'generate:mcp'}`);
 }
 
 main().catch((err) => {

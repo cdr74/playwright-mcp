@@ -8,7 +8,8 @@ apart — running the same flow get directly comparable results. See
 
 `harness/src/explore-mcp.ts` / `generate-mcp.ts` assemble the system prompts
 below at runtime from checked-in source files (`conditions/mcp/*.md`,
-`docs/app-knowledge.md`, `flows/*.md`) plus `TARGET_APP_URL`. This doc
+the app-knowledge primer `docs/app-knowledge/<PRIMER>.md`, `flows/*.md`)
+plus `TARGET_APP_URL`. This doc
 mirrors that assembly verbatim so it's readable in one place without tracing
 through code.
 
@@ -92,7 +93,12 @@ Then, what this invokes in `claude -p --output-format json` terms:
   (`harness/src/mcp-tools-server.ts`, also an absolute path, `RUN_DIR`
   set to this run's output directory)
 - **System prompt** (`conditions/mcp/explore-prompt.md` + target URL +
-  `docs/app-knowledge.md`), verbatim as of this writing:
+  the app-knowledge primer), verbatim as of this writing, **with the
+  default primer `v2`** (`docs/app-knowledge/v2.md`). With `PRIMER=v1`
+  the `## App knowledge` block is `docs/app-knowledge/v1.md` instead;
+  everything else is identical. The primer is an explicit experimental
+  variable (`CLAUDE.md` decision 14) and is recorded per run as
+  `primerVersion`:
 
   ````markdown
   You are an expert QA engineer. You have live browser control tools
@@ -270,7 +276,7 @@ is still fresh. Otherwise: same model, MCP servers, and browser tools as
 phase 1, plus `mcp__tools__run_playwright_test`.
 
 - **System prompt** (`conditions/mcp/generate-prompt.md` + target URL +
-  `docs/app-knowledge.md` — the app-knowledge block is identical to phase
+  the app-knowledge primer — the app-knowledge block is identical to phase
   1's, only the lead-in differs), verbatim as of this writing:
 
   ````markdown
@@ -301,7 +307,7 @@ phase 1, plus `mcp__tools__run_playwright_test`.
 
   ## App knowledge
 
-  [same `docs/app-knowledge.md` content as phase 1 above]
+  [same app-knowledge primer content as phase 1 above]
   ````
 
 - **User message**, assembled as:

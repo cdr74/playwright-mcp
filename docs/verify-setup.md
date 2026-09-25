@@ -23,7 +23,7 @@ Then open **http://localhost:8081/** in a real browser and log in:
 You should land on the OrangeHRM dashboard. Poke around PIM → Employee
 List and Leave → Assign Leave to get a feel for the flow we'll be
 scripting against (see `README.md` "Test bed"; note it's "Assign Leave",
-not the self-service "Apply" screen - see `docs/app-knowledge.md` for why).
+not the self-service "Apply" screen - see `docs/app-knowledge/` for why).
 
 ## 2. Playwright CLI
 

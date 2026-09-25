@@ -8,7 +8,8 @@ works" for why.)
 
 `harness/src/run-codegen.ts` assembles the system prompt and user message
 below at runtime from checked-in source files (`conditions/codegen/*.md`,
-`docs/app-knowledge.md`, `flows/*.md`, `fixtures/*.codegen.ts`) plus
+the app-knowledge primer `docs/app-knowledge/<PRIMER>.md`, `flows/*.md`,
+`fixtures/*.codegen.ts`) plus
 `TARGET_APP_URL`. This doc mirrors that assembly verbatim so it's readable
 in one place without tracing through code.
 
@@ -77,7 +78,9 @@ Then, what this invokes in `claude -p --output-format json` terms:
   its own node_modules walk; `RUN_DIR` set to this run's output
   directory) — no `playwright-mcp` registered at all.
 - **System prompt** (`conditions/codegen/system-prompt.md` + target URL +
-  `docs/app-knowledge.md`), verbatim as of this writing:
+  the app-knowledge primer — `docs/app-knowledge/v2.md` by default,
+  `PRIMER=v1` for the older version; recorded per run as `primerVersion`,
+  `CLAUDE.md` decision 14), verbatim as of this writing:
 
   ````markdown
   You are an expert QA engineer writing Playwright tests. You have:
@@ -117,9 +120,9 @@ Then, what this invokes in `claude -p --output-format json` terms:
 
   ## App knowledge
 
-  [same `docs/app-knowledge.md` content as the MCP condition - see
-  `docs/run-mcp-condition.md` §2 for the full text, verbatim and identical
-  for both conditions]
+  [same app-knowledge primer as the MCP condition, for the same PRIMER
+  version - see `docs/run-mcp-condition.md` §2 for the full default (v2)
+  text, verbatim and identical for both conditions]
   ````
 
 - **User message**: the flow spec, a heading, then the fixture content

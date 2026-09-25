@@ -81,7 +81,8 @@ comparison toward whichever condition happens to explore more cheaply,
 which isn't the thing we're trying to measure.
 
 So both conditions are given the same **app knowledge primer**
-(`docs/app-knowledge.md`) verbatim, as part of the system prompt, in
+(`docs/app-knowledge/`, versioned — see below) verbatim, as part of the
+system prompt, in
 addition to the task spec (`flows/`). It covers navigation structure,
 where the relevant forms live, and known quirks/gotchas of this specific
 app build - all gathered by actually exploring the running instance during
@@ -167,7 +168,7 @@ both conditions:
 2. Assign that employee a leave request via the Leave module's
    **administrative assignment** screen (not the self-service "Apply"
    screen, which only applies leave for whichever user is logged in - see
-   `docs/app-knowledge.md` for why this distinction matters and tripped up
+   `docs/app-knowledge/` for why this distinction matters and tripped up
    exploration).
 3. Verify the request was recorded.
 
@@ -188,7 +189,7 @@ not something an "add an employee, assign them leave" test should have to
 set up itself. `harness/src/seed.ts` (`npm run seed`) does this once,
 deterministically, outside either condition's token budget, and saves an
 authenticated browser storage state both conditions start from. Full
-details in `docs/app-knowledge.md`.
+details in `docs/app-knowledge/`.
 
 **Resetting between runs:** a full teardown + reinstall
 (`podman-compose down -v && ./install.sh`) takes about **80 seconds**
@@ -330,13 +331,18 @@ above):
 ```bash
 npm run repeat:baseline   # both conditions, 3 repeats each, resets the app before every run
 npm run repeat:nudged     # same, with docs/testing-best-practices.md's guidance appended
+npm run repeat:baseline -- --primer v1   # same, with an older app-knowledge primer (default: v2)
 ```
 
-See `docs/run-repeats.md` for what this actually does (a full app reset
-before *every individual run*, not just once per batch - that distinction
-is what caught the Codegen condition's first flakiness bug, see
-"Quality" above), cost/time expectations (~$7, ~50 min for a baseline
-batch), and where the `RUN_ID`s get logged.
+The app-knowledge primer both conditions get is versioned
+(`docs/app-knowledge/`) and is an explicit experimental variable — it
+moved results more than anything else so far — so every run records which
+version it used, and results are reported per version. See
+`docs/run-repeats.md` for what a batch actually does (a full app reset
+before *every individual run*, not just once per batch — that distinction
+is what caught the Codegen condition's first flakiness bug), cost/time
+expectations (~$3, ~30 min for a baseline batch on primer v2), and where
+the `RUN_ID`s get logged.
 
 ## License
 

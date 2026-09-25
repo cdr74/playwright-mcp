@@ -19,7 +19,7 @@ and iterates on terse `run_playwright_test` output until the test is
 clean and green.
 
 `system-prompt.md` is the exact system prompt used, checked in so the run
-is reproducible; combined at runtime with `docs/app-knowledge.md` and the
+is reproducible; combined at runtime with `docs/app-knowledge/` and the
 target URL, same pattern as `conditions/mcp/`.
 
 `fixtures/01-add-employee-leave-request.codegen.ts` is recorded (see

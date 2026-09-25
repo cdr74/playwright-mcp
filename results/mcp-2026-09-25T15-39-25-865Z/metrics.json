@@ -2,6 +2,7 @@
   "runId": "mcp-2026-09-25T15-39-25-865Z",
   "condition": "mcp",
   "promptVariant": "baseline",
+  "primerVersion": "v2",
   "phases": [
     {
       "phase": "explore",
