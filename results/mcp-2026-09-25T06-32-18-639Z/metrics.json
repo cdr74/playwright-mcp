@@ -1,0 +1,62 @@
+{
+  "runId": "mcp-2026-09-25T06-32-18-639Z",
+  "condition": "mcp",
+  "phases": [
+    {
+      "phase": "explore",
+      "model": "sonnet",
+      "sessionId": "a4984caf-28c1-4bd4-9882-795ab4bad27d",
+      "inputTokens": 102,
+      "outputTokens": 9544,
+      "cacheCreationInputTokens": 73632,
+      "cacheReadInputTokens": 2051911,
+      "costUsd": 0.8005542000000001,
+      "turns": 58,
+      "toolCallCounts": {
+        "mcp__playwright__browser_navigate": 7,
+        "mcp__playwright__browser_snapshot": 14,
+        "mcp__playwright__browser_type": 10,
+        "mcp__playwright__browser_click": 16,
+        "mcp__playwright__browser_wait_for": 1,
+        "mcp__playwright__browser_find": 2,
+        "mcp__playwright__browser_press_key": 6,
+        "mcp__tools__write_file": 1
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-25T06:32:18.646Z",
+      "finishedAt": "2026-09-25T06:35:20.953Z",
+      "durationMs": 176728
+    },
+    {
+      "phase": "generate",
+      "model": "sonnet",
+      "sessionId": "a2d5436e-0700-44f0-b23d-70164588aecc",
+      "inputTokens": 154,
+      "outputTokens": 24082,
+      "cacheCreationInputTokens": 70453,
+      "cacheReadInputTokens": 3402794,
+      "costUsd": 1.2034988,
+      "turns": 77,
+      "toolCallCounts": {
+        "mcp__tools__write_file": 6,
+        "mcp__tools__run_playwright_test": 8,
+        "mcp__playwright__browser_navigate": 3,
+        "mcp__playwright__browser_snapshot": 7,
+        "mcp__playwright__browser_click": 18,
+        "mcp__playwright__browser_fill_form": 1,
+        "mcp__playwright__browser_wait_for": 5,
+        "mcp__playwright__browser_type": 6,
+        "mcp__playwright__browser_find": 10,
+        "mcp__playwright__browser_press_key": 7,
+        "mcp__playwright__browser_console_messages": 1,
+        "mcp__playwright__browser_network_requests": 2,
+        "mcp__playwright__browser_network_request": 1,
+        "mcp__playwright__browser_evaluate": 1
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-25T06:37:12.305Z",
+      "finishedAt": "2026-09-25T06:44:09.875Z",
+      "durationMs": 413057
+    }
+  ]
+}

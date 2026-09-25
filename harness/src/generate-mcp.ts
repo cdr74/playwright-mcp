@@ -63,7 +63,7 @@ async function main(): Promise<void> {
     mcpServers: {
       playwright: {
         command: 'npx',
-        args: ['playwright-mcp', '--browser', 'chromium', '--headless', '--isolated', '--storage-state', AUTH_STATE_PATH],
+        args: ['playwright-mcp', '--browser', 'chromium', '--headless', '--isolated', '--storage-state', AUTH_STATE_PATH, '--output-dir', path.join(rawDir, 'playwright-mcp')],
       },
       tools: {
         command: 'npx',

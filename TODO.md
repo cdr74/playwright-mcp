@@ -53,7 +53,11 @@ starts on them, per `CLAUDE.md`.
       See `results/README.md`.
 - [ ] **[DECISION]** How many repeat runs per condition for statistical
       noise (token counts and agent behavior aren't perfectly
-      deterministic even at temperature 0) — still open.
+      deterministic even at temperature 0) — still open. Deliberately
+      deferred again after the first real MCP run (~$2, ~10 min, see
+      "Run a complete MCP condition end to end" below): decided to wait
+      until the CLI condition runner exists too, so the repeat count is
+      set for both conditions symmetrically rather than for MCP alone.
 - [x] **[DECISION]** Measurement mechanism: **Claude Code (`claude -p`),
       not the Anthropic API directly** — pivoted after the harness was
       already built and working against the raw API, because API usage is
@@ -167,12 +171,30 @@ decisions above) was confirmed to lose no measurement fidelity.
       because nothing in the prompt stated the target URL. Fixed by
       injecting `Target application base URL: ...` into the system prompt
       in both phase scripts, from `TARGET_APP_URL`.
-- [ ] **Run a complete MCP condition end to end** (both phases, without
-      being killed by a timeout) - still not done. Has to happen from a
-      terminal that isn't itself a sandboxed Claude Code session, since
-      this session's own auto-mode classifier blocks the permission
-      bypass (see `CLAUDE.md` decision 3) - this is the next concrete
-      thing to try.
+- [x] `docs/run-mcp-condition.md`: reproducible runbook for the MCP
+      condition - every command plus the exact composed system/user
+      prompts sent to Claude Code for each phase, so different people
+      running it get comparable results. Must be resynced whenever
+      `conditions/mcp/*.md`, `docs/app-knowledge.md`, or the flow spec
+      change (covered by the standing "sync all .md before commit" rule).
+- [x] **Ran a complete MCP condition end to end** for the first time
+      (`mcp-2026-09-25T06-32-18-639Z`, both phases, no timeout): explore
+      $0.80 / 58 turns / ~3 min, generate $1.20 / 77 turns / ~7 min
+      (8 `run_playwright_test` iterations to green, then 2 consecutive
+      passes to confirm stability). The agent caught and fixed two real
+      bugs in its own generated test along the way (a weekend date
+      rejected by the Assign Leave API, and an `isVisible()` vs
+      `waitFor()` polling bug that silently skipped a required dialog
+      click) - a good sign for the "efficiency: iterations to green" and
+      quality axes. Full numbers in
+      `results/mcp-2026-09-25T06-32-18-639Z/metrics.json`.
+- [x] Fixed a real gap this run surfaced: `playwright-mcp` was writing its
+      own accessibility-snapshot/console-log dumps to a `.playwright-mcp/`
+      directory at the repo root (untracked, ungitignored) instead of
+      under `results/raw/<run-id>/` per decision 8. Fixed by passing
+      `--output-dir` in `explore-mcp.ts`/`generate-mcp.ts`; see
+      `docs/run-mcp-condition.md` "Gotchas confirmed on the first real
+      run".
 - [ ] CLI condition runner: per the "both conditions via Claude Code"
       decision above, will reuse `claude-runner.ts` +
       `mcp-tools-server.ts` (write_file/run_playwright_test only, no

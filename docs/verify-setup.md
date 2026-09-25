@@ -85,6 +85,10 @@ No API key needed - the harness drives the `claude` CLI (your existing
 Claude Code subscription), not the Anthropic API directly. You do need
 `claude` installed and authenticated (`claude auth login`).
 
+See `docs/run-mcp-condition.md` for the exact, reproducible step-by-step
+(including the literal prompts sent to Claude Code for each phase) - the
+commands below are the short version.
+
 **Run this from a plain terminal, not from inside a Claude Code session.**
 The scripts need `--dangerously-skip-permissions` for unattended tool use,
 and a Claude Code session's own auto-mode classifier blocks it from
@@ -107,7 +111,7 @@ detail if something looks off.
 
 ---
 
-If sections 1-4 work, the environment phase is solid. Section 5 is the
-first real end-to-end signal on the harness itself - as of this writing it
-has only been partially exercised (see `TODO.md` Phase 3), not run to full
-completion.
+If sections 1-4 work, the environment phase is solid. Section 5's harness
+has now completed one full end-to-end run of both phases (see `TODO.md`
+Phase 3 and `docs/run-mcp-condition.md`) - the numbers looked plausible and
+the produced test passed reproducibly.

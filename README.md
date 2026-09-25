@@ -191,14 +191,13 @@ if it turns out to be a bottleneck once the harness is running many repeats.
 Environment phase done (target app, Playwright, Playwright MCP - all
 automated and verified, see `docs/verify-setup.md`). The **MCP condition**
 harness is built (`npm run seed`, `npm run explore:mcp`,
-`npm run generate:mcp`) and its individual pieces are all live-validated
-against the running app - the custom scoped-tools MCP server, the
-Claude-Code-registration mechanism (`--mcp-config` + permission bypass), a
-real (if timeout-truncated) tool call. What hasn't happened yet is one
-complete, uninterrupted run of both phases - no MCP-condition numbers
-exist yet. Has to run from a plain terminal, not from inside another
-Claude Code session (see `harness/README.md`). The **CLI condition**
-harness doesn't exist yet. See `TODO.md`.
+`npm run generate:mcp`) and has completed one full, uninterrupted run of
+both phases end to end (see `docs/run-mcp-condition.md` for the exact,
+reproducible steps and `results/mcp-2026-09-25T06-32-18-639Z/metrics.json`
+for the first real numbers: ~$2.00 total across both phases, 8 test-run
+iterations to a stable green). Has to run from a plain terminal, not from
+inside another Claude Code session (see `harness/README.md`). The **CLI
+condition** harness doesn't exist yet. See `TODO.md`.
 
 ## Getting started
 

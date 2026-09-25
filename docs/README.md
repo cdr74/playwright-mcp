@@ -11,5 +11,11 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
 - `verify-setup.md` — step-by-step manual check that the app + Playwright
   + Playwright MCP setup actually works, before building anything on top
   of it.
+- `run-mcp-condition.md` — the reproducible runbook for the MCP condition:
+  every command plus the exact composed system/user prompts sent to Claude
+  Code for each phase, so different people running it get comparable
+  results. Must be resynced whenever `conditions/mcp/*.md`,
+  `docs/app-knowledge.md`, or the flow spec change — see that file's own
+  header.
 - `quality-rubric.md` (test-quality scoring criteria, `TODO.md` Phase 3)
   and eventual results write-ups (`TODO.md` Phase 4) — not written yet.
