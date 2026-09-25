@@ -202,7 +202,9 @@ condition** has also now completed a full run
 test-run iterations to green) — directionally in line with the inspiring
 post's cost-gap claim, though this is one run of each condition, not yet
 a controlled comparison (repeat-run count is still an open decision, see
-`TODO.md`). See `TODO.md` for the full picture.
+`TODO.md`). See `docs/results.md` for the full first write-up (including
+where the "directionally in line" framing above does and doesn't hold up)
+and `TODO.md` for what's next.
 
 ## Getting started
 

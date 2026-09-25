@@ -19,7 +19,8 @@ clean and green.
 is reproducible; combined at runtime with `docs/app-knowledge.md` and the
 target URL, same pattern as `conditions/mcp/`.
 
-Runnable now: `fixtures/01-add-employee-leave-request.codegen.ts` is
-recorded (see `fixtures/README.md` for the exact steps taken and two
-documented deviations from the flow spec) — `npm run bench:cli` end to
-end hasn't happened yet, see `TODO.md`.
+`fixtures/01-add-employee-leave-request.codegen.ts` is recorded (see
+`fixtures/README.md` for the exact steps taken and two documented
+deviations from the flow spec), and `npm run bench:cli` has completed a
+first full run — see `docs/run-cli-condition.md` for the exact,
+reproducible commands and prompt, and `docs/results.md` for the numbers.

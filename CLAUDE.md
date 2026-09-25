@@ -71,7 +71,9 @@ assume some `.md` file describes it and needs a pass.
      (Claude Code's native `Bash` tool is a general shell, not scoped to
      `npx playwright test`, so the CLI condition must NOT be given it) —
      and turns the raw recording into a clean, asserted test, iterating on
-     terse test-run output until green. Not built yet — see `TODO.md`.
+     terse test-run output until green. Built (`harness/src/run-cli.ts`,
+     `npm run bench:cli`) and has completed a first full run — see
+     `TODO.md` and `docs/run-cli-condition.md`.
    - Both conditions receive the **identical natural-language task spec**
      (see `flows/`). That's the controlled variable. Tooling, and therefore
      workflow shape, is the independent variable — that asymmetry is exactly

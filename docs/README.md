@@ -11,11 +11,16 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
 - `verify-setup.md` — step-by-step manual check that the app + Playwright
   + Playwright MCP setup actually works, before building anything on top
   of it.
-- `run-mcp-condition.md` — the reproducible runbook for the MCP condition:
-  every command plus the exact composed system/user prompts sent to Claude
-  Code for each phase, so different people running it get comparable
-  results. Must be resynced whenever `conditions/mcp/*.md`,
-  `docs/app-knowledge.md`, or the flow spec change — see that file's own
+- `run-mcp-condition.md` / `run-cli-condition.md` — the reproducible
+  runbooks for each condition: every command plus the exact composed
+  system/user prompts sent to Claude Code, so different people running
+  them get comparable results. Must be resynced whenever
+  `conditions/{mcp,cli}/*.md`, `docs/app-knowledge.md`, the flow spec, or
+  (for the CLI one) the codegen fixture change — see each file's own
   header.
-- `quality-rubric.md` (test-quality scoring criteria, `TODO.md` Phase 3)
-  and eventual results write-ups (`TODO.md` Phase 4) — not written yet.
+- `results.md` — the first aggregated write-up of what's been run so far
+  (currently one run per condition — see its own caveats section).
+  `TODO.md` Phase 4 tracks turning this into a fuller report once more
+  repeats exist.
+- `quality-rubric.md` (test-quality scoring criteria, `TODO.md` Phase 3) —
+  not written yet.

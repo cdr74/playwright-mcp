@@ -2,7 +2,9 @@
 
 Every step, command, and prompt actually sent to Claude Code for the MCP
 condition, in one file, so two different people — or the same person weeks
-apart — running the same flow get directly comparable results.
+apart — running the same flow get directly comparable results. See
+`docs/run-cli-condition.md` for the CLI condition's counterpart, and
+`docs/results.md` for the first aggregated numbers from both.
 
 `harness/src/explore-mcp.ts` / `generate-mcp.ts` assemble the system prompts
 below at runtime from checked-in source files (`conditions/mcp/*.md`,

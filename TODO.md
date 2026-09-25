@@ -325,12 +325,24 @@ thing anyone reproducing this repo would hit again.
 
 ## Phase 4 — Run & report
 
-- [ ] Run both conditions (N repeats per the decision above) against the
-      confirmed flow.
-- [ ] Aggregate results, write up findings (likely `docs/results.md` or a
-      dated report) — token cost, efficiency, and quality side by side.
-- [ ] Sanity-check findings against the ~4x (up to 10x) figure from the
-      inspiring post.
+- [x] Ran both conditions once each against the confirmed flow (see the
+      first-run entries above under Phase 3). **Not yet the N-repeats run
+      this phase is really about** - the repeat-count decision is still
+      open.
+- [x] First aggregated write-up: `docs/results.md` - cost (dollar and raw
+      token volume, which tell different stories), efficiency, and a
+      qualitative quality read, side by side, with an explicit N=1 caveat
+      section. To be revisited once repeat runs exist.
+- [x] Sanity-checked against the inspiring post's ~4x (up to 10x) figure:
+      see `docs/results.md` "How this compares to the inspiring post" -
+      raw token volume showed a larger gap (~29x), dollar cost a smaller
+      one (~7x), neither straightforwardly confirming or refuting the
+      post given it doesn't disclose whether/how it accounted for prompt
+      caching.
+- [ ] Run both conditions **N repeats** (per the still-open decision
+      above) once that decision is made, and update `docs/results.md`
+      from a single anecdote into an actual comparison with a real
+      sample size.
 
 ## Phase 5 — Test healing (v2, not started)
 

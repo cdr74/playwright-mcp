@@ -91,4 +91,4 @@ conditions use. Run `npm run seed` (from the repo root) after
 
 ## Open items
 
-See `TODO.md` Phase 2 — the codegen fixture that seeds the CLI condition.
+None currently blocking either condition — see `TODO.md` for what's next.

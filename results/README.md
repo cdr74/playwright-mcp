@@ -1,8 +1,10 @@
 # results/
 
-Output of benchmark runs, split into what's kept and what isn't. Now
-implemented by `harness/src/explore-mcp.ts` / `generate-mcp.ts` (the CLI
-condition will follow the same shape).
+Output of benchmark runs, split into what's kept and what isn't.
+Implemented by `harness/src/explore-mcp.ts` / `generate-mcp.ts` (MCP
+condition, two phases) and `harness/src/run-cli.ts` (CLI condition, one
+phase named `"generate"` for comparability). See `docs/results.md` for the
+first aggregated write-up across both.
 
 ## `results/<run-id>/` — committed-eligible
 
