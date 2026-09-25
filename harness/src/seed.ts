@@ -67,9 +67,26 @@ async function ensureLeaveTypeExists(page: Page, name: string): Promise<void> {
   await page.getByRole('button', { name: 'Add' }).click();
   await page.waitForURL('**/leave/defineLeaveType');
   // index 0 is the page-level header search box, index 1 is this form's Name field
-  await page.locator('input.oxd-input').nth(1).fill(name);
-  await page.getByRole('button', { name: 'Save' }).click();
-  await page.waitForTimeout(500);
+  const nameInput = page.locator('input.oxd-input').nth(1);
+  await nameInput.fill(name);
+  // Clicking Save immediately after fill() races the SPA's form-state
+  // update: confirmed by direct network inspection that the click then
+  // fires *no* POST request at all - it silently no-ops, no error, no
+  // toast, and this function used to log "Created" regardless because it
+  // only waited a fixed timeout rather than checking anything actually
+  // happened. Blurring the field first lets the model update settle.
+  await nameInput.blur();
+  await page.waitForTimeout(300);
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (res) => res.url().includes('/api/v2/leave/leave-types') && res.request().method() === 'POST',
+      { timeout: 10_000 },
+    ),
+    page.getByRole('button', { name: 'Save' }).click(),
+  ]);
+  if (!response.ok()) {
+    throw new Error(`Failed to create leave type "${name}": ${response.status()} ${await response.text()}`);
+  }
   console.log(`==> Created leave type "${name}"`);
 }
 

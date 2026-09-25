@@ -216,6 +216,26 @@ decisions above) was confirmed to lose no measurement fidelity.
 Kept here rather than only in commit history since they're the kind of
 thing anyone reproducing this repo would hit again.
 
+- **`seed.ts`'s Leave Type creation silently no-op'd — logged success,
+  created nothing.** Surfaced when a user recording the CLI fixture hit
+  "No Records Found" in the Assign Leave Type dropdown on a freshly
+  seeded install; reproduced from a clean `cleanup:app` + `setup:app` +
+  `seed` cycle, and confirmed at the network level (`page.on('request')`)
+  that clicking "Save" immediately after `.fill()`-ing the Name field
+  fired **no POST request at all** to `/api/v2/leave/leave-types` — no
+  error, no toast, nothing — while `ensureLeaveTypeExists` still logged
+  `Created leave type "Annual Leave"` because it only waited a fixed
+  500ms timeout rather than checking anything actually happened. Root
+  cause: clicking Save races the SPA's form-state update before the
+  Name field's model binding settles. Fixed by blurring the field and
+  waiting briefly before clicking Save, and by replacing the blind
+  timeout with an explicit `page.waitForResponse` on the create POST
+  that throws if it doesn't arrive — so a regression here fails loudly
+  instead of silently lying again. Verified from a clean install: DB now
+  actually has the row (`ohrm_leave_type`), and a second `npm run seed`
+  correctly takes the idempotent "already exists" path. Confined to
+  `seed.ts`'s own one-time setup action, not the flow either condition's
+  agent is scored on — no `docs/app-knowledge.md` change needed.
 - **dotenv silently truncates unquoted values at `#`.**
   `OHRM_ADMIN_PASSWORD=PwMcpBench#2026` in `.env` loaded as `PwMcpBench` —
   no error, just a truncated password that made `seed.ts` hang on the
