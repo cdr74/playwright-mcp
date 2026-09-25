@@ -59,19 +59,23 @@ starts on them, per `CLAUDE.md`.
       just per condition, if the baseline-vs-nudged comparison below also
       gets built (3 × 2 conditions × 2 variants = 12 runs, not 6). See
       `CLAUDE.md` decision 12.
-- [ ] **[DECISION]** Baseline-vs-nudged quality comparison: add
-      `docs/testing-best-practices.md` (drafted, mirrors
-      `docs/quality-rubric.md`'s 7 criteria one-for-one) to both
-      conditions' prompts, identically, and compare generated-test quality
-      with vs. without it — does explicit guidance close the MCP/Codegen
-      quality gap, widen it, or leave it unchanged? Keeps the existing
-      two runs as the unguided baseline cell; only new "nudged" runs are
-      needed. Open sub-questions: (1) wiring mechanism - an env var/flag
-      that appends the primer to the system prompt and changes the
-      `RUN_ID` prefix (e.g. `mcp-nudged-...`) so results stay
-      distinguishable, proposed but not agreed; (2) whether to run one
-      directional pair first before committing to N repeats of a full
-      2×2 (condition × prompt-variant).
+- [x] **[DECISION]** Baseline-vs-nudged quality comparison: **build it,
+      run it later.** `docs/testing-best-practices.md` (mirrors
+      `docs/quality-rubric.md`'s 7 criteria one-for-one) is now wired into
+      the code-writing phase of both conditions
+      (`generate-mcp.ts`/`run-codegen.ts`, not `explore-mcp.ts` - see that
+      file's own header), opt-in and symmetric, via `NUDGE_QUALITY=1` /
+      the `*:nudged` npm scripts (`explore:mcp:nudged` +
+      `generate:mcp:nudged`, `bench:codegen:nudged`). `RUN_ID` gets an
+      `mcp-nudged-`/`codegen-nudged-` prefix so results stay
+      distinguishable by directory name alone, and `metrics.json` also
+      carries an explicit `promptVariant: "baseline" | "nudged"` field for
+      querying without parsing the prefix. `generate-mcp.ts` warns loudly
+      if its `NUDGE_QUALITY` and the `RUN_ID` prefix it was handed
+      disagree.
+      - **Not yet run.** No nudged runs exist yet. Tracked with the rest
+        of the actual-run work in Phase 4 below ("Run both conditions
+        3 repeats each").
 - [x] **[DECISION]** Measurement mechanism: **Claude Code (`claude -p`),
       not the Anthropic API directly** — pivoted after the harness was
       already built and working against the raw API, because API usage is
@@ -438,10 +442,13 @@ thing anyone reproducing this repo would hit again.
       one (~7x), neither straightforwardly confirming or refuting the
       post given it doesn't disclose whether/how it accounted for prompt
       caching.
-- [ ] Run both conditions **3 repeats each** (per the decision above,
-      6 runs total for the unguided baseline alone), and update
-      `docs/results.md` from a single anecdote into an actual comparison
-      with a real sample size.
+- [ ] Run both conditions **3 repeats each**, on the now-fixed harness
+      (see the CLAUDE.md-contamination Gotcha - don't reuse the two
+      existing runs, they predate the fix) - 6 runs for the unguided
+      baseline, or 12 if the baseline-vs-nudged 2×2 also happens at the
+      same time (see that decision above). Update `docs/results.md` from
+      a single anecdote into an actual comparison with a real sample
+      size either way.
 
 ## Phase 5 — Test healing (v2, not started)
 

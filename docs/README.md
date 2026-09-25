@@ -27,8 +27,9 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
   real scoring passes showed a need for them - task/spec compliance and
   config/data separation). Applied to both first runs in `docs/results.md`.
   Automated/LLM-judge scoring is a later option, see `TODO.md` Phase 3.
-- `testing-best-practices.md` — draft agent-facing primer mirroring the
-  rubric above, one practice per criterion. **Not wired into either
-  condition's prompt yet** - it's the input half of a planned
-  baseline-vs-nudged comparison (does explicit guidance change generated
-  quality, and does it change the MCP/Codegen gap?), see `TODO.md`.
+- `testing-best-practices.md` — agent-facing primer mirroring the rubric
+  above, one practice per criterion. Wired in (opt-in, symmetric) via
+  `NUDGE_QUALITY=1` / the `*:nudged` npm scripts - it's the input half of
+  the baseline-vs-nudged comparison (does explicit guidance change
+  generated quality, and does it change the MCP/Codegen gap?). No nudged
+  runs exist yet - see `TODO.md`.

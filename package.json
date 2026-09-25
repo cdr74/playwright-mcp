@@ -13,8 +13,11 @@
     "verify:tools": "playwright --version && playwright-mcp --version",
     "cleanup:app": "app/cleanup.sh",
     "explore:mcp": "tsx harness/src/explore-mcp.ts",
+    "explore:mcp:nudged": "NUDGE_QUALITY=1 tsx harness/src/explore-mcp.ts",
     "generate:mcp": "tsx harness/src/generate-mcp.ts",
-    "bench:codegen": "tsx harness/src/run-codegen.ts"
+    "generate:mcp:nudged": "NUDGE_QUALITY=1 tsx harness/src/generate-mcp.ts",
+    "bench:codegen": "tsx harness/src/run-codegen.ts",
+    "bench:codegen:nudged": "NUDGE_QUALITY=1 tsx harness/src/run-codegen.ts"
   },
   "license": "MIT",
   "dependencies": {

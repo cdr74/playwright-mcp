@@ -8,7 +8,9 @@
  * embedded directly in the prompt (fixtures/), not live browser
  * exploration. See conditions/codegen/README.md.
  *
- * Usage: npm run bench:codegen
+ * Usage: npm run bench:codegen (or bench:codegen:nudged, which appends
+ * docs/testing-best-practices.md to the system prompt - see that file's
+ * own header for the baseline-vs-nudged comparison this enables)
  * Prints a RUN_ID.
  */
 import 'dotenv/config';
@@ -25,18 +27,19 @@ const TARGET_APP_URL = process.env.TARGET_APP_URL ?? 'http://localhost:8081/';
 const REPO_ROOT = process.cwd();
 const FLOW_PATH = process.argv[2] ?? 'flows/01-add-employee-leave-request.md';
 const FIXTURE_PATH = process.env.CODEGEN_FIXTURE ?? 'fixtures/01-add-employee-leave-request.codegen.ts';
+const NUDGE_QUALITY = process.env.NUDGE_QUALITY === '1';
 
 async function main(): Promise<void> {
   console.log('==> Refreshing auth state (session may have expired since last run)');
   await seed();
 
-  const runId = process.env.RUN_ID ?? newRunId('codegen');
+  const runId = process.env.RUN_ID ?? newRunId(NUDGE_QUALITY ? 'codegen-nudged' : 'codegen');
   const runDir = path.resolve('results', runId);
   const rawDir = path.resolve('results/raw', runId);
   await mkdir(runDir, { recursive: true });
   await mkdir(rawDir, { recursive: true });
 
-  const [appKnowledge, systemPromptBase, flowSpec, codegenRecording] = await Promise.all([
+  const [appKnowledge, systemPromptBase, flowSpec, codegenRecording, testingBestPractices] = await Promise.all([
     readFile('docs/app-knowledge.md', 'utf-8'),
     readFile('conditions/codegen/system-prompt.md', 'utf-8'),
     readFile(FLOW_PATH, 'utf-8'),
@@ -45,8 +48,10 @@ async function main(): Promise<void> {
         `Could not read codegen fixture at ${FIXTURE_PATH}. Record it first: see fixtures/README.md.`,
       );
     }),
+    NUDGE_QUALITY ? readFile('docs/testing-best-practices.md', 'utf-8') : Promise.resolve(null),
   ]);
-  const systemPrompt = `${systemPromptBase}\n\nTarget application base URL: ${TARGET_APP_URL}\n\n## App knowledge\n\n${appKnowledge}`;
+  const nudgeBlock = testingBestPractices ? `\n\n## Testing best practices\n\n${testingBestPractices}` : '';
+  const systemPrompt = `${systemPromptBase}\n\nTarget application base URL: ${TARGET_APP_URL}\n\n## App knowledge\n\n${appKnowledge}${nudgeBlock}`;
   const userMessage = `## Flow\n\n${flowSpec}\n\n## Raw codegen recording (starting point - clean this up, don't just wrap it)\n\n\`\`\`typescript\n${codegenRecording}\n\`\`\``;
 
   console.log(`==> Run ${runId}: Codegen condition via Claude Code (no browser tools, no shell)`);
@@ -72,7 +77,7 @@ async function main(): Promise<void> {
   });
 
   const phase = summarizePhase('generate', MODEL, result, startedAt);
-  await recordPhaseMetrics(runDir, runId, 'codegen', phase);
+  await recordPhaseMetrics(runDir, runId, 'codegen', phase, NUDGE_QUALITY ? 'nudged' : 'baseline');
 
   console.log(`\n==> Done: ${runId}`);
   console.log(`    tokens: ${result.inputTokens} in / ${result.outputTokens} out (+${result.cacheCreationInputTokens} cache-write / ${result.cacheReadInputTokens} cache-read) - $${result.costUsd.toFixed(4)}, ${result.turns} turns`);

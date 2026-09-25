@@ -6,6 +6,10 @@
  * the agent.
  *
  * Usage: RUN_ID=<id from explore-mcp.ts> npm run generate:mcp
+ * (or generate:mcp:nudged, matching whichever explore:mcp variant minted
+ * the RUN_ID - NUDGE_QUALITY appends docs/testing-best-practices.md to
+ * this phase's system prompt, since this is the phase that writes code;
+ * see that file's own header for why explore-mcp.ts doesn't also get it)
  */
 import 'dotenv/config';
 import { readFile, mkdir, copyFile } from 'node:fs/promises';
@@ -21,12 +25,23 @@ const TARGET_APP_URL = process.env.TARGET_APP_URL ?? 'http://localhost:8081/';
 const AUTH_STATE_PATH = path.resolve('harness/.auth/state.json');
 const REPO_ROOT = process.cwd();
 const FLOW_PATH = process.argv[2] ?? 'flows/01-add-employee-leave-request.md';
+const NUDGE_QUALITY = process.env.NUDGE_QUALITY === '1';
 
 async function main(): Promise<void> {
   const runId = process.env.RUN_ID;
   if (!runId) {
     console.error('RUN_ID is not set. Run `npm run explore:mcp` first, then `RUN_ID=<id> npm run generate:mcp`.');
     process.exit(1);
+  }
+
+  const runIdLooksNudged = runId.startsWith('mcp-nudged-');
+  if (runIdLooksNudged !== NUDGE_QUALITY) {
+    console.warn(
+      `    WARNING: RUN_ID "${runId}" looks ${runIdLooksNudged ? 'nudged' : 'baseline'} but ` +
+      `NUDGE_QUALITY is ${NUDGE_QUALITY ? 'set' : 'unset'} - these should match (use ` +
+      `${runIdLooksNudged ? 'generate:mcp:nudged' : 'generate:mcp'} for this RUN_ID). Continuing ` +
+      `with NUDGE_QUALITY's value for the system prompt and metrics.`,
+    );
   }
 
   console.log('==> Refreshing auth state (session may have expired since explore:mcp ran)');
@@ -44,12 +59,14 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const [appKnowledge, generatePrompt, flowSpec] = await Promise.all([
+  const [appKnowledge, generatePrompt, flowSpec, testingBestPractices] = await Promise.all([
     readFile('docs/app-knowledge.md', 'utf-8'),
     readFile('conditions/mcp/generate-prompt.md', 'utf-8'),
     readFile(FLOW_PATH, 'utf-8'),
+    NUDGE_QUALITY ? readFile('docs/testing-best-practices.md', 'utf-8') : Promise.resolve(null),
   ]);
-  const systemPrompt = `${generatePrompt}\n\nTarget application base URL: ${TARGET_APP_URL}\n\n## App knowledge\n\n${appKnowledge}`;
+  const nudgeBlock = testingBestPractices ? `\n\n## Testing best practices\n\n${testingBestPractices}` : '';
+  const systemPrompt = `${generatePrompt}\n\nTarget application base URL: ${TARGET_APP_URL}\n\n## App knowledge\n\n${appKnowledge}${nudgeBlock}`;
   const userMessage = `## Flow\n\n${flowSpec}\n\n## Test plan (from exploration)\n\n${testPlan}`;
 
   console.log(`==> Run ${runId}: generating and running the test via Claude Code + Playwright MCP`);
@@ -84,7 +101,7 @@ async function main(): Promise<void> {
   });
 
   const phase = summarizePhase('generate', MODEL, result, startedAt);
-  await recordPhaseMetrics(runDir, runId, 'mcp', phase);
+  await recordPhaseMetrics(runDir, runId, 'mcp', phase, NUDGE_QUALITY ? 'nudged' : 'baseline');
 
   console.log(`\n==> Done: ${runId}`);
   console.log(`    tokens: ${result.inputTokens} in / ${result.outputTokens} out (+${result.cacheCreationInputTokens} cache-write / ${result.cacheReadInputTokens} cache-read) - $${result.costUsd.toFixed(4)}, ${result.turns} turns`);

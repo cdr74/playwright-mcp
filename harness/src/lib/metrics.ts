@@ -22,6 +22,7 @@ export interface PhaseMetrics {
 interface RunMetrics {
   runId: string;
   condition: 'mcp' | 'codegen';
+  promptVariant: 'baseline' | 'nudged';
   phases: PhaseMetrics[];
 }
 
@@ -58,11 +59,12 @@ export async function recordPhaseMetrics(
   runId: string,
   condition: 'mcp' | 'codegen',
   phase: PhaseMetrics,
+  promptVariant: 'baseline' | 'nudged' = 'baseline',
 ): Promise<void> {
   const metricsPath = path.join(runDir, 'metrics.json');
   await mkdir(runDir, { recursive: true });
 
-  let existing: RunMetrics = { runId, condition, phases: [] };
+  let existing: RunMetrics = { runId, condition, promptVariant, phases: [] };
   try {
     existing = JSON.parse(await readFile(metricsPath, 'utf-8')) as RunMetrics;
   } catch {

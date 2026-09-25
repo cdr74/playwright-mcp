@@ -6,13 +6,21 @@ against afterward. The two are kept deliberately close (each item below
 maps to one rubric criterion) so scoring never penalizes an agent for
 something it was never told mattered.
 
-**Not wired into either condition's prompt yet.** This is the draft for
-review before it becomes part of the shared context both conditions
-receive — see `TODO.md` for the planned baseline-vs-nudged comparison this
-enables. When it is wired in, it must go in identically for both
-conditions, the same way `docs/app-knowledge.md` already does — that
-symmetry is the controlled variable this whole benchmark depends on
-(`CLAUDE.md` decision 1).
+**Wired in, opt-in, symmetric.** Set `NUDGE_QUALITY=1` (or use the
+`*:nudged` npm scripts: `explore:mcp:nudged` + `generate:mcp:nudged` for
+the MCP condition, `bench:codegen:nudged` for Codegen) and this file gets
+appended to the system prompt of whichever phase actually writes
+Playwright code - `generate-mcp.ts` and `run-codegen.ts`, not
+`explore-mcp.ts`, since that phase only writes a prose test plan and this
+guidance is entirely about code craftsmanship. Applied identically to
+both conditions' code-writing phase, the same symmetry
+`docs/app-knowledge.md` already relies on (`CLAUDE.md` decision 1).
+`explore-mcp.ts` still needs `NUDGE_QUALITY` set too, purely to mint a
+`RUN_ID` with the matching `mcp-nudged-` prefix that `generate-mcp.ts`
+later reuses - `generate-mcp.ts` warns loudly if the two ever disagree.
+
+Baseline (no flag) vs. nudged results haven't been compared yet - see
+`TODO.md` for that still-open piece of the baseline-vs-nudged decision.
 
 ---
 

@@ -5,8 +5,9 @@
  * the agent, and CLAUDE.md decision 3 for why this drives Claude Code
  * (`claude -p`) rather than the Anthropic API directly.
  *
- * Usage: npm run explore:mcp
- * Prints a RUN_ID to continue with `npm run generate:mcp`.
+ * Usage: npm run explore:mcp (or npm run explore:mcp:nudged)
+ * Prints a RUN_ID to continue with `npm run generate:mcp` (matching
+ * variant - see NUDGE_QUALITY below).
  */
 import 'dotenv/config';
 import { readFile, mkdir, copyFile } from 'node:fs/promises';
@@ -23,12 +24,18 @@ const TARGET_APP_URL = process.env.TARGET_APP_URL ?? 'http://localhost:8081/';
 const AUTH_STATE_PATH = path.resolve('harness/.auth/state.json');
 const REPO_ROOT = process.cwd();
 const FLOW_PATH = process.argv[2] ?? 'flows/01-add-employee-leave-request.md';
+// This phase never injects testing-best-practices.md itself (it writes a
+// prose test plan, not code - see docs/testing-best-practices.md's own
+// header for why only code-writing phases get it), but it still needs to
+// know about nudge mode to mint a RUN_ID with the matching prefix, since
+// generate-mcp.ts reuses whatever RUN_ID this phase produces.
+const NUDGE_QUALITY = process.env.NUDGE_QUALITY === '1';
 
 async function main(): Promise<void> {
   console.log('==> Refreshing auth state (session may have expired since last run)');
   await seed();
 
-  const runId = process.env.RUN_ID ?? newRunId('mcp');
+  const runId = process.env.RUN_ID ?? newRunId(NUDGE_QUALITY ? 'mcp-nudged' : 'mcp');
   const runDir = path.resolve('results', runId);
   const rawDir = path.resolve('results/raw', runId);
   await mkdir(runDir, { recursive: true });
@@ -68,7 +75,7 @@ async function main(): Promise<void> {
   });
 
   const phase = summarizePhase('explore', MODEL, result, startedAt);
-  await recordPhaseMetrics(runDir, runId, 'mcp', phase);
+  await recordPhaseMetrics(runDir, runId, 'mcp', phase, NUDGE_QUALITY ? 'nudged' : 'baseline');
 
   console.log(`\n==> Done: ${runId}`);
   console.log(`    tokens: ${result.inputTokens} in / ${result.outputTokens} out (+${result.cacheCreationInputTokens} cache-write / ${result.cacheReadInputTokens} cache-read) - $${result.costUsd.toFixed(4)}, ${result.turns} turns`);
@@ -78,7 +85,7 @@ async function main(): Promise<void> {
   }
   console.log(`    test plan: results/${runId}/test-plan.md`);
   console.log(`    agent's final message: ${result.resultText.slice(0, 300)}`);
-  console.log(`\nNext: RUN_ID=${runId} npm run generate:mcp`);
+  console.log(`\nNext: RUN_ID=${runId} npm run ${NUDGE_QUALITY ? 'generate:mcp:nudged' : 'generate:mcp'}`);
 }
 
 main().catch((err) => {
