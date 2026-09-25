@@ -189,22 +189,34 @@ if it turns out to be a bottleneck once the harness is running many repeats.
 ## Status
 
 Environment phase done (target app, Playwright, Playwright MCP - all
-automated and verified, see `docs/verify-setup.md`). The **MCP condition**
-harness is built (`npm run seed`, `npm run explore:mcp`,
-`npm run generate:mcp`) and has completed one full, uninterrupted run of
-both phases end to end (see `docs/run-mcp-condition.md` for the exact,
-reproducible steps and `results/mcp-2026-09-25T06-32-18-639Z/metrics.json`
-for the first real numbers: ~$2.00 total across both phases, 8 test-run
-iterations to a stable green). Has to run from a plain terminal, not from
-inside another Claude Code session (see `harness/README.md`). The **CLI
-condition** has also now completed a full run
-(`results/cli-2026-09-25T08-46-56-590Z/metrics.json`: ~$0.28 total, 4
-test-run iterations to green) — directionally in line with the inspiring
-post's cost-gap claim, though this is one run of each condition, not yet
-a controlled comparison (repeat-run count is still an open decision, see
-`TODO.md`). See `docs/results.md` for the full first write-up (including
-where the "directionally in line" framing above does and doesn't hold up)
-and `TODO.md` for what's next.
+automated and verified, see `docs/verify-setup.md`). Both the **MCP
+condition** (`npm run seed`, `npm run explore:mcp`, `npm run generate:mcp`)
+and the **CLI condition** (`npm run bench:cli`) harnesses are built and
+have each completed one full, uninterrupted run end to end - see "Results"
+below for the numbers and `docs/run-mcp-condition.md` /
+`docs/run-cli-condition.md` for the exact, reproducible steps. Both have
+to run from a plain terminal, not from inside another Claude Code session
+(see `harness/README.md`). See `TODO.md` for what's next.
+
+## Results
+
+**One run per condition so far — not yet a controlled comparison** (the
+repeat-run count needed for that is still an open decision, see `TODO.md`).
+Full write-up, including where these numbers do and don't line up with the
+inspiring post's claim, in `docs/results.md`.
+
+| | MCP | CLI | Ratio |
+|---|---|---|---|
+| Cost (list-price, cache-discounted) | $2.00 | $0.28 | ~7.0x |
+| Total tokens (incl. uncached cache-read volume) | 5.63M | 196K | ~28.7x |
+| Turns | 135 | 9 | ~15x |
+| Test-run iterations to green | 8 | 4 | ~2x |
+| Wall clock | ~9.8 min | ~4.1 min | ~2.4x |
+
+Both runs produced a passing test on the first complete attempt. See
+`results/mcp-2026-09-25T06-32-18-639Z/` and
+`results/cli-2026-09-25T08-46-56-590Z/` for the raw `metrics.json` and
+generated spec files.
 
 ## Getting started
 
