@@ -118,7 +118,16 @@ assume some `.md` file describes it and needs a pass.
      (full replace, not `--append-system-prompt`) set to the phase prompt
      + `docs/app-knowledge.md` + the target app URL — this avoids Claude
      Code's own default identity/tool-guidance system prompt, keeping the
-     prompt close to what a bare API harness would have sent.
+     prompt close to what a bare API harness would have sent. **Not
+     sufficient on its own**, confirmed empirically: Claude Code
+     auto-attaches this repo's own `CLAUDE.md` and auto-memory files to
+     every session's context through a separate mechanism `--system-prompt`
+     doesn't touch. Fixed by running each `claude -p` invocation from a
+     `cwd` outside this repo (`harness/src/lib/isolated-session.ts`,
+     `isolatedCwd()`/`bin()`) — see `TODO.md` Gotchas for the full
+     investigation, what was ruled out (`--bare` forces API-key billing;
+     `--safe-mode` silently breaks `--mcp-config`), and why an external
+     cwd is what actually works.
    - `--tools` is an **explicit allow-list** per phase (proven empirically,
      not assumed - see below), never `default`. `--mcp-config` (inline
      JSON, always paired with `--strict-mcp-config` so no project/user

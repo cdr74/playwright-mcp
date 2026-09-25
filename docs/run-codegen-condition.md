@@ -66,8 +66,15 @@ Then, what this invokes in `claude -p --output-format json` terms:
   `mcp__tools__run_playwright_test` — no `playwright-mcp`, no browser tools
   of any kind, and critically Claude Code's native `Bash` is **not** in the
   allow-list (see `CLAUDE.md` decision 1, "no raw shell").
-- **MCP servers**: only the scoped `tools` server
-  (`harness/src/mcp-tools-server.ts`, `RUN_DIR` set to this run's output
+- **Process `cwd`**: a scratch directory outside this repo entirely
+  (`os.tmpdir()/playwright-mcp-bench/<run-id>`, via
+  `harness/src/lib/isolated-session.ts`), not the repo root - see
+  `docs/run-mcp-condition.md` "Process `cwd`" for why (Claude Code
+  auto-attaches this repo's `CLAUDE.md`/auto-memory otherwise, confirmed
+  empirically, `TODO.md` Gotchas has the full investigation).
+- **MCP servers**: only the scoped `tools` server (`harness/src/mcp-tools-server.ts`,
+  an absolute path since the relocated cwd can't resolve `npx tsx` via
+  its own node_modules walk; `RUN_DIR` set to this run's output
   directory) — no `playwright-mcp` registered at all.
 - **System prompt** (`conditions/codegen/system-prompt.md` + target URL +
   `docs/app-knowledge.md`), verbatim as of this writing:

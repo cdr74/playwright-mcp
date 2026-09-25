@@ -14,6 +14,7 @@ import { runClaude } from './lib/claude-runner.js';
 import { PLAYWRIGHT_MCP_TOOLS, withServerPrefix } from './lib/mcp-tool-names.js';
 import { recordPhaseMetrics, summarizePhase } from './lib/metrics.js';
 import { seed } from './seed.js';
+import { isolatedCwd, bin } from './lib/isolated-session.js';
 
 const MODEL = process.env.CLAUDE_MODEL ?? 'sonnet';
 const TARGET_APP_URL = process.env.TARGET_APP_URL ?? 'http://localhost:8081/';
@@ -66,16 +67,16 @@ async function main(): Promise<void> {
     ],
     mcpServers: {
       playwright: {
-        command: 'npx',
-        args: ['playwright-mcp', '--browser', 'chromium', '--headless', '--isolated', '--storage-state', AUTH_STATE_PATH, '--output-dir', path.join(rawDir, 'playwright-mcp')],
+        command: bin(REPO_ROOT, 'playwright-mcp'),
+        args: ['--browser', 'chromium', '--headless', '--isolated', '--storage-state', AUTH_STATE_PATH, '--output-dir', path.join(rawDir, 'playwright-mcp')],
       },
       tools: {
-        command: 'npx',
-        args: ['tsx', 'harness/src/mcp-tools-server.ts'],
+        command: bin(REPO_ROOT, 'tsx'),
+        args: [path.join(REPO_ROOT, 'harness/src/mcp-tools-server.ts')],
         env: { RUN_DIR: runDir, REPO_ROOT },
       },
     },
-    cwd: REPO_ROOT,
+    cwd: await isolatedCwd(runId),
   });
 
   await copyFile(result.transcriptPath, path.join(rawDir, 'generate-transcript.jsonl')).catch((err) => {

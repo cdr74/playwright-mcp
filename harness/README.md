@@ -32,6 +32,14 @@ decision 3 for the full reasoning and mechanics.
   what's excluded and why).
 - `src/lib/metrics.ts`, `src/lib/run-id.ts` — per-run `metrics.json`
   bookkeeping and run-id generation.
+- `src/lib/isolated-session.ts` — `isolatedCwd(runId)` /
+  `bin(repoRoot, name)`, used by all three run scripts to run `claude -p`
+  from outside this repo entirely. Not cosmetic: Claude Code auto-attaches
+  this repo's own `CLAUDE.md` and auto-memory files to every session
+  regardless of `--system-prompt` (confirmed empirically, not assumed -
+  see `TODO.md` Gotchas), and running from an external cwd is the fix
+  that doesn't also break `--mcp-config` (`--safe-mode` does) or force
+  API-key billing (`--bare` does) - both were tested and ruled out first.
 - `src/explore-mcp.ts` (`npm run explore:mcp`) / `src/generate-mcp.ts`
   (`npm run generate:mcp`) — the MCP condition's two phases. See
   `conditions/mcp/` for the exact prompts and `README.md` "How the

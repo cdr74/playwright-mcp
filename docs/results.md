@@ -186,6 +186,17 @@ this harness instead of trusting either figure blind.
 
 - **N=1 per condition.** No error bars, no idea yet whether either run was
   typical or an outlier. Do not cite the ratios above as "the" MCP/Codegen gap.
+- **Both runs below are affected by a since-fixed contamination bug**:
+  Claude Code was auto-attaching this repo's own `CLAUDE.md` (15.9K chars)
+  and auto-memory files to every session regardless of `--system-prompt` -
+  confirmed by inspecting the real transcripts, not assumed. See `TODO.md`
+  Gotchas for the full investigation and the fix
+  (`harness/src/lib/isolated-session.ts`). The token/cost numbers below
+  are real (that's genuinely what got billed) but measure something
+  slightly larger than what `docs/run-mcp-condition.md` /
+  `docs/run-codegen-condition.md` document as the system prompt. Don't
+  reuse these two runs as 1-of-3 when the N=3 baseline set gets built -
+  redo all 3 on the fixed harness so the set is homogeneous.
 - **Not a blind/controlled trial** in the stricter sense — both runs used
   the same model, flow, and app-knowledge primer (that symmetry is
   deliberate, see `README.md`), but only one seed/attempt each.

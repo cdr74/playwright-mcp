@@ -268,6 +268,54 @@ decisions above) was confirmed to lose no measurement fidelity.
 Kept here rather than only in commit history since they're the kind of
 thing anyone reproducing this repo would hit again.
 
+- **Claude Code was auto-attaching this repo's entire `CLAUDE.md`
+  (15,909 chars) plus its auto-memory files to every single benchmark
+  run, regardless of `--system-prompt`.** Surfaced by the user asking
+  "how do we avoid session memory giving wrong results for repeat runs" -
+  answered empirically instead of assumed: grepped the real transcripts
+  from both existing runs for auto-memory content and found it, in all
+  three phase transcripts. Confirmed the mechanism with
+  `python3 -c "json.loads(...)"` on the raw JSONL: an `"attachment"` entry
+  of `attachment.type: "instructions"` carrying
+  `/home/chris/dev/playwright-mcp/CLAUDE.md` (`type: "Project"`) and
+  `.../memory/MEMORY.md` (`type: "AutoMem"`) verbatim, on every phase of
+  every run. This is a *separate* mechanism from the rendered system
+  prompt - `--system-prompt` is a full replace of the prompt itself, but
+  doesn't touch this auto-attachment step, so decision 3's "keeping the
+  prompt close to what a bare API harness would have sent" wasn't
+  actually true for any run before this fix. Both existing baseline runs
+  (`results/mcp-2026-09-25T06-32-18-639Z/`,
+  `results/codegen-2026-09-25T08-46-56-590Z/`) carry this contamination -
+  treat their exact token/cost numbers as measuring something slightly
+  different from what the docs claim, and don't reuse them as 1-of-3 in
+  the N=3 baseline set once that gets (re-)run on the fixed harness.
+  - Two candidate fixes were tested directly against a real
+    `--mcp-config`/`--strict-mcp-config` tool call (not assumed from
+    `--help` text alone) and **both ruled out**: `claude -p --bare` does
+    stop the attachment, but its help text says plainly "Anthropic auth
+    is strictly `ANTHROPIC_API_KEY` or `apiKeyHelper`... OAuth and
+    keychain are never read" - forcing metered API billing, which defeats
+    decision 3's entire reason for existing. `--safe-mode` also stops the
+    attachment, but a real test call showed it silently drops
+    explicitly-configured `--mcp-config` servers too (no
+    `permission_denials` entry at all - the model never even saw the
+    tool, just described a fake call in prose) - would have broken the
+    harness's actual mechanism, not just the contamination.
+  - **The fix that works**: run `claude -p` from a `cwd` outside this
+    repo entirely. CLAUDE.md auto-discovery walks up from cwd looking for
+    the file; auto-memory is scoped by a project slug derived from cwd
+    (`cwd.replace(/\//g, '-')`, the same formula the transcript path
+    already uses) - an unrelated external cwd gets a fresh, empty memory
+    space with nothing to attach. Confirmed with the same real
+    `--mcp-config` tool-call test: relocated cwd, genuine
+    `permission_denials` entry (a real attempted call, not hallucinated),
+    zero `"instructions"` attachment in the resulting transcript.
+    Implemented as `harness/src/lib/isolated-session.ts`
+    (`isolatedCwd(runId)`, `bin(repoRoot, name)`) and wired into all three
+    run scripts. The one catch: relocating cwd means `npx <bin>` can no
+    longer resolve this repo's local `node_modules/.bin/` via its own
+    cwd-relative lookup, so the MCP server `command`s switched from
+    `npx tsx`/`npx playwright-mcp` to `bin()`'s absolute paths.
 - **The saved auth session in `harness/.auth/state.json` can expire
   between when a test was generated and when you come back to run it
   later.** Hit while manually re-running both conditions' generated tests

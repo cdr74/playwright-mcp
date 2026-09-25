@@ -18,6 +18,7 @@ import { runClaude } from './lib/claude-runner.js';
 import { recordPhaseMetrics, summarizePhase } from './lib/metrics.js';
 import { newRunId } from './lib/run-id.js';
 import { seed } from './seed.js';
+import { isolatedCwd, bin } from './lib/isolated-session.js';
 
 const MODEL = process.env.CLAUDE_MODEL ?? 'sonnet';
 const TARGET_APP_URL = process.env.TARGET_APP_URL ?? 'http://localhost:8081/';
@@ -58,12 +59,12 @@ async function main(): Promise<void> {
     tools: ['mcp__tools__write_file', 'mcp__tools__run_playwright_test'],
     mcpServers: {
       tools: {
-        command: 'npx',
-        args: ['tsx', 'harness/src/mcp-tools-server.ts'],
+        command: bin(REPO_ROOT, 'tsx'),
+        args: [path.join(REPO_ROOT, 'harness/src/mcp-tools-server.ts')],
         env: { RUN_DIR: runDir, REPO_ROOT },
       },
     },
-    cwd: REPO_ROOT,
+    cwd: await isolatedCwd(runId),
   });
 
   await copyFile(result.transcriptPath, path.join(rawDir, 'codegen-transcript.jsonl')).catch((err) => {

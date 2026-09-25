@@ -73,13 +73,22 @@ Then, what this invokes in `claude -p --output-format json` terms:
   `browser_select_option`, `browser_hover`, `browser_wait_for`,
   `browser_handle_dialog`, `browser_find`, `browser_take_screenshot`) +
   `mcp__tools__write_file`
-- **MCP servers**: `playwright-mcp` (`--browser chromium --headless
+- **Process `cwd`**: a scratch directory outside this repo entirely
+  (`os.tmpdir()/playwright-mcp-bench/<run-id>`, via
+  `harness/src/lib/isolated-session.ts`), not the repo root - Claude Code
+  auto-attaches this repo's own `CLAUDE.md` and auto-memory files to
+  every session regardless of `--system-prompt`, confirmed empirically,
+  and an external cwd is what actually stops it without also breaking
+  `--mcp-config` (see "Gotchas" below and `TODO.md`).
+- **MCP servers**: `playwright-mcp` (absolute path into this repo's
+  `node_modules/.bin/`, not `npx` - the relocated cwd can't resolve that
+  via its own node_modules walk; `--browser chromium --headless
   --isolated --storage-state harness/.auth/state.json --output-dir
   results/raw/<run-id>/playwright-mcp`, so its own accessibility-snapshot
   and console-log dumps land under `results/raw/` instead of the repo
   root — see "Gotchas" below) + the scoped `tools` server
-  (`harness/src/mcp-tools-server.ts`, `RUN_DIR` set to this run's output
-  directory)
+  (`harness/src/mcp-tools-server.ts`, also an absolute path, `RUN_DIR`
+  set to this run's output directory)
 - **System prompt** (`conditions/mcp/explore-prompt.md` + target URL +
   `docs/app-knowledge.md`), verbatim as of this writing:
 
@@ -312,6 +321,14 @@ Produces `results/<run-id>/tests/add-employee-leave.spec.ts`,
   results/raw/<run-id>/playwright-mcp` (now in `explore-mcp.ts` /
   `generate-mcp.ts`). If you're on an older checkout without this fix,
   check for a stray `.playwright-mcp/` after a run.
+- **Claude Code auto-attaches this repo's `CLAUDE.md` and auto-memory
+  files to every session regardless of `--system-prompt`.** Found by
+  actually inspecting the raw transcripts, not assumed - both baseline
+  runs this project's `docs/results.md` cites were affected. Fixed by
+  running `claude -p` from a `cwd` outside this repo (see "Process `cwd`"
+  above); `--bare`/`--safe-mode` were tested and ruled out first (API-key
+  billing, silently broken `--mcp-config`, respectively). Full
+  investigation in `TODO.md` Gotchas.
 
 ## What "reproducible" means here
 
