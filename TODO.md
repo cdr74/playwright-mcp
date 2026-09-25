@@ -442,13 +442,22 @@ thing anyone reproducing this repo would hit again.
       one (~7x), neither straightforwardly confirming or refuting the
       post given it doesn't disclose whether/how it accounted for prompt
       caching.
-- [ ] Run both conditions **3 repeats each**, on the now-fixed harness
-      (see the CLAUDE.md-contamination Gotcha - don't reuse the two
-      existing runs, they predate the fix) - 6 runs for the unguided
-      baseline, or 12 if the baseline-vs-nudged 2×2 also happens at the
-      same time (see that decision above). Update `docs/results.md` from
+- [x] `harness/run-repeats.sh` (`npm run repeat:baseline` /
+      `repeat:nudged`) + `docs/run-repeats.md`: the actual mechanism for
+      producing the N-repeats-per-condition dataset - resets the app
+      before *every* individual run (not just once per batch, see that
+      doc for why this specific discipline matters), logs every `RUN_ID`
+      to `results/repeat-run-log-<timestamp>.txt`, keeps going if one
+      repeat fails rather than aborting the batch. Prompted by the user
+      noticing this had no actual instructions anywhere, let alone one
+      referenced from `README.md`.
+- [ ] **Actually run it**: `npm run repeat:baseline` (6 runs, on the
+      now-fixed harness - see the CLAUDE.md-contamination Gotcha, don't
+      reuse the two existing runs, they predate the fix), and
+      `npm run repeat:nudged` (6 more) if the baseline-vs-nudged
+      comparison happens at the same time. Update `docs/results.md` from
       a single anecdote into an actual comparison with a real sample
-      size either way.
+      size.
 
 ## Phase 5 — Test healing (v2, not started)
 

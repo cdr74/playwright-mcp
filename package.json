@@ -17,7 +17,9 @@
     "generate:mcp": "tsx harness/src/generate-mcp.ts",
     "generate:mcp:nudged": "NUDGE_QUALITY=1 tsx harness/src/generate-mcp.ts",
     "bench:codegen": "tsx harness/src/run-codegen.ts",
-    "bench:codegen:nudged": "NUDGE_QUALITY=1 tsx harness/src/run-codegen.ts"
+    "bench:codegen:nudged": "NUDGE_QUALITY=1 tsx harness/src/run-codegen.ts",
+    "repeat:baseline": "harness/run-repeats.sh",
+    "repeat:nudged": "harness/run-repeats.sh --nudged"
   },
   "license": "MIT",
   "dependencies": {

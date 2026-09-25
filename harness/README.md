@@ -50,6 +50,10 @@ decision 3 for the full reasoning and mechanics.
   excluded from `--tools` (see `CLAUDE.md` decision 1). Runnable now -
   `fixtures/01-add-employee-leave-request.codegen.ts` is recorded, see
   `fixtures/README.md`.
+- `run-repeats.sh` (`npm run repeat:baseline` / `repeat:nudged`, not
+  under `src/` since it's a shell orchestrator, not TypeScript) — runs N
+  repeats of one or both conditions, resetting the app before *every*
+  individual run. See `docs/run-repeats.md`.
 
 ## A known limitation of testing this from inside Claude Code
 

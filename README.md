@@ -211,10 +211,11 @@ to run from a plain terminal, not from inside another Claude Code session
 
 ## Results
 
-**One run per condition so far — not yet a controlled comparison** (the
-repeat-run count needed for that is still an open decision, see `TODO.md`).
-Full write-up, including where these numbers do and don't line up with the
-inspiring post's claim, in `docs/results.md`.
+**One run per condition so far — not yet a controlled comparison.** The
+confirmed target is 3 repeats per condition (`CLAUDE.md` decision 12) -
+see "Reproducing the full comparison" below for the actual command; it
+hasn't been run yet. Full write-up, including where these numbers do and
+don't line up with the inspiring post's claim, in `docs/results.md`.
 
 | | MCP | Codegen | Ratio |
 |---|---|---|---|
@@ -292,6 +293,24 @@ Neither command needs a separate login step first - both refresh the
 authenticated session and one-time Leave module setup themselves as their
 first move (`npm run seed`, still available standalone if you want to warm
 that state without spinning up Claude Code - see `harness/README.md`).
+
+### Reproducing the full comparison (both conditions, 3 repeats)
+
+The commands above are for a single one-off run of one condition. To
+actually reproduce the N=3-per-condition dataset this project's numbers
+are supposed to rest on (**from a plain terminal**, same restriction as
+above):
+
+```bash
+npm run repeat:baseline   # both conditions, 3 repeats each, resets the app before every run
+npm run repeat:nudged     # same, with docs/testing-best-practices.md's guidance appended
+```
+
+See `docs/run-repeats.md` for what this actually does (a full app reset
+before *every individual run*, not just once per batch - that distinction
+is what caught the Codegen condition's first flakiness bug, see
+"Quality" above), cost/time expectations (~$7, ~50 min for a baseline
+batch), and where the `RUN_ID`s get logged.
 
 ## License
 

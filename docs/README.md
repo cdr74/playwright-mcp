@@ -18,6 +18,12 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
   `conditions/{mcp,codegen}/*.md`, `docs/app-knowledge.md`, the flow spec,
   or (for the Codegen one) the codegen fixture change — see each file's
   own header.
+- `run-repeats.md` — how to actually produce the 3-repeats-per-condition
+  dataset `CLAUDE.md` decision 12 calls for, via `harness/run-repeats.sh`
+  (also `npm run repeat:baseline` / `repeat:nudged`) - resets the app
+  before *every* individual run, not just once per batch, and logs every
+  `RUN_ID` produced. Neither single-run runbook above covers this by
+  itself.
 - `results.md` — the first aggregated write-up of what's been run so far
   (currently one run per condition — see its own caveats section).
   `TODO.md` Phase 4 tracks turning this into a fuller report once more
