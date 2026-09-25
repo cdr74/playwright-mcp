@@ -208,9 +208,21 @@ decisions above) was confirmed to lose no measurement fidelity.
       `conditions/cli/system-prompt.md`, embeds the codegen fixture
       directly in the user message (no read tool needed). Now runnable -
       the fixture it depends on is recorded (see above).
-- [ ] **Run the CLI condition end to end** (`npm run bench:cli`) - the
-      next concrete milestone, mirroring the MCP condition's first full
-      run above. First real CLI-vs-MCP comparison once this lands.
+- [x] **Ran the CLI condition end to end** for the first time
+      (`cli-2026-09-25T08-46-56-590Z`): $0.28 / 9 turns / ~4 min, 4
+      `run_playwright_test` iterations to green (vs. MCP's $0.80+$1.20 /
+      135 turns / ~10 min, 8 iterations - see the MCP run above). Big
+      caveat: this is one run of each, not a controlled comparison yet
+      (see the open repeat-count decision) - but the first real signal
+      lines up directionally with the inspiring post's cost-gap claim.
+      The agent correctly narrowed the fixture's recorded two-day leave
+      range to a single day per the flow spec, caught the same
+      `isVisible()`-vs-`waitFor()` dialog-timing bug the MCP condition's
+      agent found independently, and also caught a second one specific
+      to the raw recording: blindly picking the Leave Type listbox's
+      "first option" could select the re-rendered `-- Select --`
+      placeholder rather than a real leave type. Full numbers in
+      `results/cli-2026-09-25T08-46-56-590Z/metrics.json`.
 - [ ] `docs/quality-rubric.md`: define the quality checks (selector
       robustness, assertion quality, best-practices adherence,
       flakiness-across-N-runs) and how they're scored — manual checklist

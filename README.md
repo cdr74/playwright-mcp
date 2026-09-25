@@ -197,9 +197,12 @@ reproducible steps and `results/mcp-2026-09-25T06-32-18-639Z/metrics.json`
 for the first real numbers: ~$2.00 total across both phases, 8 test-run
 iterations to a stable green). Has to run from a plain terminal, not from
 inside another Claude Code session (see `harness/README.md`). The **CLI
-condition** runner (`npm run bench:cli`) is built and its codegen fixture
-is recorded (`fixtures/01-add-employee-leave-request.codegen.ts`, see
-`fixtures/README.md`) — hasn't been run end to end yet. See `TODO.md`.
+condition** has also now completed a full run
+(`results/cli-2026-09-25T08-46-56-590Z/metrics.json`: ~$0.28 total, 4
+test-run iterations to green) — directionally in line with the inspiring
+post's cost-gap claim, though this is one run of each condition, not yet
+a controlled comparison (repeat-run count is still an open decision, see
+`TODO.md`). See `TODO.md` for the full picture.
 
 ## Getting started
 

@@ -1,0 +1,25 @@
+{
+  "runId": "cli-2026-09-25T08-46-56-590Z",
+  "condition": "cli",
+  "phases": [
+    {
+      "phase": "generate",
+      "model": "sonnet",
+      "sessionId": "4c618e93-76fc-480a-9e76-81647cc306cb",
+      "inputTokens": 18,
+      "outputTokens": 14450,
+      "cacheCreationInputTokens": 27333,
+      "cacheReadInputTokens": 154199,
+      "costUsd": 0.2847078,
+      "turns": 9,
+      "toolCallCounts": {
+        "mcp__tools__write_file": 4,
+        "mcp__tools__run_playwright_test": 4
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-25T08:46:56.597Z",
+      "finishedAt": "2026-09-25T08:51:05.138Z",
+      "durationMs": 243751
+    }
+  ]
+}
