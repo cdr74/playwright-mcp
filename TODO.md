@@ -112,12 +112,16 @@ starts on them, per `CLAUDE.md`.
       Period/Leave Type setup + saves `harness/.auth/state.json`. Live-
       validated against a freshly-installed instance (idempotent leave-
       type check confirmed both "already exists" and "created" paths).
-- [ ] **Record the CLI condition's codegen fixture** — the one thing
-      currently blocking `npm run bench:cli` from actually running. Needs
-      a human driving a real headed browser (`npx playwright codegen`),
-      so it can't be done from an automated/sandboxed session. Exact
-      steps and the metadata to fill in afterward are in
-      `fixtures/README.md`.
+- [x] **Recorded the CLI condition's codegen fixture**
+      (`fixtures/01-add-employee-leave-request.codegen.ts`, 2026-09-25).
+      Recording this surfaced a real `seed.ts` bug (see Gotchas below,
+      Leave Type creation silently no-op'ing) that had to be fixed first.
+      Two deviations from the intended steps, documented in
+      `fixtures/README.md`: recorded a two-day leave range instead of a
+      single day (still a valid DB-confirmed assignment, but the CLI
+      agent has to narrow it itself), and recorded enabling login details
+      for the employee (out of flow scope, left in as realistic noise).
+      `npm run bench:cli` is now actually runnable.
 
 ## Phase 3 — Harness
 
@@ -202,9 +206,11 @@ decisions above) was confirmed to lose no measurement fidelity.
       playwright-mcp registered, and `--tools` excludes Claude Code's
       native `Bash` - see `CLAUDE.md` decision 1). System prompt is
       `conditions/cli/system-prompt.md`, embeds the codegen fixture
-      directly in the user message (no read tool needed). **Not runnable
-      yet** - blocked on the fixture below, fails with a clear error
-      until it exists.
+      directly in the user message (no read tool needed). Now runnable -
+      the fixture it depends on is recorded (see above).
+- [ ] **Run the CLI condition end to end** (`npm run bench:cli`) - the
+      next concrete milestone, mirroring the MCP condition's first full
+      run above. First real CLI-vs-MCP comparison once this lands.
 - [ ] `docs/quality-rubric.md`: define the quality checks (selector
       robustness, assertion quality, best-practices adherence,
       flakiness-across-N-runs) and how they're scored — manual checklist

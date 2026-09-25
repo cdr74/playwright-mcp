@@ -33,9 +33,9 @@ decision 3 for the full reasoning and mechanics.
 - `src/run-cli.ts` (`npm run bench:cli`) — the CLI condition's single
   phase. Reuses `claude-runner.ts` + `mcp-tools-server.ts`, without
   `playwright-mcp` registered and with Claude Code's native `Bash`
-  excluded from `--tools` (see `CLAUDE.md` decision 1). Not runnable yet:
-  needs `fixtures/01-add-employee-leave-request.codegen.ts`, which hasn't
-  been recorded (`TODO.md` Phase 2) — see `fixtures/README.md`.
+  excluded from `--tools` (see `CLAUDE.md` decision 1). Runnable now -
+  `fixtures/01-add-employee-leave-request.codegen.ts` is recorded, see
+  `fixtures/README.md`.
 
 Run `npm run seed` once per fresh app install before either condition.
 

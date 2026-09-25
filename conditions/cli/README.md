@@ -19,8 +19,7 @@ clean and green.
 is reproducible; combined at runtime with `docs/app-knowledge.md` and the
 target URL, same pattern as `conditions/mcp/`.
 
-**Not runnable yet**: `fixtures/01-add-employee-leave-request.codegen.ts`
-hasn't been recorded (`TODO.md` Phase 2) — `run-cli.ts` will fail with a
-clear error until it exists. Recording it needs a human driving a real
-headed browser via `playwright codegen`, so it can't be done from an
-automated session — see `fixtures/README.md`.
+Runnable now: `fixtures/01-add-employee-leave-request.codegen.ts` is
+recorded (see `fixtures/README.md` for the exact steps taken and two
+documented deviations from the flow spec) — `npm run bench:cli` end to
+end hasn't happened yet, see `TODO.md`.

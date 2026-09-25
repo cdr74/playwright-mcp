@@ -197,9 +197,9 @@ reproducible steps and `results/mcp-2026-09-25T06-32-18-639Z/metrics.json`
 for the first real numbers: ~$2.00 total across both phases, 8 test-run
 iterations to a stable green). Has to run from a plain terminal, not from
 inside another Claude Code session (see `harness/README.md`). The **CLI
-condition** runner (`npm run bench:cli`) is built but not runnable yet —
-it's blocked on recording `fixtures/01-add-employee-leave-request.codegen.ts`
-by hand (see `fixtures/README.md`). See `TODO.md`.
+condition** runner (`npm run bench:cli`) is built and its codegen fixture
+is recorded (`fixtures/01-add-employee-leave-request.codegen.ts`, see
+`fixtures/README.md`) — hasn't been run end to end yet. See `TODO.md`.
 
 ## Getting started
 
@@ -229,9 +229,11 @@ RUN_ID=<id> npm run generate:mcp
 
 Results land in `results/<run-id>/` (`test-plan.md`, `tests/*.spec.ts`,
 `metrics.json`) and `results/raw/<run-id>/` (full transcripts). The CLI
-condition's runner is built (`npm run bench:cli`) but needs
-`fixtures/01-add-employee-leave-request.codegen.ts` recorded first — see
-`fixtures/README.md` for the exact steps.
+condition is ready to run the same way:
+
+```bash
+npm run bench:cli        # prints a RUN_ID
+```
 
 ## License
 
