@@ -5,7 +5,7 @@
  * for each `claude -p` invocation - see harness/src/lib/claude-runner.ts.
  *
  * Why a real MCP server rather than Claude Code's native Write/Bash: those
- * are unscoped (Bash is a general shell). This keeps the CLI condition's
+ * are unscoped (Bash is a general shell). This keeps the Codegen condition's
  * "shell scoped to npx playwright test, nothing broader" design intent,
  * and the MCP condition's "file write" tool scoped the same way, intact
  * under Claude Code exactly as they were under the (now retired) direct

@@ -4,7 +4,7 @@ Everything below is automated (`npm install && npm run setup`), and was
 scripted-and-verified once already during scaffolding. This doc is for
 **you** to independently confirm it actually works on your machine — five
 minutes, no code required. Sections 1-4 cover the environment (done and
-built on top of already); sections 5-6 cover the MCP and CLI condition
+built on top of already); sections 5-6 cover the MCP and Codegen condition
 harnesses built on top of it - both need the `claude` CLI (installed,
 authenticated) and, critically, **must be run from a plain terminal, not
 from inside another Claude Code session** - see those sections for why.
@@ -40,7 +40,7 @@ npx playwright codegen http://localhost:8081
 ```
 
 Log in and click around a little, then close the window. You should see a
-generated script printed/saved. This is exactly the mechanism the CLI
+generated script printed/saved. This is exactly the mechanism the Codegen
 condition's seed fixtures (`fixtures/`) will be recorded with later.
 
 ## 3. Playwright MCP
@@ -108,22 +108,22 @@ sense, and `results/<run-id>/metrics.json` has plausible-looking token
 counts and cost. `results/raw/<run-id>/*-transcript.jsonl` has the full
 detail if something looks off.
 
-## 6. The CLI condition harness
+## 6. The Codegen condition harness
 
 Same prerequisites and same plain-terminal requirement as section 5. See
-`docs/run-cli-condition.md` for the exact, reproducible step-by-step.
+`docs/run-codegen-condition.md` for the exact, reproducible step-by-step.
 
 ```bash
-npm run bench:cli    # prints a RUN_ID when done
+npm run bench:codegen    # prints a RUN_ID when done
 ```
 
 Check `results/<run-id>/tests/add-employee-leave.spec.ts` and
 `results/<run-id>/metrics.json` the same way as section 5.
-`results/raw/<run-id>/cli-transcript.jsonl` has the full detail.
+`results/raw/<run-id>/codegen-transcript.jsonl` has the full detail.
 
 ---
 
 If sections 1-4 work, the environment phase is solid. Sections 5 and 6's
 harnesses have each now completed one full end-to-end run (see `TODO.md`
-Phase 3, `docs/run-mcp-condition.md`, `docs/run-cli-condition.md`, and
+Phase 3, `docs/run-mcp-condition.md`, `docs/run-codegen-condition.md`, and
 `docs/results.md` for the first numbers) - both produced passing tests.

@@ -1,6 +1,6 @@
 # fixtures/
 
-Checked-in `playwright codegen` recordings that seed the CLI condition.
+Checked-in `playwright codegen` recordings that seed the Codegen condition.
 
 Each fixture is produced **once, deterministically, with zero LLM tokens**
 by a human running `npx playwright codegen <target-url>` and performing the
@@ -37,7 +37,7 @@ material, not the final test), then perform the same flow
    the **Leave Type** dropdown and pick any option → click **From Date**
    and **To Date** and enter the same near-future date in each (the
    date-picker popup may make this fiddly to record cleanly — that's
-   expected, it's exactly the kind of brittle interaction the CLI
+   expected, it's exactly the kind of brittle interaction the Codegen
    condition's agent has to clean up) → **Assign** → click **Ok** on the
    confirmation dialog (expected for a zero-balance employee).
 3. Optionally also record checking **Leave → Leave List** for the new
@@ -55,7 +55,7 @@ to `fixtures/01-add-employee-leave-request.codegen.ts`, then fill in below.
     month) rather than the same single date in both fields. Confirmed in
     the DB this still produces a real, valid assignment (two `SCHEDULED`
     `ohrm_leave` rows), so the fixture is usable as-is — but it means the
-    CLI condition's agent has to actually narrow this to a single-day
+    Codegen condition's agent has to actually narrow this to a single-day
     request itself to match `flows/01-add-employee-leave-request.md`
     ("any single-day date"), not just parameterize the recorded dates.
   - Also recorded enabling **login details** for the new employee (the
@@ -69,9 +69,10 @@ to `fixtures/01-add-employee-leave-request.codegen.ts`, then fill in below.
     a specific option text) — codegen's own recording quirk with this
     custom div-based dropdown, not a failed selection: confirmed in the DB
     that `leave_type_id` on both saved rows correctly points at "Annual
-    Leave", the only leave type that exists. Left unedited; if the CLI
-    condition's agent can't make sense of this sequence when cleaning the
-    recording up, that difficulty is itself a real, comparable data point
-    (see `README.md` "How the comparison works" — CLI's `-- Select --`
+    Leave", the only leave type that exists. Left unedited; if the
+    Codegen condition's agent can't make sense of this sequence when
+    cleaning the recording up, that difficulty is itself a real,
+    comparable data point (see `README.md` "How the comparison works" —
+    Codegen's `-- Select --`
     handling for this same custom dropdown was a documented hurdle for the
     MCP condition too, in `docs/app-knowledge.md`).

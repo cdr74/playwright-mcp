@@ -3,7 +3,7 @@
 Every step, command, and prompt actually sent to Claude Code for the MCP
 condition, in one file, so two different people — or the same person weeks
 apart — running the same flow get directly comparable results. See
-`docs/run-cli-condition.md` for the CLI condition's counterpart, and
+`docs/run-codegen-condition.md` for the Codegen condition's counterpart, and
 `docs/results.md` for the first aggregated numbers from both.
 
 `harness/src/explore-mcp.ts` / `generate-mcp.ts` assemble the system prompts
@@ -113,7 +113,7 @@ Then, what this invokes in `claude -p --output-format json` terms:
   baseline is only fair, and also keeps exploration from burning tokens
   rediscovering things like "where is the employee form" from scratch. This
   doc is written into both conditions' prompts (see `conditions/mcp/` and
-  `conditions/cli/`) verbatim.
+  `conditions/codegen/`) verbatim.
 
   Gathered by direct exploration of the running instance (Playwright script
   against `app/install.sh`'s output) during harness development — not

@@ -1,6 +1,6 @@
 /**
  * Seed step: logs in (via plain Playwright, not an agent) and saves an
- * authenticated storage state that both the MCP and CLI conditions start
+ * authenticated storage state that both the MCP and Codegen conditions start
  * from - so neither burns tokens on the login form itself, the same way a
  * real tester would already have a session going.
  *
@@ -11,7 +11,7 @@
  * docs/app-knowledge.md.
  *
  * Exported as `seed()` so every run script (explore-mcp.ts,
- * generate-mcp.ts, run-cli.ts) can call it unconditionally as its first
+ * generate-mcp.ts, run-codegen.ts) can call it unconditionally as its first
  * step - the saved session can expire between runs (confirmed for real,
  * see TODO.md Gotchas), and re-seeding is cheap, deterministic, and
  * already off the measured token budget either way, so there's no reason

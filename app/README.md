@@ -87,7 +87,7 @@ bed" and `TODO.md`.
 Leave module (needs a one-time Leave Period + Leave Type, see
 `docs/app-knowledge.md`) or produce the authenticated session the harness
 conditions use. You don't need a separate step for that though -
-`explore:mcp`/`generate:mcp`/`bench:cli` each do it themselves as their
+`explore:mcp`/`generate:mcp`/`bench:codegen` each do it themselves as their
 first move (`npm run seed`'s logic, still available standalone too) - see
 `harness/README.md`.
 

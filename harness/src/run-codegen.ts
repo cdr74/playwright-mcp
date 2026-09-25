@@ -1,12 +1,14 @@
 /**
- * CLI condition: a single Claude Code phase with only the scoped
+ * Codegen condition: a single Claude Code phase with only the scoped
  * write_file/run_playwright_test tools - no playwright-mcp, and
- * critically no Bash (see CLAUDE.md decision 1 - "no raw shell").
- * Starts from a checked-in `playwright codegen` recording embedded
- * directly in the prompt (fixtures/), not live browser exploration.
- * See conditions/cli/README.md.
+ * critically no Bash (see CLAUDE.md decision 1 - "no raw shell"). The
+ * agent itself never gets real command-line access - see README.md "How
+ * the comparison works" for why this is called the Codegen condition,
+ * not "CLI". Starts from a checked-in `playwright codegen` recording
+ * embedded directly in the prompt (fixtures/), not live browser
+ * exploration. See conditions/codegen/README.md.
  *
- * Usage: npm run bench:cli
+ * Usage: npm run bench:codegen
  * Prints a RUN_ID.
  */
 import 'dotenv/config';
@@ -27,7 +29,7 @@ async function main(): Promise<void> {
   console.log('==> Refreshing auth state (session may have expired since last run)');
   await seed();
 
-  const runId = process.env.RUN_ID ?? newRunId('cli');
+  const runId = process.env.RUN_ID ?? newRunId('codegen');
   const runDir = path.resolve('results', runId);
   const rawDir = path.resolve('results/raw', runId);
   await mkdir(runDir, { recursive: true });
@@ -35,7 +37,7 @@ async function main(): Promise<void> {
 
   const [appKnowledge, systemPromptBase, flowSpec, codegenRecording] = await Promise.all([
     readFile('docs/app-knowledge.md', 'utf-8'),
-    readFile('conditions/cli/system-prompt.md', 'utf-8'),
+    readFile('conditions/codegen/system-prompt.md', 'utf-8'),
     readFile(FLOW_PATH, 'utf-8'),
     readFile(FIXTURE_PATH, 'utf-8').catch(() => {
       throw new Error(
@@ -46,7 +48,7 @@ async function main(): Promise<void> {
   const systemPrompt = `${systemPromptBase}\n\nTarget application base URL: ${TARGET_APP_URL}\n\n## App knowledge\n\n${appKnowledge}`;
   const userMessage = `## Flow\n\n${flowSpec}\n\n## Raw codegen recording (starting point - clean this up, don't just wrap it)\n\n\`\`\`typescript\n${codegenRecording}\n\`\`\``;
 
-  console.log(`==> Run ${runId}: CLI condition via Claude Code (no browser tools, no shell)`);
+  console.log(`==> Run ${runId}: Codegen condition via Claude Code (no browser tools, no shell)`);
   const startedAt = new Date().toISOString();
 
   const result = await runClaude({
@@ -64,12 +66,12 @@ async function main(): Promise<void> {
     cwd: REPO_ROOT,
   });
 
-  await copyFile(result.transcriptPath, path.join(rawDir, 'cli-transcript.jsonl')).catch((err) => {
+  await copyFile(result.transcriptPath, path.join(rawDir, 'codegen-transcript.jsonl')).catch((err) => {
     console.warn(`   (could not copy transcript: ${err.message})`);
   });
 
   const phase = summarizePhase('generate', MODEL, result, startedAt);
-  await recordPhaseMetrics(runDir, runId, 'cli', phase);
+  await recordPhaseMetrics(runDir, runId, 'codegen', phase);
 
   console.log(`\n==> Done: ${runId}`);
   console.log(`    tokens: ${result.inputTokens} in / ${result.outputTokens} out (+${result.cacheCreationInputTokens} cache-write / ${result.cacheReadInputTokens} cache-read) - $${result.costUsd.toFixed(4)}, ${result.turns} turns`);

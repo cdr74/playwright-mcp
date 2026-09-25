@@ -2,8 +2,9 @@
 
 Output of benchmark runs, split into what's kept and what isn't.
 Implemented by `harness/src/explore-mcp.ts` / `generate-mcp.ts` (MCP
-condition, two phases) and `harness/src/run-cli.ts` (CLI condition, one
-phase named `"generate"` for comparability). See `docs/results.md` for the
+condition, two phases) and `harness/src/run-codegen.ts` (Codegen
+condition, one phase named `"generate"` for comparability). See
+`docs/results.md` for the
 first aggregated write-up across both.
 
 ## `results/<run-id>/` — committed-eligible
@@ -13,7 +14,7 @@ first aggregated write-up across both.
   generated/healed test file. This is the deliverable of the run, not
   exhaust.
 - `metrics.json` — `{ runId, condition, phases: [...] }`, one entry per
-  phase (`explore` / `generate` for MCP; a single phase for CLI), each
+  phase (`explore` / `generate` for MCP; a single phase for Codegen), each
   with `model`, `sessionId` (the Claude Code session id - use it to find
   the full transcript), `inputTokens`, `outputTokens`,
   `cacheCreationInputTokens`, `cacheReadInputTokens`, `costUsd` (list-price

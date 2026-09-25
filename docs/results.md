@@ -8,12 +8,12 @@ comparison is still an open decision in `TODO.md`.
 Both runs used the confirmed v1 flow (`flows/01-add-employee-leave-request.md`,
 "add employee → assign leave → verify") against a freshly reset,
 identically seeded OrangeHRM instance, model `sonnet`, exactly as documented
-in `docs/run-mcp-condition.md` / `docs/run-cli-condition.md`. Both produced
+in `docs/run-mcp-condition.md` / `docs/run-codegen-condition.md`. Both produced
 a passing test on the first complete run of each condition.
 
 ## The runs
 
-| | MCP (`mcp-2026-09-25T06-32-18-639Z`) | CLI (`cli-2026-09-25T08-46-56-590Z`) |
+| | MCP (`mcp-2026-09-25T06-32-18-639Z`) | Codegen (`codegen-2026-09-25T08-46-56-590Z`) |
 |---|---|---|
 | Phases | explore + generate | generate only |
 | Turns | 58 + 77 = **135** | **9** |
@@ -23,7 +23,7 @@ a passing test on the first complete run of each condition.
 | Result | passed, re-confirmed with a second run | passed |
 
 Full detail in `results/mcp-2026-09-25T06-32-18-639Z/metrics.json` and
-`results/cli-2026-09-25T08-46-56-590Z/metrics.json`.
+`results/codegen-2026-09-25T08-46-56-590Z/metrics.json`.
 
 ## Cost: two different pictures depending on what you measure
 
@@ -31,7 +31,7 @@ Full detail in `results/mcp-2026-09-25T06-32-18-639Z/metrics.json` and
 which already applies standard prompt-cache discounting to repeated
 context):
 
-| | MCP | CLI | Ratio |
+| | MCP | Codegen | Ratio |
 |---|---|---|---|
 | Cost | $0.80 (explore) + $1.20 (generate) = **$2.00** | **$0.28** | **~7.0x** |
 
@@ -39,7 +39,7 @@ context):
 summed — i.e. how much context actually got reprocessed each turn, before
 cache-discount pricing is applied):
 
-| | MCP | CLI | Ratio |
+| | MCP | Codegen | Ratio |
 |---|---|---|---|
 | Total tokens | **5,632,672** | **196,000** | **~28.7x** |
 
@@ -61,11 +61,11 @@ worse than what caching's dollar figure alone suggests.**
 
 - **Turns**: MCP took **15x** as many turns (135 vs 9) — expected, since
   each MCP browser action (navigate, snapshot, click, type...) is its own
-  turn, where the CLI condition mostly just writes/edits a file and reads
+  turn, where the Codegen condition mostly just writes/edits a file and reads
   back condensed test-run output.
   - MCP explore phase alone: 14 snapshots, 16 clicks, 10 type actions, 7
     key presses just to map out the flow before any code was written.
-- **Iterations to green**: MCP needed 8 `run_playwright_test` calls, CLI
+- **Iterations to green**: MCP needed 8 `run_playwright_test` calls, Codegen
   needed 4 — roughly 2x, smaller than the turn-count gap, suggesting the
   extra MCP turns are mostly exploration/browser-interaction overhead
   rather than extra debugging cycles once actual test-writing started.
@@ -83,9 +83,9 @@ Rescored below against the rubric's revised 7-criterion version (criterion
 2 tightened to require fail-fast checkpoints *and* failure diagnostics,
 not just correct end-state assertions; criterion 7, config/data
 separation, added) — the totals below supersede the earlier /24 scoring,
-and the changes cut in **both** directions, not just against CLI:
+and the changes cut in **both** directions, not just against Codegen:
 
-| Criterion | MCP | CLI |
+| Criterion | MCP | Codegen |
 |---|---|---|
 | 1. Selector robustness | 4 | 4 |
 | 2. Assertion meaningfulness | **3** | **4** |
@@ -99,7 +99,7 @@ and the changes cut in **both** directions, not just against CLI:
 Two things changed the picture from the original /24 pass, and both are
 worth calling out rather than glossing over:
 
-- **Criterion 2 flipped.** CLI's test actually has *more* fail-fast
+- **Criterion 2 flipped.** Codegen's test actually has *more* fail-fast
   checkpoints than MCP's (asserts the employee-details heading right after
   creation, asserts the Assign Leave URL right after navigating there) and
   it logs real diagnostic context when the Leave List check comes up empty
@@ -107,13 +107,13 @@ worth calling out rather than glossing over:
   quirk)...')`). MCP's assertions are correctly placed too, but it has no
   diagnostic logging anywhere - a bare Playwright timeout trace is all a
   future maintainer gets. Under the tightened criterion, that's a real
-  difference: CLI 4, MCP 3.
-- **Criterion 7 is new, and it dings MCP, not CLI, on the "config" half.**
+  difference: Codegen 4, MCP 3.
+- **Criterion 7 is new, and it dings MCP, not Codegen, on the "config" half.**
   MCP hardcodes the full absolute base URL in three separate `page.goto()`
   calls, duplicating what `playwright.config.ts`'s `baseURL` already
   provides - works today, breaks silently if that config value ever
-  changes. CLI navigates by clicking links / a relative path, so it never
-  hits this. But CLI still loses a point on the "data" half of the same
+  changes. Codegen navigates by clicking links / a relative path, so it never
+  hits this. But Codegen still loses a point on the "data" half of the same
   criterion for the same hardcoded `firstName = 'Thomas'` already flagged
   under criterion 6 - both conditions land on **2/4** here, for two
   genuinely different reasons.
@@ -130,22 +130,22 @@ its render and silently skipped the required "Ok" click. Both fixed it
 the same way (`locator.waitFor({ state: 'visible' })`) despite neither
 condition being told about this bug in advance — a mildly reassuring
 signal that the flow spec and app-knowledge primer are fair to both
-conditions. The CLI condition's agent also caught a bug the MCP agent
+conditions. The Codegen condition's agent also caught a bug the MCP agent
 never had to: blindly picking the Leave Type listbox's "first option"
 could select the re-rendered `-- Select --` placeholder rather than a
 real leave type — an artifact specific to working from an imperfect
 recording instead of live-observing the dropdown.
 
 **Where the score actually diverges, and why — this is the interesting
-part.** The CLI test failed 3 of 5 repeat runs, always at the same line:
+part.** The Codegen test failed 3 of 5 repeat runs, always at the same line:
 timing out waiting for the employee autocomplete option to appear. Root
-cause, confirmed against the database rather than guessed: the CLI test
+cause, confirmed against the database rather than guessed: the Codegen test
 hardcodes `firstName = 'Thomas'` (inherited literally from the codegen
 fixture — see `fixtures/README.md`) and only generates a unique *last*
 name, then searches the autocomplete by typing just `firstName`. The flow
 spec explicitly asks for "a unique, generated first *and* last name."
 Every run (this scoring pass included) leaves another `Thomas Mueller*`
-row in the database — after the fixture recording, the first CLI run, and
+row in the database — after the fixture recording, the first Codegen run, and
 this 5x scoring pass, there were **8** employees named "Thomas" — so
 searching by "Thomas" alone got steadily less selective, and the
 autocomplete increasingly failed to surface the *new* one inside the
@@ -161,10 +161,10 @@ files looked equally solid on inspection alone.
 
 One asymmetry worth flagging as a possible confound, not a finding: the
 MCP condition's agent chose to run the test **twice** after first going
-green (to confirm stability) before stopping; the CLI condition's agent
+green (to confirm stability) before stopping; the Codegen condition's agent
 stopped after the first pass. That's a difference in agent judgment, not
 something either prompt requested — worth watching across more runs before
-reading anything into it. Notably, the CLI agent's choice to stop after
+reading anything into it. Notably, the Codegen agent's choice to stop after
 one pass meant it never had the chance to catch its own flakiness bug the
 way the MCP agent's extra confirmation run might have surfaced an
 equivalent issue, had one existed.
@@ -185,13 +185,13 @@ this harness instead of trusting either figure blind.
 ## Caveats — what this is not yet
 
 - **N=1 per condition.** No error bars, no idea yet whether either run was
-  typical or an outlier. Do not cite the ratios above as "the" MCP/CLI gap.
+  typical or an outlier. Do not cite the ratios above as "the" MCP/Codegen gap.
 - **Not a blind/controlled trial** in the stricter sense — both runs used
   the same model, flow, and app-knowledge primer (that symmetry is
   deliberate, see `README.md`), but only one seed/attempt each.
 - **The flakiness measurement (criterion 3) was run against accumulated,
   not freshly reset, app state** — by design this time (it's exactly what
-  exposed the CLI test's bug), but it means the 5/5 vs 2/5 pass counts
+  exposed the Codegen test's bug), but it means the 5/5 vs 2/5 pass counts
   aren't from identical starting conditions each run. A cleaner
   methodology for future scoring passes would run each repeat against a
   full app reset, though that would have hidden this specific finding -
@@ -202,23 +202,23 @@ this harness instead of trusting either figure blind.
   `CLAUDE.md` decision 2 axis list — added because the first scoring pass
   showed a direct need for it, flagged explicitly in that doc's own
   header rather than silently folded in.
-- **App state wasn't pristine for the CLI run** in one sense worth noting:
+- **App state wasn't pristine for the Codegen run** in one sense worth noting:
   the codegen fixture itself (`fixtures/01-add-employee-leave-request.codegen.ts`)
   has two documented deviations from the flow spec (a two-day date range,
-  and extra login-detail setup) — see `fixtures/README.md`. The CLI
+  and extra login-detail setup) — see `fixtures/README.md`. The Codegen
   condition's agent had to clean these up as part of its job, which is
-  in-scope by design, not a run defect, but means the CLI condition's task
+  in-scope by design, not a run defect, but means the Codegen condition's task
   is arguably slightly harder than "just clean up a recording" in a way
   the MCP condition doesn't have an equivalent for.
 
 ## Reproducing these runs
 
-See `docs/run-mcp-condition.md` and `docs/run-cli-condition.md` for the
+See `docs/run-mcp-condition.md` and `docs/run-codegen-condition.md` for the
 exact commands and prompts. Short version, from a plain terminal (not from
 inside a Claude Code session — see those docs for why):
 
 ```bash
 npm run cleanup:app && npm run setup:app
 npm run explore:mcp && RUN_ID=<id> npm run generate:mcp   # MCP condition (re-seeds itself)
-npm run bench:cli                                          # CLI condition (re-seeds itself)
+npm run bench:codegen                                          # Codegen condition (re-seeds itself)
 ```

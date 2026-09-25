@@ -5,7 +5,7 @@ already know roughly how the app is laid out. Giving the agent the same
 baseline is only fair, and also keeps exploration from burning tokens
 rediscovering things like "where is the employee form" from scratch. This
 doc is written into both conditions' prompts (see `conditions/mcp/` and
-`conditions/cli/`) verbatim.
+`conditions/codegen/`) verbatim.
 
 Gathered by direct exploration of the running instance (Playwright script
 against `app/install.sh`'s output) during harness development — not

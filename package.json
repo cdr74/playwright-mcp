@@ -2,7 +2,7 @@
   "name": "playwright-mcp-bench",
   "version": "0.0.1",
   "private": true,
-  "description": "Reproducible benchmark of Playwright MCP vs Playwright CLI token cost, efficiency, and test quality for AI-driven test generation.",
+  "description": "Reproducible benchmark of Playwright MCP vs a Playwright Codegen-based flow: token cost, efficiency, and test quality for AI-driven test generation.",
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -14,7 +14,7 @@
     "cleanup:app": "app/cleanup.sh",
     "explore:mcp": "tsx harness/src/explore-mcp.ts",
     "generate:mcp": "tsx harness/src/generate-mcp.ts",
-    "bench:cli": "tsx harness/src/run-cli.ts"
+    "bench:codegen": "tsx harness/src/run-codegen.ts"
   },
   "license": "MIT",
   "dependencies": {

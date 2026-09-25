@@ -1,14 +1,17 @@
-# conditions/cli/
+# conditions/codegen/
 
-Prompt and runner for the **CLI condition**, run as a single phase by
-`harness/src/run-cli.ts` (`npm run bench:cli`). Reuses
+Prompt and runner for the **Codegen condition**, run as a single phase by
+`harness/src/run-codegen.ts` (`npm run bench:codegen`). Reuses
 `harness/src/lib/claude-runner.ts` + `harness/src/mcp-tools-server.ts`
 (the same `write_file` / `run_playwright_test` tools the MCP condition
 uses), driven via Claude Code exactly like the MCP condition — just with
 `playwright-mcp` **not** registered, and Claude Code's native `Bash`
 excluded from `--tools` (it's a general shell, not scoped to
 `npx playwright test` — see `CLAUDE.md` decision 1). No live browser
-visibility.
+visibility, and no raw command-line access either — despite the
+underlying mechanism being Playwright's CLI tooling, the agent itself
+never gets a shell (see `README.md` "How the comparison works" for why
+this is called "Codegen," not "CLI").
 
 It starts from a checked-in `fixtures/` codegen recording (embedded
 directly in the prompt — no read tool needed) and a `flows/` task spec,
@@ -21,6 +24,6 @@ target URL, same pattern as `conditions/mcp/`.
 
 `fixtures/01-add-employee-leave-request.codegen.ts` is recorded (see
 `fixtures/README.md` for the exact steps taken and two documented
-deviations from the flow spec), and `npm run bench:cli` has completed a
-first full run — see `docs/run-cli-condition.md` for the exact,
+deviations from the flow spec), and `npm run bench:codegen` has completed
+a first full run — see `docs/run-codegen-condition.md` for the exact,
 reproducible commands and prompt, and `docs/results.md` for the numbers.

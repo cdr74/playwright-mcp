@@ -21,7 +21,7 @@ export interface PhaseMetrics {
 
 interface RunMetrics {
   runId: string;
-  condition: 'mcp' | 'cli';
+  condition: 'mcp' | 'codegen';
   phases: PhaseMetrics[];
 }
 
@@ -56,7 +56,7 @@ export function summarizePhase(
 export async function recordPhaseMetrics(
   runDir: string,
   runId: string,
-  condition: 'mcp' | 'cli',
+  condition: 'mcp' | 'codegen',
   phase: PhaseMetrics,
 ): Promise<void> {
   const metricsPath = path.join(runDir, 'metrics.json');

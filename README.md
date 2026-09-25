@@ -202,10 +202,10 @@ if it turns out to be a bottleneck once the harness is running many repeats.
 Environment phase done (target app, Playwright, Playwright MCP - all
 automated and verified, see `docs/verify-setup.md`). Both the **MCP
 condition** (`npm run explore:mcp`, `npm run generate:mcp`) and the
-**Codegen condition** (`npm run bench:cli`) harnesses are built and
+**Codegen condition** (`npm run bench:codegen`) harnesses are built and
 have each completed one full, uninterrupted run end to end - see "Results"
 below for the numbers and `docs/run-mcp-condition.md` /
-`docs/run-cli-condition.md` for the exact, reproducible steps. Both have
+`docs/run-codegen-condition.md` for the exact, reproducible steps. Both have
 to run from a plain terminal, not from inside another Claude Code session
 (see `harness/README.md`). See `TODO.md` for what's next.
 
@@ -252,7 +252,7 @@ link-clicking navigation never has to. Different failure mode,
 same underlying lesson - a rubric that only checks the happy path misses
 both of these. See `docs/results.md` "Quality" for the full writeup, and
 `results/mcp-2026-09-25T06-32-18-639Z/` /
-`results/cli-2026-09-25T08-46-56-590Z/` for the raw `metrics.json` and
+`results/codegen-2026-09-25T08-46-56-590Z/` for the raw `metrics.json` and
 generated spec files.
 
 ## Getting started
@@ -285,7 +285,7 @@ Results land in `results/<run-id>/` (`test-plan.md`, `tests/*.spec.ts`,
 Codegen condition is ready to run the same way:
 
 ```bash
-npm run bench:cli        # prints a RUN_ID
+npm run bench:codegen        # prints a RUN_ID
 ```
 
 Neither command needs a separate login step first - both refresh the

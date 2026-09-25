@@ -19,7 +19,7 @@ axis list — flagging that explicitly per this repo's collaboration model:
   criteria for larger test suites. Also has concrete evidence already:
   MCP's first-run test hardcodes the full absolute URL
   (`page.goto('http://localhost:8081/web/index.php/pim/addEmployee')`)
-  while CLI's correctly uses a relative path
+  while Codegen's correctly uses a relative path
   (`page.goto('/web/index.php/dashboard/index')`) that respects
   `playwright.config.ts`'s `baseURL` — same config available to both,
   one test ignores it. Criterion 2 was also revised (not just extended)

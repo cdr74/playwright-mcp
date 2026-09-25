@@ -1,6 +1,6 @@
 # TODO
 
-Tracking for the MCP-vs-CLI token/quality benchmark. Phased roughly in build
+Tracking for the MCP-vs-Codegen token/quality benchmark. Phased roughly in build
 order. Items marked **[DECISION]** need explicit user sign-off before work
 starts on them, per `CLAUDE.md`.
 
@@ -14,7 +14,7 @@ starts on them, per `CLAUDE.md`.
       working with `podman-compose`/Podman 5.7.0, rootless). Alternatives
       considered and rejected: Sauce Demo / Automation Exercise (too simple
       / likely heavily memorized by models from training data, which would
-      unfairly help the blind/CLI condition).
+      unfairly help the blind/Codegen condition).
 - [x] Full install, scripted: `app/install.sh` + checked-in
       `app/cli_install_config.yaml` drive OrangeHRM's non-interactive CLI
       installer (`installer/cli_install.php`) — no manual web wizard
@@ -56,7 +56,7 @@ starts on them, per `CLAUDE.md`.
       deterministic even at temperature 0) — still open. Deliberately
       deferred again after the first real MCP run (~$2, ~10 min, see
       "Run a complete MCP condition end to end" below): decided to wait
-      until the CLI condition runner exists too, so the repeat count is
+      until the Codegen condition runner exists too, so the repeat count is
       set for both conditions symmetrically rather than for MCP alone.
       Now also entangled with the baseline-vs-nudged decision directly
       below — deciding both together makes more sense than deciding
@@ -65,7 +65,7 @@ starts on them, per `CLAUDE.md`.
       `docs/testing-best-practices.md` (drafted, mirrors
       `docs/quality-rubric.md`'s 7 criteria one-for-one) to both
       conditions' prompts, identically, and compare generated-test quality
-      with vs. without it — does explicit guidance close the MCP/CLI
+      with vs. without it — does explicit guidance close the MCP/Codegen
       quality gap, widen it, or leave it unchanged? Keeps the existing
       two runs as the unguided baseline cell; only new "nudged" runs are
       needed. Open sub-questions: (1) wiring mechanism - an env var/flag
@@ -82,7 +82,7 @@ starts on them, per `CLAUDE.md`.
       in Copilot/VS Code instead of paying per token). Confirmed no loss
       of measurement precision first (see Gotchas below) before commiting
       to the rewrite. Both conditions go through Claude Code, for
-      symmetry (the alternative — CLI condition direct-API, MCP condition
+      symmetry (the alternative — Codegen condition direct-API, MCP condition
       via Claude Code — would compare two different mechanisms, not just
       two different tool surfaces). See `CLAUDE.md` decision 3.
 
@@ -128,16 +128,16 @@ starts on them, per `CLAUDE.md`.
       Period/Leave Type setup + saves `harness/.auth/state.json`. Live-
       validated against a freshly-installed instance (idempotent leave-
       type check confirmed both "already exists" and "created" paths).
-- [x] **Recorded the CLI condition's codegen fixture**
+- [x] **Recorded the Codegen condition's codegen fixture**
       (`fixtures/01-add-employee-leave-request.codegen.ts`, 2026-09-25).
       Recording this surfaced a real `seed.ts` bug (see Gotchas below,
       Leave Type creation silently no-op'ing) that had to be fixed first.
       Two deviations from the intended steps, documented in
       `fixtures/README.md`: recorded a two-day leave range instead of a
-      single day (still a valid DB-confirmed assignment, but the CLI
+      single day (still a valid DB-confirmed assignment, but the Codegen
       agent has to narrow it itself), and recorded enabling login details
       for the employee (out of flow scope, left in as realistic noise).
-      `npm run bench:cli` is now actually runnable.
+      `npm run bench:codegen` is now actually runnable.
 
 ## Phase 3 — Harness
 
@@ -216,16 +216,16 @@ decisions above) was confirmed to lose no measurement fidelity.
       `--output-dir` in `explore-mcp.ts`/`generate-mcp.ts`; see
       `docs/run-mcp-condition.md` "Gotchas confirmed on the first real
       run".
-- [x] CLI condition runner (`harness/src/run-cli.ts`, `npm run bench:cli`):
+- [x] Codegen condition runner (`harness/src/run-codegen.ts`, `npm run bench:codegen`):
       a single Claude Code phase, reusing `claude-runner.ts` +
       `mcp-tools-server.ts` (write_file/run_playwright_test only, no
       playwright-mcp registered, and `--tools` excludes Claude Code's
       native `Bash` - see `CLAUDE.md` decision 1). System prompt is
-      `conditions/cli/system-prompt.md`, embeds the codegen fixture
+      `conditions/codegen/system-prompt.md`, embeds the codegen fixture
       directly in the user message (no read tool needed). Now runnable -
       the fixture it depends on is recorded (see above).
-- [x] **Ran the CLI condition end to end** for the first time
-      (`cli-2026-09-25T08-46-56-590Z`): $0.28 / 9 turns / ~4 min, 4
+- [x] **Ran the Codegen condition end to end** for the first time
+      (`codegen-2026-09-25T08-46-56-590Z`): $0.28 / 9 turns / ~4 min, 4
       `run_playwright_test` iterations to green (vs. MCP's $0.80+$1.20 /
       135 turns / ~10 min, 8 iterations - see the MCP run above). Big
       caveat: this is one run of each, not a controlled comparison yet
@@ -238,7 +238,7 @@ decisions above) was confirmed to lose no measurement fidelity.
       to the raw recording: blindly picking the Leave Type listbox's
       "first option" could select the re-rendered `-- Select --`
       placeholder rather than a real leave type. Full numbers in
-      `results/cli-2026-09-25T08-46-56-590Z/metrics.json`.
+      `results/codegen-2026-09-25T08-46-56-590Z/metrics.json`.
 - [x] `docs/quality-rubric.md`: started at 6 criteria (5 from `CLAUDE.md`
       decision 2 plus task/spec compliance), now 7 - a config/data
       separation criterion was added, and the assertions criterion
@@ -248,12 +248,13 @@ decisions above) was confirmed to lose no measurement fidelity.
       original plan; automated/LLM-judge pass still a later option, see
       below.
 - [x] First manual scoring pass, both runs from `docs/results.md`
-      (originally MCP 23/24, CLI 20/24; rescored to MCP 24/28, CLI 22/28
-      after the rubric's criterion-2/7 revisions above - see that doc for
-      what changed and why). Criterion 3 (flakiness) was **measured**, not
-      estimated - each test actually re-run 5x (`--repeat-each=5
-      --workers=1`) against a live, re-seeded app: MCP 5/5, CLI 2/5. Root
-      cause of the CLI gap traced to the DB, not guessed: CLI's test
+      (originally MCP 23/24, Codegen 20/24; rescored to MCP 24/28, Codegen
+      22/28 after the rubric's criterion-2/7 revisions above - see that doc
+      for what changed and why). Criterion 3 (flakiness) was **measured**,
+      not estimated - each test actually re-run 5x (`--repeat-each=5
+      --workers=1`) against a live, re-seeded app: MCP 5/5, Codegen 2/5.
+      Root cause of the Codegen gap traced to the DB, not guessed:
+      Codegen's test
       hardcodes `firstName = 'Thomas'` (inherited from the codegen
       fixture) and only generates a unique last name, so its employee-
       autocomplete search gets less selective every time the test runs -
@@ -282,12 +283,12 @@ thing anyone reproducing this repo would hit again.
   actual page snapshot in the failure output first. **Fixed properly**,
   not just noted: `seed()` is now exported from `seed.ts` and called
   unconditionally as the first step of `explore-mcp.ts`/`generate-mcp.ts`/
-  `run-cli.ts`, so freshness is no longer the operator's problem for a
+  `run-codegen.ts`, so freshness is no longer the operator's problem for a
   fresh run (still worth knowing if you manually re-run an *old*
   `results/<run-id>/tests/*.spec.ts` directly with `npx playwright test`,
   which doesn't go through any of those scripts).
 - **`seed.ts`'s Leave Type creation silently no-op'd — logged success,
-  created nothing.** Surfaced when a user recording the CLI fixture hit
+  created nothing.** Surfaced when a user recording the Codegen fixture hit
   "No Records Found" in the Assign Leave Type dropdown on a freshly
   seeded install; reproduced from a clean `cleanup:app` + `setup:app` +
   `seed` cycle, and confirmed at the network level (`page.on('request')`)

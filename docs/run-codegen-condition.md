@@ -1,10 +1,13 @@
-# Running the CLI condition (reproducible runbook)
+# Running the Codegen condition (reproducible runbook)
 
-Every step, command, and prompt actually sent to Claude Code for the CLI
-condition, in one file — the counterpart to `docs/run-mcp-condition.md`.
+Every step, command, and prompt actually sent to Claude Code for the
+Codegen condition, in one file — the counterpart to
+`docs/run-mcp-condition.md`. (Called "Codegen," not "CLI" — the agent
+never gets real command-line access, see `README.md` "How the comparison
+works" for why.)
 
-`harness/src/run-cli.ts` assembles the system prompt and user message
-below at runtime from checked-in source files (`conditions/cli/*.md`,
+`harness/src/run-codegen.ts` assembles the system prompt and user message
+below at runtime from checked-in source files (`conditions/codegen/*.md`,
 `docs/app-knowledge.md`, `flows/*.md`, `fixtures/*.codegen.ts`) plus
 `TARGET_APP_URL`. This doc mirrors that assembly verbatim so it's readable
 in one place without tracing through code.
@@ -36,7 +39,7 @@ npm run cleanup:app     # tear down app + volumes
 npm run setup:app       # fresh OrangeHRM 5.9 install, ~80s end-to-end
 ```
 
-No separate seed step needed here - `bench:cli` runs it itself as its
+No separate seed step needed here - `bench:codegen` runs it itself as its
 first move (login + one-time Leave module setup, saves
 `harness/.auth/state.json`), since the saved session can expire between
 runs (see `TODO.md` Gotchas). `npm run seed` is still available standalone
@@ -49,7 +52,7 @@ including against the MCP condition's runs.
 ## 2. Run it
 
 ```bash
-npm run bench:cli
+npm run bench:codegen
 ```
 
 First move, before anything else: re-runs the seed logic, unconditionally
@@ -66,7 +69,7 @@ Then, what this invokes in `claude -p --output-format json` terms:
 - **MCP servers**: only the scoped `tools` server
   (`harness/src/mcp-tools-server.ts`, `RUN_DIR` set to this run's output
   directory) — no `playwright-mcp` registered at all.
-- **System prompt** (`conditions/cli/system-prompt.md` + target URL +
+- **System prompt** (`conditions/codegen/system-prompt.md` + target URL +
   `docs/app-knowledge.md`), verbatim as of this writing:
 
   ````markdown
@@ -197,7 +200,7 @@ Prints a `RUN_ID` when done. Produces
 `results/<run-id>/tests/add-employee-leave.spec.ts` and
 `results/<run-id>/metrics.json` (single `"generate"` phase entry — see
 `results/README.md`), plus
-`results/raw/<run-id>/cli-transcript.jsonl`.
+`results/raw/<run-id>/codegen-transcript.jsonl`.
 
 ## What "reproducible" means here
 

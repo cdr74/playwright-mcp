@@ -11,7 +11,7 @@ decision 3 for the full reasoning and mechanics.
 
 - `src/seed.ts` — logs in, does the one-time OrangeHRM Leave module setup,
   saves an authenticated storage state to `.auth/` (gitignored). Exports a
-  `seed()` function that `explore-mcp.ts`/`generate-mcp.ts`/`run-cli.ts`
+  `seed()` function that `explore-mcp.ts`/`generate-mcp.ts`/`run-codegen.ts`
   each call unconditionally as their first move - the saved session can
   expire between runs (confirmed for real, see `TODO.md` Gotchas), and
   re-seeding is cheap, deterministic, zero-LLM-token either way, so
@@ -36,7 +36,7 @@ decision 3 for the full reasoning and mechanics.
   (`npm run generate:mcp`) — the MCP condition's two phases. See
   `conditions/mcp/` for the exact prompts and `README.md` "How the
   comparison works" for why it's split this way.
-- `src/run-cli.ts` (`npm run bench:cli`) — the CLI condition's single
+- `src/run-codegen.ts` (`npm run bench:codegen`) — the Codegen condition's single
   phase. Reuses `claude-runner.ts` + `mcp-tools-server.ts`, without
   `playwright-mcp` registered and with Claude Code's native `Bash`
   excluded from `--tools` (see `CLAUDE.md` decision 1). Runnable now -

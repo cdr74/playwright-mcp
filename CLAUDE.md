@@ -5,7 +5,8 @@ Guidance for Claude Code sessions working in this repository.
 ## What this project is
 
 A reproducible benchmark comparing **token cost, iteration efficiency, and
-output quality** of using **Playwright MCP** vs **Playwright CLI** for
+output quality** of using **Playwright MCP** vs a **Playwright Codegen-based
+flow** for
 AI-agent-driven test generation (and later, test healing). Full context is
 in `README.md`; task tracking is in `TODO.md`.
 
@@ -22,7 +23,7 @@ involved in coding mechanics**. In practice:
 
 - **Design decisions** — anything that changes the shape of the experiment —
   require the user's sign-off before implementation. This includes: the
-  target app/flow, what counts as "the MCP condition" vs "the CLI condition",
+  target app/flow, what counts as "the MCP condition" vs "the Codegen condition",
   what gets measured and how, prompt/system-message design for the agents
   under test, the quality rubric, model selection, and anything that would
   change how results should be interpreted.
@@ -34,7 +35,7 @@ involved in coding mechanics**. In practice:
   implementation detail, ask. Prefer `AskUserQuestion` with concrete options
   over open-ended "what do you think?" questions.
 - Don't silently change an already-agreed design (e.g. swapping the target
-  app, changing what "CLI condition" means) — flag it and confirm first.
+  app, changing what "Codegen condition" means) — flag it and confirm first.
 
 ## Before every commit
 
@@ -61,19 +62,27 @@ assume some `.md` file describes it and needs a pass.
      "produced a working test" separately measurable — this refines the
      original one-continuous-loop idea; the tool surface (browser + scoped
      file write + scoped test runner) is still MCP's defining shape vs the
-     CLI condition's shell-and-file-only approach.
-   - **CLI condition**: modeled on how a human actually uses Playwright's
-     CLI — `playwright codegen` first (a human/deterministic recording step,
+     Codegen condition's file-only approach.
+   - **Codegen condition** (named for `playwright codegen`, not "CLI" — see
+     `README.md` "How the comparison works" for why): modeled on how a
+     human actually uses Playwright's CLI tooling
+     — `playwright codegen` first (a human/deterministic recording step,
      **zero LLM tokens**, checked into `fixtures/` so it's reproducible
      without a human re-recording it each run), then the agent takes over
      with only a scoped `write_file` + `run_playwright_test` tool (see
      decision 3) — no live browser visibility, and critically no raw shell
      (Claude Code's native `Bash` tool is a general shell, not scoped to
-     `npx playwright test`, so the CLI condition must NOT be given it) —
-     and turns the raw recording into a clean, asserted test, iterating on
-     terse test-run output until green. Built (`harness/src/run-cli.ts`,
-     `npm run bench:cli`) and has completed a first full run — see
-     `TODO.md` and `docs/run-cli-condition.md`.
+     `npx playwright test`, so the Codegen condition must NOT be given it,
+     and never gets real command-line access despite starting from CLI
+     output) — and turns the raw recording into a clean, asserted test,
+     iterating on terse test-run output until green. Built
+     (`harness/src/run-codegen.ts`, `npm run bench:codegen`) and has
+     completed a first full run — see `TODO.md` and
+     `docs/run-codegen-condition.md`. **Renamed from "CLI condition" to
+     "Codegen condition"** after the original name was found to overclaim
+     what's tested (README.md "How the comparison works" has the full
+     reasoning) — this rename touched every file in the repo, tracked as
+     a single commit, not a silent drift.
    - Both conditions receive the **identical natural-language task spec**
      (see `flows/`). That's the controlled variable. Tooling, and therefore
      workflow shape, is the independent variable — that asymmetry is exactly
@@ -119,7 +128,7 @@ assume some `.md` file describes it and needs a pass.
      `run_playwright_test` — both conditions get this one, scoped to the
      run's output directory with a path-traversal guard, same logic the
      retired direct-API harness used, just repackaged as real MCP tools
-     instead of Anthropic tool executors. This is how the CLI condition's
+     instead of Anthropic tool executors. This is how the Codegen condition's
      "no raw shell" requirement (decision 1) stays true under Claude Code.
    - `--dangerously-skip-permissions` is required for unattended runs.
      Confirmed working when the `claude -p` process is spawned from a
@@ -165,7 +174,7 @@ assume some `.md` file describes it and needs a pass.
    next to an actual agent run. Revisit only if this becomes a measured
    bottleneck once the harness is running many repeats.
 7. **v1 model: a single model, Claude Sonnet.** Broader model coverage
-   (to see whether the MCP/CLI gap is model-dependent) is explicitly
+   (to see whether the MCP/Codegen gap is model-dependent) is explicitly
    deferred, not forgotten — see `TODO.md`.
 8. **What results keep**: per run, `results/<run-id>/` holds only the
    generated test file + `metrics.json` (tokens, efficiency counts, quality
@@ -193,7 +202,7 @@ assume some `.md` file describes it and needs a pass.
     — deterministic, zero-LLM-token, same reasoning as #10: this is
     environment setup a tester wouldn't expect to have to do as part of
     testing a specific feature. Exported as a `seed()` function that
-    `explore-mcp.ts`/`generate-mcp.ts`/`run-cli.ts` each call
+    `explore-mcp.ts`/`generate-mcp.ts`/`run-codegen.ts` each call
     unconditionally as their first move, not a manual prerequisite the
     operator has to remember — the saved session can expire between runs
     (confirmed for real, see `TODO.md` Gotchas) and re-seeding is cheap
@@ -255,7 +264,7 @@ assume some `.md` file describes it and needs a pass.
   is committed-eligible; `results/raw/` (transcripts, Playwright artifacts)
   is gitignored. See decision 8 above and `results/README.md`.
 - Fixtures in `fixtures/` (codegen recordings) are checked in — they are the
-  reproducibility anchor for the CLI condition and should not silently
+  reproducibility anchor for the Codegen condition and should not silently
   change.
 - Agent-facing tools that touch the filesystem or run commands
   (`harness/src/mcp-tools-server.ts`'s `write_file` / `run_playwright_test`)
