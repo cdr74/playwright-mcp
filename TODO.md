@@ -51,16 +51,14 @@ starts on them, per `CLAUDE.md`.
       `results/raw/` (full transcripts incl. raw MCP snapshots, Playwright
       screenshots/videos/traces/HTML reports) is gitignored, local-only.
       See `results/README.md`.
-- [ ] **[DECISION]** How many repeat runs per condition for statistical
-      noise (token counts and agent behavior aren't perfectly
-      deterministic even at temperature 0) — still open. Deliberately
-      deferred again after the first real MCP run (~$2, ~10 min, see
-      "Run a complete MCP condition end to end" below): decided to wait
-      until the Codegen condition runner exists too, so the repeat count is
-      set for both conditions symmetrically rather than for MCP alone.
-      Now also entangled with the baseline-vs-nudged decision directly
-      below — deciding both together makes more sense than deciding
-      repeat count twice.
+- [x] **[DECISION]** Repeat runs per condition for statistical noise:
+      **3**. Deferred twice before this (once before the Codegen runner
+      existed, once pending its first real run) so it wasn't picked
+      blind — decided once both conditions had real cost/duration numbers
+      to size against (`docs/results.md`). Applies per prompt variant, not
+      just per condition, if the baseline-vs-nudged comparison below also
+      gets built (3 × 2 conditions × 2 variants = 12 runs, not 6). See
+      `CLAUDE.md` decision 12.
 - [ ] **[DECISION]** Baseline-vs-nudged quality comparison: add
       `docs/testing-best-practices.md` (drafted, mirrors
       `docs/quality-rubric.md`'s 7 criteria one-for-one) to both
@@ -115,7 +113,7 @@ starts on them, per `CLAUDE.md`.
 
 ## Phase 2 — Test bed setup
 
-- [ ] **[DECISION]** Repeat-run count (only open decision left, see above).
+- [x] **[DECISION]** Repeat-run count: **3** — see Open decisions above.
 - [x] `flows/01-add-employee-leave-request.md`: the exact natural-language
       task spec given verbatim to both conditions.
 - [x] `docs/app-knowledge.md`: the shared "tester knowledge" primer fed to
@@ -392,10 +390,10 @@ thing anyone reproducing this repo would hit again.
       one (~7x), neither straightforwardly confirming or refuting the
       post given it doesn't disclose whether/how it accounted for prompt
       caching.
-- [ ] Run both conditions **N repeats** (per the still-open decision
-      above) once that decision is made, and update `docs/results.md`
-      from a single anecdote into an actual comparison with a real
-      sample size.
+- [ ] Run both conditions **3 repeats each** (per the decision above,
+      6 runs total for the unguided baseline alone), and update
+      `docs/results.md` from a single anecdote into an actual comparison
+      with a real sample size.
 
 ## Phase 5 — Test healing (v2, not started)
 

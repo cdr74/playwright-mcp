@@ -213,6 +213,12 @@ assume some `.md` file describes it and needs a pass.
     generated test files (via `playwright.config.ts`'s `use.storageState`)
     start from — neither condition, nor the generated tests themselves,
     should ever need to write a login step.
+12. **Repeat-run count: 3 per condition.** Confirmed after both conditions
+    had a first real run to size against (~$2/~10min MCP, ~$0.28/~4min
+    Codegen — see `docs/results.md`), so the count wasn't picked blind.
+    Applies per prompt variant if/when the baseline-vs-nudged comparison
+    (`TODO.md`) also gets built — 3 repeats × 2 conditions × 2 variants,
+    not 3 repeats total.
 
 ## Tech stack
 
