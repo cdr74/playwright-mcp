@@ -272,6 +272,17 @@ decisions above) was confirmed to lose no measurement fidelity.
 Kept here rather than only in commit history since they're the kind of
 thing anyone reproducing this repo would hit again.
 
+- **[Not yet root-caused] One Codegen repeat in the first real
+  `repeat:baseline` batch failed outright** -
+  `results/codegen-2026-09-25T14-00-05-130Z/` has a partial spec file but
+  no `metrics.json` and no raw transcript at all, and
+  `run-repeats.sh`'s log correctly shows an empty `run_id` field for that
+  repeat too (its `extract_run_id` found nothing to parse, consistent
+  with the run itself erroring before printing its `==> Done:` line).
+  Time-boxed out of the session that found it - next step is checking
+  whatever partial output the terminal captured at the time, or just
+  re-running `--condition codegen --repeats 1` and watching it live.
+
 - **Claude Code was auto-attaching this repo's entire `CLAUDE.md`
   (15,909 chars) plus its auto-memory files to every single benchmark
   run, regardless of `--system-prompt`.** Surfaced by the user asking

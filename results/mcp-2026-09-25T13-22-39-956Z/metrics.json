@@ -1,0 +1,53 @@
+{
+  "runId": "mcp-2026-09-25T13-22-39-956Z",
+  "condition": "mcp",
+  "promptVariant": "baseline",
+  "phases": [
+    {
+      "phase": "explore",
+      "model": "sonnet",
+      "sessionId": "f54f6078-aea3-4fb6-a24a-b9f02d9312f9",
+      "inputTokens": 68,
+      "outputTokens": 5160,
+      "cacheCreationInputTokens": 40599,
+      "cacheReadInputTokens": 735010,
+      "costUsd": 0.36113399999999996,
+      "turns": 34,
+      "toolCallCounts": {
+        "mcp__playwright__browser_navigate": 3,
+        "mcp__playwright__browser_snapshot": 7,
+        "mcp__playwright__browser_fill_form": 2,
+        "mcp__playwright__browser_click": 10,
+        "mcp__playwright__browser_wait_for": 3,
+        "mcp__playwright__browser_type": 2,
+        "mcp__playwright__browser_find": 1,
+        "mcp__playwright__browser_press_key": 3,
+        "mcp__playwright__browser_network_requests": 1,
+        "mcp__tools__write_file": 1
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-25T13:22:39.959Z",
+      "finishedAt": "2026-09-25T13:24:43.382Z",
+      "durationMs": 119125
+    },
+    {
+      "phase": "generate",
+      "model": "sonnet",
+      "sessionId": "92057e72-6ef5-4f05-b643-7fcf9d12b785",
+      "inputTokens": 10,
+      "outputTokens": 4337,
+      "cacheCreationInputTokens": 9908,
+      "cacheReadInputTokens": 65228,
+      "costUsd": 0.0960676,
+      "turns": 5,
+      "toolCallCounts": {
+        "mcp__tools__write_file": 2,
+        "mcp__tools__run_playwright_test": 2
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-25T13:24:46.817Z",
+      "finishedAt": "2026-09-25T13:25:48.465Z",
+      "durationMs": 52626
+    }
+  ]
+}

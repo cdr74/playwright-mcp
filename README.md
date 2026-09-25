@@ -211,11 +211,26 @@ to run from a plain terminal, not from inside another Claude Code session
 
 ## Results
 
-**One run per condition so far — not yet a controlled comparison.** The
-confirmed target is 3 repeats per condition (`CLAUDE.md` decision 12) -
-see "Reproducing the full comparison" below for the actual command; it
-hasn't been run yet. Full write-up, including where these numbers do and
-don't line up with the inspiring post's claim, in `docs/results.md`.
+**First real repeat batch landed** (`npm run repeat:baseline`, 3 MCP + 2
+valid Codegen runs — 1 Codegen repeat failed outright, not yet
+investigated). Full write-up, including why the *variance* is the actual
+finding here, not the means, in `docs/results.md`.
+
+| | MCP (n=3) | Codegen (n=2) |
+|---|---|---|
+| Cost | $0.46–$1.21, mean $0.71 | $0.56–$0.71, mean $0.63 |
+| Turns | 39–100, mean 60 | 19–26, mean 22.5 |
+| Iterations to green | 2–5, mean 3 | 9–13, mean 11 |
+| Wall clock | 2.3–7.3 min, mean 4.1 min | 6.8–9.5 min, mean 8.1 min |
+
+MCP's worst run cost 2.6x its best, from just 3 samples — cost and
+iteration counts both **reversed direction** from the original single-run
+pair below once repeats existed. That reversal is the headline, not
+either mean. Quality scores below are not yet re-run against these 5 new
+runs (still the original N=1 pair's scores — see `TODO.md`).
+
+<details>
+<summary>Original N=1 pair (2026-09-25, superseded for cost/turns — see docs/results.md)</summary>
 
 | | MCP | Codegen | Ratio |
 |---|---|---|---|
@@ -224,6 +239,8 @@ don't line up with the inspiring post's claim, in `docs/results.md`.
 | Turns | 135 | 9 | ~15x |
 | Test-run iterations to green | 8 | 4 | ~2x |
 | Wall clock | ~9.8 min | ~4.1 min | ~2.4x |
+
+</details>
 
 **Quality**, scored against `docs/quality-rubric.md` (0-4 per criterion,
 manual for now — see `TODO.md` for the automated-scorer option):

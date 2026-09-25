@@ -1,9 +1,47 @@
 # First results (2026-09-25)
 
-**Status: N=1 per condition.** This is a first read on real numbers, not a
-statistically meaningful comparison yet — see "Caveats" below before
-drawing conclusions from it. The repeat-run count needed for an actual
-comparison is still an open decision in `TODO.md`.
+**Status: real repeat batch landed.** `npm run repeat:baseline` produced 3
+new MCP runs and 3 new Codegen runs (one Codegen repeat failed outright -
+see below) on the CLAUDE.md-contamination-fixed harness. This section is
+the current headline number; everything below it (the original N=1 pair)
+predates both the contamination fix and the repeat batch - kept for the
+qualitative findings (the flakiness root-cause writeup, the fail-fast
+criterion story) but **do not cite its cost/turn numbers as current**.
+
+## Repeat batch (2026-09-25, `repeat-run-log-20260925T132116Z.txt`)
+
+| | MCP (n=3) | Codegen (n=2, 1 repeat failed) |
+|---|---|---|
+| Cost | $0.46 – $1.21, mean **$0.71** | $0.56 – $0.71, mean **$0.63** |
+| Turns | 39 – 100, mean **60** | 19 – 26, mean **22.5** |
+| Iterations to green | 2 – 5, mean **3** | 9 – 13, mean **11** |
+| Wall clock | 2.3 – 7.3 min, mean **4.1 min** | 6.8 – 9.5 min, mean **8.1 min** |
+
+**The headline finding from this batch is the variance itself, not the
+mean.** MCP's worst run (100 turns, $1.21) cost 2.6x its best (39 turns,
+$0.46) — from just 3 samples. That's a materially different picture than
+the original single-run pair suggested: MCP no longer looks reliably more
+expensive than Codegen on cost alone (means are $0.71 vs $0.63, well
+within each other's range), though it's still clearly more turn-heavy.
+Codegen's iteration-to-green count (9-13) came in *higher* than MCP's
+(2-5) in this batch — the opposite of the N=1 pair's 8-vs-4 read. Neither
+of these reversals would have been visible from one run each; this is
+exactly why the repeat-run-count decision mattered.
+
+**One Codegen repeat failed outright**: `codegen-2026-09-25T14-00-05-130Z`
+has a partial spec file but no `metrics.json` and no raw transcript at
+all - not investigated yet (time-boxed out of this session, see
+`TODO.md`). Excluded from the n=2 Codegen numbers above rather than
+guessed at.
+
+Quality rescoring (the 5x-repeat-run flakiness methodology from
+`docs/quality-rubric.md`) has **not** been redone against these 5 new
+runs yet - the numbers below this point are still the original N=1 pair's
+quality scores. See `TODO.md` for what's left.
+
+---
+
+## Original N=1 pair (superseded for cost/turns, kept for the qualitative findings)
 
 Both runs used the confirmed v1 flow (`flows/01-add-employee-leave-request.md`,
 "add employee → assign leave → verify") against a freshly reset,
