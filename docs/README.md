@@ -24,10 +24,12 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
   before *every* individual run, not just once per batch, and logs every
   `RUN_ID` produced. Neither single-run runbook above covers this by
   itself.
-- `results.md` — the first aggregated write-up of what's been run so far
-  (currently one run per condition — see its own caveats section).
-  `TODO.md` Phase 4 tracks turning this into a fuller report once more
-  repeats exist.
+- `results.md` — the current analysis: the first repeat batch (3 MCP +
+  3 Codegen runs, one censored by a since-fixed timeout) — cost anatomy,
+  where each condition spends its effort, variance, 7-criterion quality
+  scoring with measured flakiness, harness findings, and which
+  conclusions of the earlier single-run pair (kept as an appendix) did or
+  didn't survive repetition.
 - `quality-rubric.md` — 7-criterion manual scoring rubric for a generated
   test file (5 from `CLAUDE.md` decision 2, plus 2 added and flagged after
   real scoring passes showed a need for them - task/spec compliance and

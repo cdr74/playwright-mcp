@@ -11,6 +11,10 @@
  * browser_handle_dialog is included deliberately: assigning leave to a
  * zero-balance employee raises a confirmation dialog (see
  * docs/app-knowledge.md) that must be handled to complete the flow.
+ *
+ * NOT ENFORCED: this list is passed to `claude -p --tools`, which only
+ * restricts Claude Code's built-in tools, not MCP-server tools - real runs
+ * called excluded tools. See TODO.md (open decision) before relying on it.
  */
 export const PLAYWRIGHT_MCP_TOOLS = [
   'browser_navigate',

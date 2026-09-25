@@ -62,11 +62,18 @@ Phase 4 for related automation that hasn't been built yet either).
 
 ## Cost and time, roughly
 
-Based on the first baseline run of each condition
-(`docs/results.md`): MCP ~$2/~10 min per repeat, Codegen ~$0.28/~4 min
-per repeat, plus ~80s of app-reset time before each run. A full
-`--condition both --repeats 3` baseline batch is 6 runs total: roughly
-**~$7 and ~50 minutes of wall clock** (3×~10min MCP + 3×~4min Codegen +
-6×~80s resets), most of it unattended once started. Real variance is
-expected and part of what this batch is measuring, not a bug — see
-`TODO.md`'s variance discussion.
+From the first real batch (`docs/results.md`): MCP $0.46–$1.21 and
+2.3–7.3 min per repeat, Codegen $0.56–$0.71 and 6.8–10+ min per repeat,
+plus ~80s of app reset before each run. A full `--condition both
+--repeats 3` baseline batch is 6 runs: roughly **~$4 and ~45–55 minutes
+of wall clock**, most of it unattended once started. Variance is large
+(one MCP run in three cost 2.6x the others) and is part of what's being
+measured, not a bug.
+
+Each `claude -p` phase is capped at **30 minutes** by default
+(`CLAUDE_RUN_TIMEOUT_MS` to change it). The first batch ran with a
+10-minute cap, which killed the slowest Codegen run mid-debugging, before
+it had finished — keep the cap well above the slowest runs you expect, or you
+silently lose exactly the right tail of the distribution. If a run is
+killed anyway, the error names its session transcript; usage can be
+recovered from it (see `TODO.md` Gotchas).

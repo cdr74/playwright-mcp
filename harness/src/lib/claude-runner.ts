@@ -99,23 +99,30 @@ export async function runClaude(options: ClaudeRunOptions): Promise<ClaudeRunRes
     args.push('--mcp-config', JSON.stringify({ mcpServers: options.mcpServers }));
   }
 
+  const transcriptPath = path.join(os.homedir(), '.claude', 'projects', projectSlug(cwd), `${sessionId}.jsonl`);
+  // The old 10-minute default silently killed the slowest run of the first
+  // repeat batch mid-debugging (see TODO.md Gotchas) - a cap this close to
+  // real run times censors exactly the right tail of the variance the
+  // benchmark is trying to measure.
+  const timeoutMs = options.timeoutMs ?? Number(process.env.CLAUDE_RUN_TIMEOUT_MS ?? 30 * 60 * 1000);
+
   let stdout: string;
   try {
     const result = await execFileAsync('claude', args, {
       cwd,
-      timeout: options.timeoutMs ?? 10 * 60 * 1000,
+      timeout: timeoutMs,
       maxBuffer: 64 * 1024 * 1024,
     });
     stdout = result.stdout;
   } catch (err) {
-    const e = err as { stdout?: string; stderr?: string; message?: string };
+    const e = err as { stdout?: string; stderr?: string; message?: string; killed?: boolean };
+    const reason = e.killed ? `killed after ${timeoutMs / 60000} min timeout (CLAUDE_RUN_TIMEOUT_MS)` : (e.message ?? String(err));
     throw new Error(
-      `claude -p failed: ${e.message ?? String(err)}\n${e.stderr ?? ''}\n${e.stdout ?? ''}`,
+      `claude -p failed: ${reason}\nSession transcript (usage is recoverable from it): ${transcriptPath}\n${e.stderr ?? ''}\n${e.stdout ?? ''}`,
     );
   }
 
   const parsed = JSON.parse(stdout) as ClaudePrintJsonResult;
-  const transcriptPath = path.join(os.homedir(), '.claude', 'projects', projectSlug(cwd), `${sessionId}.jsonl`);
   const toolCalls = await extractToolCalls(transcriptPath);
 
   return {

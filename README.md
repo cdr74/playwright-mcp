@@ -202,76 +202,75 @@ if it turns out to be a bottleneck once the harness is running many repeats.
 Environment phase done (target app, Playwright, Playwright MCP - all
 automated and verified, see `docs/verify-setup.md`). Both the **MCP
 condition** (`npm run explore:mcp`, `npm run generate:mcp`) and the
-**Codegen condition** (`npm run bench:codegen`) harnesses are built and
-have each completed one full, uninterrupted run end to end - see "Results"
-below for the numbers and `docs/run-mcp-condition.md` /
-`docs/run-codegen-condition.md` for the exact, reproducible steps. Both have
-to run from a plain terminal, not from inside another Claude Code session
-(see `harness/README.md`). See `TODO.md` for what's next.
+**Codegen condition** (`npm run bench:codegen`) harnesses are built, and
+the first 3-repeat baseline batch has been run and analysed - see
+"Results" below and `docs/results.md`. `docs/run-mcp-condition.md` /
+`docs/run-codegen-condition.md` / `docs/run-repeats.md` have the exact,
+reproducible steps. Everything has to run from a plain terminal, not from
+inside another Claude Code session (see `harness/README.md`). Open before
+the next batch: how to handle the unenforced MCP tool allow-list, and
+whether to extend the app-knowledge primer — see `TODO.md`.
 
 ## Results
 
-**First real repeat batch landed** (`npm run repeat:baseline`, 3 MCP + 2
-valid Codegen runs — 1 Codegen repeat failed outright, not yet
-investigated). Full write-up, including why the *variance* is the actual
-finding here, not the means, in `docs/results.md`.
+From the first repeat batch (`npm run repeat:baseline`: 3 MCP + 3 Codegen
+runs, baseline prompts, `sonnet`). One Codegen run was cut off by a
+since-fixed 10-minute harness timeout before it finished; it's reported
+as a censored lower bound (`*`). **Full analysis in `docs/results.md`.**
 
-| | MCP (n=3) | Codegen (n=2) |
+| | MCP (n=3) | Codegen (n=3, 1 censored) |
 |---|---|---|
-| Cost | $0.46–$1.21, mean $0.71 | $0.56–$0.71, mean $0.63 |
-| Turns | 39–100, mean 60 | 19–26, mean 22.5 |
-| Iterations to green | 2–5, mean 3 | 9–13, mean 11 |
-| Wall clock | 2.3–7.3 min, mean 4.1 min | 6.8–9.5 min, mean 8.1 min |
+| Cost | $0.46–$1.21 · mean $0.71 · median $0.47 | $0.56–$0.71* · mean ≥$0.62 · median ≥$0.58 |
+| Turns | 39–100 · mean 60 | 19–26* · mean ≥23 |
+| Test runs to green | 2, 2, 5 | 9, 13, not green after 11* |
+| Wall clock | 2.3–7.3 min · mean 4.1 | 6.8–≥10.0 min · mean ≥8.8 |
+| Where the cost goes | ~80% context (cache), ~220 output tok/turn | ~53% output, ~1,400 output tok/turn |
+| Quality (`docs/quality-rubric.md`, /28) | 23, 21, 21 · mean 21.7 | 25, 23 · mean 24.0 (unfinished run: 17) |
+| Measured reliability (5 re-runs each) | 5/5, 5/5, 5/5 | 5/5, 5/5 (unfinished run: 0/5) |
 
-MCP's worst run cost 2.6x its best, from just 3 samples — cost and
-iteration counts both **reversed direction** from the original single-run
-pair below once repeats existed. That reversal is the headline, not
-either mean. Quality scores below are not yet re-run against these 5 new
-runs (still the original N=1 pair's scores — see `TODO.md`).
+What we learned:
+
+- **Cost is roughly even in this flow** — MCP was cheaper in the typical
+  (median) run; one expensive MCP run pulls its mean above Codegen's.
+  Nowhere near the 4x–10x the [inspiring
+  post](https://dreaming.press/posts/playwright-mcp-vs-cli-token-cost-browser-agents.html)
+  claims; raw token volume is ~2.7x, prompt caching absorbs most of it.
+- **The two conditions spend money in opposite ways.** MCP: many cheap
+  turns, mostly spent re-reading context. Codegen: few expensive turns,
+  because every fix rewrites the whole spec file.
+- **MCP front-loads; Codegen iterates blind.** MCP's exploration is
+  63–82% of its cost, after which its test passed on the 2nd try in 2 of
+  3 runs. Codegen can only see terse test output, so different upstream
+  bugs (placeholder leave type, rejected weekend date, unconfirmed
+  dialog) all look like the same "toast not found" failure — 9 to 13+
+  test runs to green.
+- **Quality doesn't separate the conditions.** Every finished run's test
+  passes 5/5; both make the same mistakes (hardcoded base URL 6/6, CSS
+  locators on OrangeHRM's custom dropdown 5/6).
+- **N=1 was misleading.** The first single-run pair suggested MCP costs
+  7x more, is 2.4x slower and needs more test iterations — all three
+  reversed with repeats (details in `docs/results.md` §6).
+- **Harness findings that matter for reading these numbers:** the curated
+  MCP tool allow-list was never actually enforced (every MCP run had
+  playwright-mcp's full toolset — open decision in `TODO.md`), and the
+  old 10-minute run cap was silently cutting off the slowest runs (fixed).
 
 <details>
-<summary>Original N=1 pair (2026-09-25, superseded for cost/turns — see docs/results.md)</summary>
+<summary>Original N=1 pair (superseded — kept for the record)</summary>
 
 | | MCP | Codegen | Ratio |
 |---|---|---|---|
 | Cost (list-price, cache-discounted) | $2.00 | $0.28 | ~7.0x |
-| Total tokens (incl. uncached cache-read volume) | 5.63M | 196K | ~28.7x |
+| Total tokens (incl. cache reads) | 5.63M | 196K | ~28.7x |
 | Turns | 135 | 9 | ~15x |
 | Test-run iterations to green | 8 | 4 | ~2x |
 | Wall clock | ~9.8 min | ~4.1 min | ~2.4x |
+| Quality /28 | 24 | 22 | |
+
+Run before the CLAUDE.md-contamination fix and without repeats; see the
+appendix of `docs/results.md`.
 
 </details>
-
-**Quality**, scored against `docs/quality-rubric.md` (0-4 per criterion,
-manual for now — see `TODO.md` for the automated-scorer option):
-
-| Criterion | MCP | Codegen |
-|---|---|---|
-| 1. Selector robustness | 4 | 4 |
-| 2. Assertion meaningfulness (fail-fast + diagnostics) | 3 | 4 |
-| 3. Pass reliability (5 real repeat runs) | **4** (5/5) | **2** (2/5) |
-| 4. Playwright best practices | 4 | 4 |
-| 5. Line count / structure | 3 | 4 |
-| 6. Task/spec compliance | 4 | 2 |
-| 7. Config/data separation | 2 | 2 |
-| **Total /28** | **24** | **22** |
-
-Both runs produced a passing test on the first complete attempt, and both
-generated tests read as solid on inspection - role-based locators, no hard
-sleeps, real assertions. The two biggest, most concrete gaps: (1) the
-Codegen condition's test hardcodes one of the two names the flow spec
-asks to be "unique, generated" (inherited from the codegen fixture it
-started from), so its employee-autocomplete search gets less selective
-every time the test runs and it failed 3 of 5 repeat attempts, while MCP
-generates both names and passed 5/5; (2) MCP hardcodes the full absolute
-base URL in three separate `page.goto()` calls instead of using
-`playwright.config.ts`'s `baseURL`, which the Codegen condition's
-link-clicking navigation never has to. Different failure mode,
-same underlying lesson - a rubric that only checks the happy path misses
-both of these. See `docs/results.md` "Quality" for the full writeup, and
-`results/mcp-2026-09-25T06-32-18-639Z/` /
-`results/codegen-2026-09-25T08-46-56-590Z/` for the raw `metrics.json` and
-generated spec files.
 
 ## Getting started
 

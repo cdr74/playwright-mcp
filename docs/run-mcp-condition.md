@@ -66,13 +66,18 @@ this phase's measured cost/turns.
 Then, what this invokes in `claude -p --output-format json` terms:
 
 - **Model**: `sonnet` (or `$CLAUDE_MODEL`)
-- **Tools**: the curated Playwright MCP browser tools
+- **Tools**: `--tools` is passed the curated Playwright MCP browser tools
   (`harness/src/lib/mcp-tool-names.ts`: `browser_navigate`,
   `browser_navigate_back`, `browser_snapshot`, `browser_click`,
   `browser_type`, `browser_fill_form`, `browser_press_key`,
   `browser_select_option`, `browser_hover`, `browser_wait_for`,
   `browser_handle_dialog`, `browser_find`, `browser_take_screenshot`) +
-  `mcp__tools__write_file`
+  `mcp__tools__write_file` — **but in practice the agent gets
+  playwright-mcp's full toolset**, because `--tools` only restricts
+  Claude Code's *built-in* tools, not MCP-server tools. Confirmed from
+  real runs calling excluded tools (`browser_run_code_unsafe`,
+  `browser_evaluate`, `browser_network_requests`, ...). Built-ins like
+  `Bash` *are* excluded. See `TODO.md` for the open decision on this.
 - **Process `cwd`**: a scratch directory outside this repo entirely
   (`os.tmpdir()/playwright-mcp-bench/<run-id>`, via
   `harness/src/lib/isolated-session.ts`), not the repo root - Claude Code

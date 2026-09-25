@@ -128,8 +128,19 @@ assume some `.md` file describes it and needs a pass.
      investigation, what was ruled out (`--bare` forces API-key billing;
      `--safe-mode` silently breaks `--mcp-config`), and why an external
      cwd is what actually works.
-   - `--tools` is an **explicit allow-list** per phase (proven empirically,
-     not assumed - see below), never `default`. `--mcp-config` (inline
+   - `--tools` is an **explicit allow-list** per phase, never `default` —
+     **but it only governs Claude Code's built-in tools** (its own
+     `--help`: "available tools from the built-in set"). It *does* keep
+     `Bash`/`Write`/etc. away from both conditions (the Codegen
+     condition's "no raw shell" guarantee holds — confirmed from tool
+     counts). It does **not** restrict tools exposed by an MCP server:
+     the curated 13-tool list in `harness/src/lib/mcp-tool-names.ts` was
+     never enforced, every MCP-condition run had playwright-mcp's full
+     toolset, and 3 of the 4 MCP runs so far called excluded tools
+     (`browser_run_code_unsafe`, `browser_evaluate`,
+     `browser_network_requests`, ...). Found in the first repeat batch
+     analysis; how to handle it is an open **[DECISION]** in `TODO.md`.
+     `--mcp-config` (inline
      JSON, always paired with `--strict-mcp-config` so no project/user
      `.mcp.json` leaks in) registers `playwright-mcp` (MCP condition only)
      and a small custom local MCP server,

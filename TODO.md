@@ -76,6 +76,29 @@ starts on them, per `CLAUDE.md`.
       - **Not yet run.** No nudged runs exist yet. Tracked with the rest
         of the actual-run work in Phase 4 below ("Run both conditions
         3 repeats each").
+- [ ] **[DECISION]** MCP tool allow-list isn't enforced - what should
+      "the MCP condition" actually be? Found in the first repeat batch
+      analysis: `claude -p --tools` only restricts Claude Code's
+      *built-in* tools, so the curated 13-tool list in
+      `harness/src/lib/mcp-tool-names.ts` has never applied; every MCP run
+      had playwright-mcp's full toolset, and 3 of 4 runs called excluded
+      tools (`browser_run_code_unsafe` x3, `browser_evaluate`,
+      `browser_network_requests` x3, `browser_network_request`,
+      `browser_console_messages`). playwright-mcp itself has no per-tool
+      filter flag (only `--caps` to *add* capabilities). Options:
+      (a) **accept the full toolset as the MCP condition** - arguably the
+      more realistic "MCP out of the box" setup, and it's what all
+      existing MCP data actually measured; just correct the docs and drop
+      the curated list; (b) **deny excluded tools via
+      `--disallowedTools`** - blocks calls (would show up as
+      `permission_denials`) but their definitions likely still occupy
+      context every turn, so it changes capability without fully changing
+      cost; (c) **a thin proxy MCP server** re-exposing only the curated
+      tools - fully honors the original design (capability *and* context
+      footprint) but is real extra harness code and invalidates
+      comparability with all MCP data collected so far. Docs have already
+      been corrected to stop claiming (a)-isn't-true; needs a call before
+      the next MCP batch.
 - [x] **[DECISION]** Measurement mechanism: **Claude Code (`claude -p`),
       not the Anthropic API directly** — pivoted after the harness was
       already built and working against the raw API, because API usage is
@@ -169,7 +192,9 @@ decisions above) was confirmed to lose no measurement fidelity.
       wrote a real spec, blocked a path-traversal attempt, ran the spec
       against the live app — passed.
 - [x] `harness/src/lib/mcp-tool-names.ts`: the curated (not full 25)
-      playwright-mcp browser toolset actually offered to the agent -
+      playwright-mcp browser toolset *intended* for the agent (**never
+      actually enforced** - see the tool allow-list [DECISION] under Open
+      decisions) -
       excludes `browser_run_code_unsafe`/`browser_evaluate` (arbitrary JS
       execution, more capability than this flow needs) and several others
       not relevant to a form-filling flow; deliberately includes
@@ -272,16 +297,33 @@ decisions above) was confirmed to lose no measurement fidelity.
 Kept here rather than only in commit history since they're the kind of
 thing anyone reproducing this repo would hit again.
 
-- **[Not yet root-caused] One Codegen repeat in the first real
-  `repeat:baseline` batch failed outright** -
-  `results/codegen-2026-09-25T14-00-05-130Z/` has a partial spec file but
-  no `metrics.json` and no raw transcript at all, and
-  `run-repeats.sh`'s log correctly shows an empty `run_id` field for that
-  repeat too (its `extract_run_id` found nothing to parse, consistent
-  with the run itself erroring before printing its `==> Done:` line).
-  Time-boxed out of the session that found it - next step is checking
-  whatever partial output the terminal captured at the time, or just
-  re-running `--condition codegen --repeats 1` and watching it live.
+- **A hardcoded 10-minute `claude -p` timeout silently killed the slowest
+  run of the first repeat batch, mid-debugging.**
+  `results/codegen-2026-09-25T14-00-05-130Z/` had a spec file but no
+  `metrics.json`, no copied transcript, and an empty `run_id` in the
+  repeat log. Root-caused from the session transcript Claude Code itself
+  kept under the run's isolated-cwd project slug
+  (`~/.claude/projects/-tmp-playwright-mcp-bench-codegen-2026-09-25T14-00-05-130Z/`):
+  first entry 14:00:09Z, last 14:10:05Z - exactly
+  `claude-runner.ts`'s old `timeout: 10 * 60 * 1000`; `execFile` threw,
+  so neither the transcript copy nor `recordPhaseMetrics` ran. **Careful
+  with the transcript's one `PASS`**: an early read of this took it as
+  "killed right after reaching green" - wrong. Diffing the `write_file`
+  calls shows test run #11's PASS was a stripped-down
+  `test('debug autocomplete', ...)` probe the agent wrote to investigate;
+  write #12 was the real full test again, and the run was killed while
+  running it. That real spec (the file on disk) fails 5/5 when re-run.
+  So the true outcome is *unknown* - it may or may not have got there
+  with more time - which is exactly why a cap sitting right where real
+  Codegen runs land (the other two took 6.8 and 9.5 min) is a problem,
+  not a harmless safety net: a cap like that
+  *censors the right tail* of exactly the variance the benchmark is
+  measuring. **Fixed**: default raised to 30 min, overridable via
+  `CLAUDE_RUN_TIMEOUT_MS`, and a timeout now names the session transcript
+  path in its error so usage can still be recovered. This run's usage
+  *was* recovered (dedup by API message id - method validated to match
+  two other runs' `metrics.json` exactly): 24 turns, $0.58, ≥10.0 min.
+  Reported in `docs/results.md` as a censored data point, not dropped.
 
 - **Claude Code was auto-attaching this repo's entire `CLAUDE.md`
   (15,909 chars) plus its auto-memory files to every single benchmark
@@ -462,13 +504,32 @@ thing anyone reproducing this repo would hit again.
       repeat fails rather than aborting the batch. Prompted by the user
       noticing this had no actual instructions anywhere, let alone one
       referenced from `README.md`.
-- [ ] **Actually run it**: `npm run repeat:baseline` (6 runs, on the
-      now-fixed harness - see the CLAUDE.md-contamination Gotcha, don't
-      reuse the two existing runs, they predate the fix), and
-      `npm run repeat:nudged` (6 more) if the baseline-vs-nudged
-      comparison happens at the same time. Update `docs/results.md` from
-      a single anecdote into an actual comparison with a real sample
-      size.
+- [x] **Ran the first baseline batch** (`npm run repeat:baseline`,
+      `results/repeat-run-log-20260925T132116Z.txt`): 3 MCP + 3 Codegen
+      runs on the contamination-fixed harness; one Codegen run censored by
+      the old 10-min timeout (usage recovered from its transcript, see
+      Gotchas). `docs/results.md` rewritten around it: cost anatomy (MCP
+      ~80% context cost / many cheap turns vs Codegen ~53% output cost /
+      whole-file rewrites), MCP's explore-then-`FP` pattern vs Codegen's
+      9–13 blind test iterations, a failure taxonomy, variance, and which
+      N=1 conclusions reversed (cost ratio, iteration ratio, wall clock,
+      and two quality conclusions all did).
+- [x] **Rescored quality for all 6 batch specs** with measured flakiness
+      (5x each, app reset before each spec - convention now written into
+      `docs/quality-rubric.md` criterion 3).
+- [ ] **Decide the MCP tool allow-list question** (Open decisions above)
+      - it changes what the MCP numbers mean; any re-run of MCP should
+      come after it.
+- [ ] **Decide whether to add the three recurring app traps to
+      `docs/app-knowledge.md`** (`-- Select --` rendered as an option,
+      double-space `"First  Last"` in the autocomplete, weekend dates
+      rejected) - every run of both conditions hit at least one. See
+      `docs/results.md` §9. Would change the primer both conditions get,
+      so it's a design call, and worth a before/after comparison.
+- [ ] `npm run repeat:nudged` - wiring done, no data yet.
+- [ ] More repeats, at least for MCP (one run in three cost 2.6x the
+      other two) - n=3 overturned N=1 but doesn't estimate a
+      distribution.
 
 ## Phase 5 — Test healing (v2, not started)
 

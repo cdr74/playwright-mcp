@@ -94,6 +94,18 @@ Re-seed (`npm run seed`) immediately before measuring this — the saved
 auth session can expire between when a test was generated and when you
 come back to score it (see `TODO.md` Gotchas).
 
+**Reset the app before each spec's 5 runs** (`npm run cleanup:app && npm
+run setup:app && npm run seed`), so every spec starts from the same
+state and accumulates only its own data across its 5 runs. The first
+(N=1) scoring pass skipped this and scored against accumulated state,
+which is what made a hardcoded first name ("Thomas", with several
+Thomases already in the DB) fail 3/5; from a clean reset, the same kind
+of defect passed 5/5 in the repeat batch. Neither number is "wrong" —
+they measure different things (degradation under accumulated data vs.
+reliability from a known state) — but results are only comparable if
+every spec is measured the same way. The reset-per-spec convention is
+the one used from the repeat batch onward.
+
 ## 4. Playwright best practices
 
 - **4** — No hard sleeps (`waitForTimeout`) anywhere in the final test;
