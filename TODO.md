@@ -58,6 +58,22 @@ starts on them, per `CLAUDE.md`.
       "Run a complete MCP condition end to end" below): decided to wait
       until the CLI condition runner exists too, so the repeat count is
       set for both conditions symmetrically rather than for MCP alone.
+      Now also entangled with the baseline-vs-nudged decision directly
+      below — deciding both together makes more sense than deciding
+      repeat count twice.
+- [ ] **[DECISION]** Baseline-vs-nudged quality comparison: add
+      `docs/testing-best-practices.md` (drafted, mirrors
+      `docs/quality-rubric.md`'s 7 criteria one-for-one) to both
+      conditions' prompts, identically, and compare generated-test quality
+      with vs. without it — does explicit guidance close the MCP/CLI
+      quality gap, widen it, or leave it unchanged? Keeps the existing
+      two runs as the unguided baseline cell; only new "nudged" runs are
+      needed. Open sub-questions: (1) wiring mechanism - an env var/flag
+      that appends the primer to the system prompt and changes the
+      `RUN_ID` prefix (e.g. `mcp-nudged-...`) so results stay
+      distinguishable, proposed but not agreed; (2) whether to run one
+      directional pair first before committing to N repeats of a full
+      2×2 (condition × prompt-variant).
 - [x] **[DECISION]** Measurement mechanism: **Claude Code (`claude -p`),
       not the Anthropic API directly** — pivoted after the harness was
       already built and working against the raw API, because API usage is
@@ -223,13 +239,18 @@ decisions above) was confirmed to lose no measurement fidelity.
       "first option" could select the re-rendered `-- Select --`
       placeholder rather than a real leave type. Full numbers in
       `results/cli-2026-09-25T08-46-56-590Z/metrics.json`.
-- [x] `docs/quality-rubric.md`: 6 criteria (the 5 from `CLAUDE.md`
-      decision 2, plus a 6th - task/spec compliance - added and flagged
-      explicitly after the first scoring pass showed a real need for it),
-      0-4 each. Manual for now, per the original plan; automated/LLM-judge
-      pass still a later option, see below.
-- [x] First manual scoring pass, both runs from `docs/results.md`: MCP
-      23/24, CLI 20/24. Criterion 3 (flakiness) was **measured**, not
+- [x] `docs/quality-rubric.md`: started at 6 criteria (5 from `CLAUDE.md`
+      decision 2 plus task/spec compliance), now 7 - a config/data
+      separation criterion was added, and the assertions criterion
+      tightened for fail-fast/diagnostics, after user-proposed additions
+      for larger-suite practices. Current totals are out of /28, not the
+      original /24 - see `docs/results.md`. Manual for now, per the
+      original plan; automated/LLM-judge pass still a later option, see
+      below.
+- [x] First manual scoring pass, both runs from `docs/results.md`
+      (originally MCP 23/24, CLI 20/24; rescored to MCP 24/28, CLI 22/28
+      after the rubric's criterion-2/7 revisions above - see that doc for
+      what changed and why). Criterion 3 (flakiness) was **measured**, not
       estimated - each test actually re-run 5x (`--repeat-each=5
       --workers=1`) against a live, re-seeded app: MCP 5/5, CLI 2/5. Root
       cause of the CLI gap traced to the DB, not guessed: CLI's test

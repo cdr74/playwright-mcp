@@ -22,8 +22,13 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
   (currently one run per condition — see its own caveats section).
   `TODO.md` Phase 4 tracks turning this into a fuller report once more
   repeats exist.
-- `quality-rubric.md` — 6-criterion manual scoring rubric for a generated
-  test file (5 from `CLAUDE.md` decision 2, plus a 6th - task/spec
-  compliance - added and flagged after the first scoring pass showed a
-  real need for it). Applied to both first runs in `docs/results.md`.
+- `quality-rubric.md` — 7-criterion manual scoring rubric for a generated
+  test file (5 from `CLAUDE.md` decision 2, plus 2 added and flagged after
+  real scoring passes showed a need for them - task/spec compliance and
+  config/data separation). Applied to both first runs in `docs/results.md`.
   Automated/LLM-judge scoring is a later option, see `TODO.md` Phase 3.
+- `testing-best-practices.md` — draft agent-facing primer mirroring the
+  rubric above, one practice per criterion. **Not wired into either
+  condition's prompt yet** - it's the input half of a planned
+  baseline-vs-nudged comparison (does explicit guidance change generated
+  quality, and does it change the MCP/CLI gap?), see `TODO.md`.

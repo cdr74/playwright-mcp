@@ -219,22 +219,26 @@ manual for now — see `TODO.md` for the automated-scorer option):
 | Criterion | MCP | CLI |
 |---|---|---|
 | 1. Selector robustness | 4 | 4 |
-| 2. Assertion meaningfulness | 4 | 4 |
+| 2. Assertion meaningfulness (fail-fast + diagnostics) | 3 | 4 |
 | 3. Pass reliability (5 real repeat runs) | **4** (5/5) | **2** (2/5) |
 | 4. Playwright best practices | 4 | 4 |
 | 5. Line count / structure | 3 | 4 |
 | 6. Task/spec compliance | 4 | 2 |
-| **Total /24** | **23** | **20** |
+| 7. Config/data separation | 2 | 2 |
+| **Total /28** | **24** | **22** |
 
 Both runs produced a passing test on the first complete attempt, and both
 generated tests read as solid on inspection - role-based locators, no hard
-sleeps, real assertions. The quality gap only shows up when you actually
-*run* them repeatedly: the CLI test hardcodes one of the two names the
-flow spec asks to be "unique, generated" (inherited from the codegen
-fixture it started from), so its employee-autocomplete search gets less
-selective every time the test runs and it failed 3 of 5 repeat attempts.
-The MCP test generates both names and passed 5/5. See `docs/results.md`
-"Quality" for the full root-cause writeup, and
+sleeps, real assertions. The two biggest, most concrete gaps: (1) CLI's
+test hardcodes one of the two names the flow spec asks to be "unique,
+generated" (inherited from the codegen fixture it started from), so its
+employee-autocomplete search gets less selective every time the test runs
+and it failed 3 of 5 repeat attempts, while MCP generates both names and
+passed 5/5; (2) MCP hardcodes the full absolute base URL in three separate
+`page.goto()` calls instead of using `playwright.config.ts`'s `baseURL`,
+which CLI's link-clicking navigation never has to. Different failure mode,
+same underlying lesson - a rubric that only checks the happy path misses
+both of these. See `docs/results.md` "Quality" for the full writeup, and
 `results/mcp-2026-09-25T06-32-18-639Z/` /
 `results/cli-2026-09-25T08-46-56-590Z/` for the raw `metrics.json` and
 generated spec files.

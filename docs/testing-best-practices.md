@@ -1,0 +1,69 @@
+# Testing best practices
+
+Practice-level guidance, not the scoring rubric itself — this is what an
+agent gets told; `docs/quality-rubric.md` is what an agent gets scored
+against afterward. The two are kept deliberately close (each item below
+maps to one rubric criterion) so scoring never penalizes an agent for
+something it was never told mattered.
+
+**Not wired into either condition's prompt yet.** This is the draft for
+review before it becomes part of the shared context both conditions
+receive — see `TODO.md` for the planned baseline-vs-nudged comparison this
+enables. When it is wired in, it must go in identically for both
+conditions, the same way `docs/app-knowledge.md` already does — that
+symmetry is the controlled variable this whole benchmark depends on
+(`CLAUDE.md` decision 1).
+
+---
+
+When writing the test, follow these practices:
+
+**Use accessible, role-based locators.** `getByRole`, `getByLabel`,
+`getByTestId`, `getByPlaceholder` with a real accessible name - not CSS
+classes, XPath, or `nth-child` chains. If the app genuinely has no
+accessible way to reach an element, that's worth a comment explaining why
+you fell back to something else, not a silent CSS selector.
+
+**Assert as you go, not just at the end.** After each meaningful step,
+verify the specific outcome that step was supposed to produce - a
+successful navigation, a value that should have taken effect, a dialog
+that should have appeared - before moving on to the next step. A test
+that only asserts once, at the very end, turns every failure into "step 7
+of 7 failed," which tells a maintainer nothing about which of the
+preceding six steps actually broke. Fail at the step that's actually
+wrong, not several steps later.
+
+**Leave real diagnostic context on failure.** When something might
+legitimately not happen (a confirmation dialog that only appears
+sometimes, a secondary check that's known to be unreliable), log *why*
+you're treating it as non-fatal, specifically, not just silently
+swallowing it. A future maintainer reading a failure should be able to
+tell what happened without re-running the test themselves.
+
+**Don't hardcode what the run configuration already provides.** The
+target application's base URL is already configured
+(`playwright.config.ts`'s `baseURL`) - navigate with relative paths
+(`page.goto('/web/index.php/...')`) or by clicking through the UI, not by
+re-embedding the full absolute URL in every navigation call. The same
+goes for anything else already supplied to you (the authenticated session,
+credentials) - if it's already handled, don't re-derive or re-enter it.
+
+**Generate the data the task asks you to generate - all of it.** If asked
+for a unique, generated value, generate it; don't leave one field as a
+literal value carried over from whatever example or recording you started
+from and only generate the other. A value that looks unique enough to
+pass once can still collide or degrade in selectivity the more times the
+test is actually run.
+
+**Factor out real repetition, don't invent structure for a one-off.** If
+the same non-trivial interaction (e.g. a specific date-picker workaround)
+happens more than once, pull it into a named helper function with a
+comment explaining *why* it's needed, not just what it does. Don't split
+a genuinely linear, one-shot test into abstractions it doesn't need
+either - a single well-organized test function is often the right amount
+of structure for a single flow.
+
+**No hard sleeps.** Rely on Playwright's auto-waiting and explicit
+`waitFor`/`expect(...).toBeVisible({ timeout })` for anything that
+appears asynchronously. `waitForTimeout` is a last resort, and if you do
+reach for it, say why in a comment.

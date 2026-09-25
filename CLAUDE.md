@@ -90,8 +90,9 @@ assume some `.md` file describes it and needs a pass.
      robustness (role/testid vs brittle CSS/XPath), assertion
      meaningfulness, pass reliability across N repeat runs (flakiness), use
      of Playwright best practices (auto-waiting, no hard sleeps), line
-     count, plus a 6th criterion (task/spec compliance) added after the
-     first scoring pass. See `docs/quality-rubric.md` and `docs/results.md`
+     count, plus two added after real scoring passes - task/spec
+     compliance and config/data separation (7 total). See
+     `docs/quality-rubric.md` and `docs/results.md`
      for the first scores.
 3. **Measurement harness: drives Claude Code (`claude -p`), not the
    Anthropic API directly** — changed from the original plan (billed

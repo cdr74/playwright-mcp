@@ -5,18 +5,36 @@ Applied manually for now (per-run, by reading the file and — where
 possible — actually running it) — see `TODO.md` Phase 3 "Quality scorer"
 for the eventual automated/LLM-judge pass.
 
-Five of the six criteria below are `CLAUDE.md` decision 2's original list.
-**Criterion 6 (task/spec compliance) is a new addition**, not part of the
-original agreed axis list — flagging that explicitly per this repo's
-collaboration model. It earned its place empirically: scoring the first
-two real runs (`docs/results.md`) surfaced a case where an incomplete
-implementation of the flow spec's "unique, generated first *and* last
-name" requirement directly caused measurable flakiness (criterion 3),
-and none of the original five criteria had a natural place to capture
-that root cause on its own terms. Revert this to five if that reasoning
-doesn't hold up under more data.
+Five of the seven criteria below are `CLAUDE.md` decision 2's original
+list. **Criteria 6 and 7 are additions**, not part of the original agreed
+axis list — flagging that explicitly per this repo's collaboration model:
 
-Each criterion scores **0-4**. Total **/24** (5 original criteria /20 if
+- **Criterion 6 (task/spec compliance)** earned its place empirically:
+  scoring the first two real runs (`docs/results.md`) surfaced a case
+  where an incomplete implementation of the flow spec's "unique, generated
+  first *and* last name" requirement directly caused measurable flakiness
+  (criterion 3), and none of the original five criteria had a natural
+  place to capture that root cause on its own terms.
+- **Criterion 7 (config/data separation)** came from user-proposed
+  criteria for larger test suites. Also has concrete evidence already:
+  MCP's first-run test hardcodes the full absolute URL
+  (`page.goto('http://localhost:8081/web/index.php/pim/addEmployee')`)
+  while CLI's correctly uses a relative path
+  (`page.goto('/web/index.php/dashboard/index')`) that respects
+  `playwright.config.ts`'s `baseURL` — same config available to both,
+  one test ignores it. Criterion 2 was also revised (not just extended)
+  to fold in two more of those proposed practices — fail-fast checkpoint
+  assertions and failure-diagnostic logging — rather than adding two more
+  standalone criteria, since both are really about *how* a test asserts,
+  not a separate axis.
+- Not added: reusable functions **across a suite** — v1 scope is one flow
+  → one generated file per run, not a suite (`CLAUDE.md` decision 4), so
+  cross-file reuse isn't assessable yet. Criterion 5 already covers
+  within-file structure. Revisit if the project grows to multiple flows.
+
+Revert any of this if the reasoning doesn't hold up under more data.
+
+Each criterion scores **0-4**. Total **/28** (5 original criteria /20 if
 you want the number CLAUDE.md decision 2 originally implied).
 
 ## 1. Selector robustness
@@ -35,19 +53,27 @@ Role/label/testid-based locators vs brittle CSS/XPath.
 
 ## 2. Assertion meaningfulness
 
-Does the test actually verify the outcomes the flow spec cares about, not
-just "nothing threw"?
+Does the test verify the outcomes the flow spec cares about **as it goes**
+(fail fast, at the step that actually broke), not just at the very end —
+and when it does fail, does it leave a maintainer enough to diagnose
+without re-running?
 
 - **4** — Every step the flow spec asks to be verified has a real
-  `expect()` tied to that specific outcome; the primary success signal is
-  asserted correctly per `docs/app-knowledge.md` guidance (toast, not
-  Leave List search); secondary/best-effort checks are present and
-  informative without being treated as failure conditions.
-- **3** — Primary success signal asserted correctly; secondary
-  verification present but shallow (fires the check, doesn't inspect the
-  result).
-- **2** — Some steps only implicitly verified (relies on a later action
-  throwing if an earlier one silently failed).
+  `expect()` tied to that specific outcome, placed right after that step
+  (not deferred to one giant assertion at the end) so a failure points at
+  its actual cause; the primary success signal is asserted correctly per
+  `docs/app-knowledge.md` guidance (toast, not Leave List search);
+  secondary/best-effort checks are present and informative without being
+  treated as failure conditions; failure paths leave real diagnostic
+  context (a custom assertion message, a `console.log` at a meaningful
+  branch point) rather than a bare Playwright timeout trace.
+- **3** — Primary success signal asserted correctly at the right point;
+  secondary verification present but shallow (fires the check, doesn't
+  inspect the result); no real diagnostic logging beyond default output.
+- **2** — Verification is end-loaded (e.g. one assertion at the very end
+  covers what several intermediate checkpoints should have caught
+  individually) — a failure early in the flow surfaces as a confusing
+  failure late in the flow instead.
 - **1** — Minimal assertions; mostly relies on the test runner's own
   errors rather than explicit checks.
 - **0** — No meaningful assertions.
@@ -110,3 +136,28 @@ not just "a reasonable-looking test of roughly the right shape"?
   single pass won't show.
 - **1** — Multiple requirements not fully met.
 - **0** — Materially diverges from the flow spec.
+
+## 7. Config/data separation *(added, see note above)*
+
+Does the test rely on config/fixtures the harness already provides, or
+does it re-embed values that belong outside the test body?
+
+- **4** — No hardcoded URLs, credentials, or environment specifics
+  anywhere — navigation uses relative paths against `playwright.config.ts`'s
+  `baseURL`; nothing re-derives a value (e.g. the target host) that's
+  already available via config. Generated/varying test data (names,
+  dates) is computed in the test, not copy-pasted literal values from
+  whatever the agent happened to observe during exploration or the
+  codegen recording it started from.
+- **3** — One minor hardcoded value with low blast radius (e.g. a literal
+  date format string) but no hardcoded environment/connection details.
+- **2** — One substantive hardcoded value that duplicates what config
+  already provides (e.g. the full absolute base URL baked into every
+  `page.goto()` call) — works today, breaks silently the moment the
+  config value it duplicates changes.
+- **1** — Multiple hardcoded environment/connection values, or literal
+  data values carried over from source material (a recording, an
+  exploration snapshot) without being generalized.
+- **0** — Credentials or environment-specific values hardcoded throughout,
+  or the test would need manual editing to run against a different
+  environment despite the harness already supporting that via config.

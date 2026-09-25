@@ -79,16 +79,44 @@ worse than what caching's dollar figure alone suggests.**
 Each criterion is 0-4; criterion 3 (flakiness) is **measured**, not
 estimated: both generated tests were actually re-run 5 times in a row
 (`--repeat-each=5 --workers=1`) against a freshly re-seeded, live app.
+Rescored below against the rubric's revised 7-criterion version (criterion
+2 tightened to require fail-fast checkpoints *and* failure diagnostics,
+not just correct end-state assertions; criterion 7, config/data
+separation, added) — the totals below supersede the earlier /24 scoring,
+and the changes cut in **both** directions, not just against CLI:
 
 | Criterion | MCP | CLI |
 |---|---|---|
 | 1. Selector robustness | 4 | 4 |
-| 2. Assertion meaningfulness | 4 | 4 |
+| 2. Assertion meaningfulness | **3** | **4** |
 | 3. Pass reliability (5 real repeat runs) | **4** (5/5 passed) | **2** (2/5 passed) |
 | 4. Playwright best practices | 4 | 4 |
 | 5. Line count / structure | 3 | 4 |
 | 6. Task/spec compliance | 4 | 2 |
-| **Total /24** | **23** | **20** |
+| 7. Config/data separation | **2** | **2** |
+| **Total /28** | **24** | **22** |
+
+Two things changed the picture from the original /24 pass, and both are
+worth calling out rather than glossing over:
+
+- **Criterion 2 flipped.** CLI's test actually has *more* fail-fast
+  checkpoints than MCP's (asserts the employee-details heading right after
+  creation, asserts the Assign Leave URL right after navigating there) and
+  it logs real diagnostic context when the Leave List check comes up empty
+  (`console.log('Leave List did not show the new request (known app
+  quirk)...')`). MCP's assertions are correctly placed too, but it has no
+  diagnostic logging anywhere - a bare Playwright timeout trace is all a
+  future maintainer gets. Under the tightened criterion, that's a real
+  difference: CLI 4, MCP 3.
+- **Criterion 7 is new, and it dings MCP, not CLI, on the "config" half.**
+  MCP hardcodes the full absolute base URL in three separate `page.goto()`
+  calls, duplicating what `playwright.config.ts`'s `baseURL` already
+  provides - works today, breaks silently if that config value ever
+  changes. CLI navigates by clicking links / a relative path, so it never
+  hits this. But CLI still loses a point on the "data" half of the same
+  criterion for the same hardcoded `firstName = 'Thomas'` already flagged
+  under criterion 6 - both conditions land on **2/4** here, for two
+  genuinely different reasons.
 
 Both generated tests are structurally solid on inspection: role-based
 locators throughout (no brittle CSS/XPath), no hard sleeps, correct
