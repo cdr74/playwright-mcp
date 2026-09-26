@@ -18,7 +18,7 @@
   (v1, v2) were harness-development tools. Their results are in
   [`test-bed-evolution.md`](test-bed-evolution.md) and aren't comparable
   to this page.
-- **Model:** `sonnet`. **Repeats:** 3 per condition, with a full app
+- **Model:** `claude-sonnet-5` (pinned). **Repeats:** 3 per condition, with a full app
   reset before every run. **Prompts:** baseline (not nudged).
 
 ## Cost and efficiency

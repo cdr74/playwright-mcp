@@ -25,6 +25,12 @@ import crypto from 'node:crypto';
 
 const execFileAsync = promisify(execFile);
 
+// Pinned to an exact model id, not the `sonnet` alias: Claude Code resolves
+// an alias at run time, so a later batch could silently switch models. Every
+// run before the pin resolved `sonnet` to this id (checked in all saved
+// transcripts). CLAUDE.md decision 7.
+export const DEFAULT_MODEL = 'claude-sonnet-5';
+
 export interface McpServerConfig {
   command: string;
   args: string[];
@@ -58,6 +64,8 @@ export interface ClaudeRunResult {
   durationMs: number;
   permissionDenials: number;
   toolCalls: ToolCallRecord[];
+  /** Model ids the API actually served, from the transcript - what `model` resolved to. */
+  resolvedModels: string[];
   transcriptPath: string;
 }
 
@@ -88,7 +96,7 @@ export async function runClaude(options: ClaudeRunOptions): Promise<ClaudeRunRes
   const args = [
     '-p', options.userMessage,
     '--output-format', 'json',
-    '--model', options.model ?? 'sonnet',
+    '--model', options.model ?? DEFAULT_MODEL,
     '--system-prompt', options.systemPrompt,
     '--tools', options.tools.join(','),
     '--strict-mcp-config',
@@ -123,7 +131,7 @@ export async function runClaude(options: ClaudeRunOptions): Promise<ClaudeRunRes
   }
 
   const parsed = JSON.parse(stdout) as ClaudePrintJsonResult;
-  const toolCalls = await extractToolCalls(transcriptPath);
+  const { toolCalls, resolvedModels } = await readTranscript(transcriptPath);
 
   return {
     sessionId: parsed.session_id ?? sessionId,
@@ -137,26 +145,31 @@ export async function runClaude(options: ClaudeRunOptions): Promise<ClaudeRunRes
     durationMs: parsed.duration_ms ?? 0,
     permissionDenials: Array.isArray(parsed.permission_denials) ? parsed.permission_denials.length : 0,
     toolCalls,
+    resolvedModels,
     transcriptPath,
   };
 }
 
-async function extractToolCalls(transcriptPath: string): Promise<ToolCallRecord[]> {
+async function readTranscript(
+  transcriptPath: string,
+): Promise<{ toolCalls: ToolCallRecord[]; resolvedModels: string[] }> {
   let raw: string;
   try {
     raw = await readFile(transcriptPath, 'utf-8');
   } catch {
-    return [];
+    return { toolCalls: [], resolvedModels: [] };
   }
   const calls: ToolCallRecord[] = [];
+  const models = new Set<string>();
   for (const line of raw.split('\n')) {
     if (!line.trim()) continue;
-    let entry: { message?: { content?: unknown } };
+    let entry: { message?: { content?: unknown; model?: string } };
     try {
       entry = JSON.parse(line);
     } catch {
       continue;
     }
+    if (entry.message?.model) models.add(entry.message.model);
     const content = entry.message?.content;
     if (!Array.isArray(content)) continue;
     for (const block of content) {
@@ -165,5 +178,5 @@ async function extractToolCalls(transcriptPath: string): Promise<ToolCallRecord[
       }
     }
   }
-  return calls;
+  return { toolCalls: calls, resolvedModels: [...models].sort() };
 }

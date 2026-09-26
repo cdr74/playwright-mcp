@@ -23,7 +23,7 @@ treat this file the same way as `docs/run-mcp-condition.md`.
 - `claude` CLI installed and authenticated (`claude auth login`) — a Claude
   Code subscription, not an API key.
 - `.env` populated from `.env.example` (defaults below assume it's untouched:
-  `TARGET_APP_URL=http://localhost:8081/`, `CLAUDE_MODEL=sonnet`).
+  `TARGET_APP_URL=http://localhost:8081/`, `CLAUDE_MODEL=claude-sonnet-5`).
 - Run every command below **from a plain terminal, not from inside a Claude
   Code session** — same `--dangerously-skip-permissions` restriction as the
   MCP condition, see `docs/run-mcp-condition.md` §0 for why.
@@ -62,7 +62,9 @@ First move, before anything else: re-runs the seed logic, unconditionally
 
 Then, what this invokes in `claude -p --output-format json` terms:
 
-- **Model**: `sonnet` (or `$CLAUDE_MODEL`)
+- **Model**: `claude-sonnet-5` (or `$CLAUDE_MODEL`), an exact id rather
+  than the `sonnet` alias; the id the API actually served is recorded as
+  `resolvedModels` in `metrics.json`
 - **Tools**: exactly `mcp__tools__write_file` and
   `mcp__tools__run_playwright_test` — no `playwright-mcp`, no browser tools
   of any kind, and critically Claude Code's native `Bash` is **not** in the

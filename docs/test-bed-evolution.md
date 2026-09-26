@@ -25,7 +25,7 @@ headline results.
 
 Everything below is the detailed write-up of batches 1 and 2 as it stood
 before v3 (2026-09-25). Both batches: baseline prompts (not nudged),
-model `sonnet`, the contamination-fixed harness, playwright-mcp's full
+model `sonnet` (resolved to `claude-sonnet-5` in every run), the contamination-fixed harness, playwright-mcp's full
 toolset, a full app reset before every run.
 
 | Batch | Log | Primer | Runs |

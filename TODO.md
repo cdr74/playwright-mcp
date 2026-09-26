@@ -543,6 +543,10 @@ thing anyone reproducing this repo would hit again.
       batches become development history (`docs/results.md` moved to
       `docs/test-bed-evolution.md`); `docs/results.md` is now the
       headline page, waiting on v3 data. v3 is the default primer.
+- [x] Model pinned to `claude-sonnet-5` (was the `sonnet` alias) and
+      the served model recorded per phase as `resolvedModels`
+      (backfilled: every earlier run got `claude-sonnet-5`). `CLAUDE.md`
+      decision 7.
 - [ ] **Run the v3 baseline batch** (`npm run repeat:baseline`, plain
       terminal, ~$5 / up to an hour), then rescore quality (5x re-runs,
       reset per spec) and fill in `docs/results.md`.

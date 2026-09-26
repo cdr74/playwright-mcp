@@ -20,7 +20,10 @@ condition, one phase named `"generate"` for comparability). See
   versions. `promptVariant`: `"baseline"` or `"nudged"` - see `TODO.md`
   baseline-vs-nudged decision), one entry per phase (`explore` /
   `generate` for MCP; a single phase for Codegen), each
-  with `model`, `sessionId` (the Claude Code session id - use it to find
+  with `model` (what the harness asked for), `resolvedModels` (the
+  model id(s) the API actually served, read from the transcript;
+  backfilled for earlier runs, which asked for the `sonnet` alias and all
+  got `claude-sonnet-5`), `sessionId` (the Claude Code session id - use it to find
   the full transcript), `inputTokens`, `outputTokens`,
   `cacheCreationInputTokens`, `cacheReadInputTokens`, `costUsd` (list-price
   USD equivalent from `claude -p`'s own result, even though it's not

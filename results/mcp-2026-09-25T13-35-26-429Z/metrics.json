@@ -7,6 +7,9 @@
     {
       "phase": "explore",
       "model": "sonnet",
+      "resolvedModels": [
+        "claude-sonnet-5"
+      ],
       "sessionId": "de84c434-a922-4819-ac8d-a9a39fb01cdb",
       "inputTokens": 72,
       "outputTokens": 5493,
@@ -32,6 +35,9 @@
     {
       "phase": "generate",
       "model": "sonnet",
+      "resolvedModels": [
+        "claude-sonnet-5"
+      ],
       "sessionId": "a6d06803-cf32-4d83-ba24-4e47c5aef571",
       "inputTokens": 10,
       "outputTokens": 4123,

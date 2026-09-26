@@ -203,7 +203,13 @@ assume some `.md` file describes it and needs a pass.
    bottleneck once the harness is running many repeats.
 7. **v1 model: a single model, Claude Sonnet.** Broader model coverage
    (to see whether the MCP/Codegen gap is model-dependent) is explicitly
-   deferred, not forgotten — see `TODO.md`.
+   deferred, not forgotten — see `TODO.md`. **Pinned to the exact id
+   `claude-sonnet-5`** (2026-09-26), not the `sonnet` alias Claude Code
+   resolves at run time, so a batch can't silently switch models. Every
+   earlier run asked for `sonnet` and got `claude-sonnet-5` (checked in
+   all 20 phase transcripts). Each phase records the id the API actually
+   served as `resolvedModels` in `metrics.json`, backfilled for earlier
+   runs by session id.
 8. **What results keep**: per run, `results/<run-id>/` holds only the
    generated test file + `metrics.json` (tokens, efficiency counts, quality
    scores) — see `results/README.md` for the exact shape. Full transcripts

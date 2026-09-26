@@ -6,6 +6,7 @@ import type { PrimerVersion } from './primer.js';
 export interface PhaseMetrics {
   phase: string;
   model: string;
+  resolvedModels: string[];
   sessionId: string;
   inputTokens: number;
   outputTokens: number;
@@ -44,6 +45,7 @@ export function summarizePhase(
   return {
     phase,
     model,
+    resolvedModels: result.resolvedModels,
     sessionId: result.sessionId,
     inputTokens: result.inputTokens,
     outputTokens: result.outputTokens,

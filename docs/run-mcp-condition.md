@@ -24,7 +24,7 @@ one place a stale copy would actually mislead someone.
 - `claude` CLI installed and authenticated (`claude auth login`) — a Claude
   Code subscription, not an API key.
 - `.env` populated from `.env.example` (defaults below assume it's untouched:
-  `TARGET_APP_URL=http://localhost:8081/`, `CLAUDE_MODEL=sonnet`).
+  `TARGET_APP_URL=http://localhost:8081/`, `CLAUDE_MODEL=claude-sonnet-5`).
 - Run every command below **from a plain terminal, not from inside a Claude
   Code session** — `--dangerously-skip-permissions` is required for
   unattended tool use, and a Claude Code session's own auto-mode classifier
@@ -66,7 +66,9 @@ this phase's measured cost/turns.
 
 Then, what this invokes in `claude -p --output-format json` terms:
 
-- **Model**: `sonnet` (or `$CLAUDE_MODEL`)
+- **Model**: `claude-sonnet-5` (or `$CLAUDE_MODEL`), an exact id rather
+  than the `sonnet` alias; the id the API actually served is recorded as
+  `resolvedModels` in `metrics.json`
 - **Tools**: playwright-mcp's **full toolset** (~25 browser tools,
   including `browser_evaluate` / `browser_run_code_unsafe`) plus the
   scoped `tools` server's `write_file` (and, technically,

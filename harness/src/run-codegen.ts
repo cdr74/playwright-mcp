@@ -16,14 +16,14 @@
 import 'dotenv/config';
 import { readFile, mkdir, copyFile } from 'node:fs/promises';
 import path from 'node:path';
-import { runClaude } from './lib/claude-runner.js';
+import { DEFAULT_MODEL, runClaude } from './lib/claude-runner.js';
 import { recordPhaseMetrics, summarizePhase } from './lib/metrics.js';
 import { newRunId } from './lib/run-id.js';
 import { seed } from './seed.js';
 import { loadPrimer } from './lib/primer.js';
 import { isolatedCwd, bin } from './lib/isolated-session.js';
 
-const MODEL = process.env.CLAUDE_MODEL ?? 'sonnet';
+const MODEL = process.env.CLAUDE_MODEL ?? DEFAULT_MODEL;
 const TARGET_APP_URL = process.env.TARGET_APP_URL ?? 'http://localhost:8081/';
 const REPO_ROOT = process.cwd();
 const FLOW_PATH = process.argv[2] ?? 'flows/01-add-employee-leave-request.md';
