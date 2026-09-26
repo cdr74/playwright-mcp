@@ -29,8 +29,9 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
   `RUN_ID` produced. Neither single-run runbook above covers this by
   itself.
 - `results.md` — **the headline results**: the create flow on the
-  realistic primer v3 (cost, efficiency, failure causes, quality with
-  measured flakiness).
+  realistic primer v3, baseline and nudged batches (cost, efficiency,
+  failure causes, quality with measured flakiness). Facts only so far;
+  conclusions still to come.
 - `test-bed-evolution.md` — development history: the N=1 pair and the
   two primer-v1/v2 batches, what each taught us (contamination, timeouts,
   toolset, the primer's weight), full analysis kept as it was. Lessons,
@@ -44,5 +45,6 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
   above, one practice per criterion. Wired in (opt-in, symmetric) via
   `NUDGE_QUALITY=1` / the `*:nudged` npm scripts - it's the input half of
   the baseline-vs-nudged comparison (does explicit guidance change
-  generated quality, and does it change the MCP/Codegen gap?). No nudged
-  runs exist yet - see `TODO.md`.
+  generated quality, and does it change the MCP/Codegen gap?). Run on
+  primer v3; results in `results.md`. Note that it's fed verbatim,
+  including its benchmark-describing intro (see `TODO.md`).

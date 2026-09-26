@@ -73,9 +73,8 @@ starts on them, per `CLAUDE.md`.
       querying without parsing the prefix. `generate-mcp.ts` warns loudly
       if its `NUDGE_QUALITY` and the `RUN_ID` prefix it was handed
       disagree.
-      - **Not yet run.** No nudged runs exist yet. Tracked with the rest
-        of the actual-run work in Phase 4 below ("Run both conditions
-        3 repeats each").
+      - **Run 2026-09-26 on primer v3** (see Phase 4 below and
+        `docs/results.md`).
 - [x] **[DECISION]** MCP toolset: **the full playwright-mcp toolset *is*
       the MCP condition** (`CLAUDE.md` decision 13). Found in the first
       repeat batch analysis that `claude -p --tools` only restricts
@@ -557,8 +556,26 @@ thing anyone reproducing this repo would hit again.
       testing "future" leave (verified with a past-date probe).
 - [x] **[DECISION]** Nudged batch primer: **v3**, compared against the
       v3 baseline (2026-09-26; it was v2 before v3 existed).
-- [ ] `npm run repeat:nudged` (v3 is the default, so no flag). Wiring
-      done, no data yet. Run after the v3 baseline.
+- [x] **v3 nudged batch** (`results/repeat-run-log-20260926T095822Z.txt`,
+      all 6 runs complete, clean; best-practices text verified present in
+      exactly the code-writing phases). MCP:Codegen cost **5.5x** ($1.23
+      vs $0.22): MCP cost 2.4x its baseline (all of it in generate, which
+      now debugged in the live browser, 34–48 browser calls vs 0), Codegen
+      cost −47% (its first attempt now navigates, using the nudge's
+      relative-`goto` example). Quality up in both (MCP 24.7, Codegen
+      26.7); all 12 v3 specs 5/5. Written up in `docs/results.md`.
+- [ ] **[DECISION]** `docs/testing-best-practices.md` is fed verbatim,
+      and its opening paragraphs describe the benchmark (including that
+      `docs/quality-rubric.md` is "what an agent gets scored against"),
+      plus a relative-`goto` example that carries a little app knowledge.
+      The nudged batch ran with both. Options: keep as-is and caveat it
+      (done in `docs/results.md`), or split agent-facing text from the
+      human intro (a new "nudge v2", like the primer versions) and re-run.
+- [x] Fixed `run-repeats.sh` logging the variant as `nudged:nudged`
+      (a parameter-expansion slip; `metrics.json` was always right).
+      Corrected in the nudged batch's log.
+- [ ] **Conclusions** from the v3 baseline and nudged batches (with the
+      user).
 - [ ] More repeats per cell - n=3 shows direction but doesn't estimate
       distributions; MCP had one expensive outlier in each development
       batch.

@@ -1,0 +1,30 @@
+{
+  "runId": "codegen-nudged-2026-09-26T10-37-05-330Z",
+  "condition": "codegen",
+  "promptVariant": "nudged",
+  "primerVersion": "v3",
+  "phases": [
+    {
+      "phase": "generate",
+      "model": "claude-sonnet-5",
+      "resolvedModels": [
+        "claude-sonnet-5"
+      ],
+      "sessionId": "23cdd659-c40b-4d6a-804b-fe7ab6ac9e91",
+      "inputTokens": 22,
+      "outputTokens": 18724,
+      "cacheCreationInputTokens": 23735,
+      "cacheReadInputTokens": 174734,
+      "costUsd": 0.31717080000000003,
+      "turns": 11,
+      "toolCallCounts": {
+        "mcp__tools__write_file": 5,
+        "mcp__tools__run_playwright_test": 5
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-26T10:37:05.332Z",
+      "finishedAt": "2026-09-26T10:41:13.923Z",
+      "durationMs": 244489
+    }
+  ]
+}

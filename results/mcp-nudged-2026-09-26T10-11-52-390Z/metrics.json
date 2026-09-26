@@ -1,0 +1,69 @@
+{
+  "runId": "mcp-nudged-2026-09-26T10-11-52-390Z",
+  "condition": "mcp",
+  "promptVariant": "nudged",
+  "primerVersion": "v3",
+  "phases": [
+    {
+      "phase": "explore",
+      "model": "claude-sonnet-5",
+      "resolvedModels": [
+        "claude-sonnet-5"
+      ],
+      "sessionId": "192a8da6-2b39-4bf9-8627-1c5c3c1ee91f",
+      "inputTokens": 76,
+      "outputTokens": 5483,
+      "cacheCreationInputTokens": 37983,
+      "cacheReadInputTokens": 989547,
+      "costUsd": 0.40482339999999994,
+      "turns": 41,
+      "toolCallCounts": {
+        "mcp__playwright__browser_navigate": 3,
+        "mcp__playwright__browser_snapshot": 9,
+        "mcp__playwright__browser_type": 8,
+        "mcp__playwright__browser_click": 10,
+        "mcp__playwright__browser_wait_for": 3,
+        "mcp__playwright__browser_find": 2,
+        "mcp__playwright__browser_evaluate": 1,
+        "mcp__playwright__browser_press_key": 2,
+        "mcp__playwright__browser_network_requests": 1,
+        "mcp__tools__write_file": 1
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-26T10:11:52.392Z",
+      "finishedAt": "2026-09-26T10:13:40.928Z",
+      "durationMs": 104309
+    },
+    {
+      "phase": "generate",
+      "model": "claude-sonnet-5",
+      "resolvedModels": [
+        "claude-sonnet-5"
+      ],
+      "sessionId": "0642e6c3-582b-44d9-ad00-1b117b63a9f0",
+      "inputTokens": 104,
+      "outputTokens": 16969,
+      "cacheCreationInputTokens": 57043,
+      "cacheReadInputTokens": 2036859,
+      "costUsd": 0.8054418000000001,
+      "turns": 57,
+      "toolCallCounts": {
+        "mcp__playwright__browser_navigate": 5,
+        "mcp__playwright__browser_snapshot": 10,
+        "mcp__playwright__browser_evaluate": 1,
+        "mcp__playwright__browser_click": 15,
+        "mcp__playwright__browser_type": 7,
+        "mcp__tools__write_file": 4,
+        "mcp__tools__run_playwright_test": 4,
+        "mcp__playwright__browser_fill_form": 1,
+        "mcp__playwright__browser_find": 4,
+        "mcp__playwright__browser_wait_for": 1,
+        "mcp__playwright__browser_press_key": 4
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-26T10:13:44.252Z",
+      "finishedAt": "2026-09-26T10:19:37.195Z",
+      "durationMs": 348826
+    }
+  ]
+}

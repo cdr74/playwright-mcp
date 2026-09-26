@@ -1,0 +1,7 @@
+run_id repeat condition variant primer
+mcp-nudged-2026-09-26T09-59-47-358Z 1 mcp nudged v3
+codegen-nudged-2026-09-26T10-07-21-338Z 1 codegen nudged v3
+mcp-nudged-2026-09-26T10-11-52-390Z 2 mcp nudged v3
+codegen-nudged-2026-09-26T10-21-08-935Z 2 codegen nudged v3
+mcp-nudged-2026-09-26T10-25-26-038Z 3 mcp nudged v3
+codegen-nudged-2026-09-26T10-37-05-330Z 3 codegen nudged v3

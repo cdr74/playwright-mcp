@@ -11,24 +11,44 @@ tests two ways:
   recording and only sees terse `npx playwright test` output, with no live
   page.
 
-> ### 📊 Results → **[docs/results.md](docs/results.md)**
->
-> With app notes of the kind a real tester keeps (primer v3), **MCP costs
-> only ~1.2x as much as Codegen** per generated test ($0.51 vs $0.42), is
-> ~2.5x faster, and gets to green almost immediately, while Codegen needs
-> ~8 blind test runs. Test quality is about equal (22.7 vs 23.3 of 28) and
-> all six specs pass 5/5 re-runs.
+## What has been tested so far
 
-| Means per run (primer v3, n=3) | MCP | Codegen |
-|---|---|---|
-| Cost | $0.51 | $0.42 |
-| Turns | 45 | 18 |
-| Test runs to green | 1.3 | 8.3 |
-| Wall clock | 3.3 min | 8.4 min |
-| Quality (/28) | 22.7 | 23.3 |
+| Flow | Variant | MCP | Codegen | Status |
+|---|---|---|---|---|
+| **Create a new test** (add employee → assign leave → verify) | Baseline: task + app notes | 3 runs | 3 runs | ✅ measured |
+| | Nudged: + testing best-practices guidance | 3 runs | 3 runs | ✅ measured |
+| **Heal a test that used to pass** (after a label or DOM change in the app) | | | | 🔜 designed, not built |
 
-How we got here, including a 6.3x gap that turned out to depend on an
-answer-key-level primer: [docs/test-bed-evolution.md](docs/test-bed-evolution.md).
+All measured runs: model `claude-sonnet-5`, app-knowledge primer v3
+(short notes of the kind a tester keeps), one self-hosted OrangeHRM 5.9
+install reset before every run. Earlier development runs with more
+detailed primers are kept separately in
+[docs/test-bed-evolution.md](docs/test-bed-evolution.md) and aren't part
+of these numbers.
+
+## First facts
+
+Means per run, n=3 per cell. Full tables, per-run data, failure analysis
+and caveats: **[docs/results.md](docs/results.md)**. Conclusions are
+still to be drawn.
+
+| | MCP baseline | Codegen baseline | MCP nudged | Codegen nudged |
+|---|---|---|---|---|
+| Cost (list-price equivalent) | $0.51 | $0.42 | $1.23 | $0.22 |
+| **MCP : Codegen cost** | **1.2x** | | **5.5x** | |
+| Test runs until the test passed | 1.3 | 8.3 | 5.0 | 3.0 |
+| Wall clock | 3.3 min | 8.4 min | 7.5 min | 2.7 min |
+| Quality score (/28, [rubric](docs/quality-rubric.md)) | 22.7 | 23.3 | 24.7 | 26.7 |
+| Specs passing 5 of 5 re-runs | 3/3 | 3/3 | 3/3 | 3/3 |
+
+- **Baseline:** MCP's cost is mostly exploring the live app (~90%);
+  after that its test usually passed on the first run. Codegen, which
+  can't see the app, needed ~8 test runs, each rewriting the whole file.
+- **Nudged:** guidance on test-writing practices raised quality in both
+  conditions. It raised MCP's cost 2.4x (new assertions failed and MCP
+  debugged them in the live browser) and cut Codegen's by about half.
+- In both batches, some MCP specs hardcode values the agent saw while
+  exploring (a leave date, a first name). No Codegen spec does.
 
 ## Why
 
@@ -133,20 +153,14 @@ Each run writes its spec, `metrics.json` and (for MCP) `test-plan.md` to
 gitignored ([`results/README.md`](results/README.md)).
 [`docs/run-repeats.md`](docs/run-repeats.md) covers batches in detail.
 
-## Status and what's next
+## What's next
 
-- ✅ Test **generation**: both conditions built. Two development batches
-  have been run and analysed ([evolution](docs/test-bed-evolution.md)).
-- ✅ **Realistic baseline** (primer v3): run and analysed, the headline
-  result.
-- ⏳ **Nudged** batch (best-practice guidance added to the prompt): wired
-  up, not yet run.
-- 🔜 Test **healing**: change the app under a working test (one label
+- **Conclusions** from the two generation batches.
+- **Test healing:** change the app under a working test (one label
   change, one DOM change) and measure what it costs to fix it, and
-  whether the fix keeps the test honest. We compare Playwright's own
-  MCP-based healer against an agent that only has test output and
-  Playwright's failure snapshot. Designed, not built yet (`CLAUDE.md`
-  decision 15).
+  whether the fix keeps the test honest. Playwright's own MCP-based
+  healer vs an agent that only has test output and Playwright's failure
+  snapshot. Designed (`CLAUDE.md` decision 15), not built yet.
 
 Details are in [`TODO.md`](TODO.md).
 

@@ -35,13 +35,14 @@ cd "$REPO_ROOT"
 CONDITION="both"
 REPEATS=3
 SUFFIX=""
+VARIANT="baseline"
 PRIMER="${PRIMER:-v3}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --condition) CONDITION="$2"; shift 2 ;;
     --repeats) REPEATS="$2"; shift 2 ;;
-    --nudged) SUFFIX=":nudged"; shift ;;
+    --nudged) SUFFIX=":nudged"; VARIANT="nudged"; shift ;;
     --primer) PRIMER="$2"; shift 2 ;;
     -h|--help)
       echo "Usage: $0 [--condition mcp|codegen|both] [--repeats N] [--nudged] [--primer v1|v2|v3]"
@@ -64,7 +65,7 @@ export PRIMER
 LOG_FILE="results/repeat-run-log-$(date -u +%Y%m%dT%H%M%SZ).txt"
 echo "run_id repeat condition variant primer" > "$LOG_FILE"
 echo "==> Logging RUN_IDs to $LOG_FILE"
-echo "==> Condition: $CONDITION, repeats: $REPEATS, variant: ${SUFFIX:+nudged}${SUFFIX:-baseline}, primer: $PRIMER"
+echo "==> Condition: $CONDITION, repeats: $REPEATS, variant: $VARIANT, primer: $PRIMER"
 
 reset_app() {
   echo "==> Resetting app to a clean, known state"
@@ -92,7 +93,7 @@ run_mcp() {
     echo "!! Could not parse a RUN_ID from explore:mcp${SUFFIX}'s output - skipping generate for this repeat." >&2
     return 1
   fi
-  echo "$run_id $i mcp ${SUFFIX:+nudged}${SUFFIX:-baseline} $PRIMER" >> "$LOG_FILE"
+  echo "$run_id $i mcp $VARIANT $PRIMER" >> "$LOG_FILE"
   RUN_ID="$run_id" npm run "generate:mcp${SUFFIX}"
 }
 
@@ -108,7 +109,7 @@ run_codegen() {
     echo "!! Could not parse a RUN_ID from bench:codegen${SUFFIX}'s output (run failed or was killed)." >&2
     return 1
   fi
-  echo "$run_id $i codegen ${SUFFIX:+nudged}${SUFFIX:-baseline} $PRIMER" >> "$LOG_FILE"
+  echo "$run_id $i codegen $VARIANT $PRIMER" >> "$LOG_FILE"
 }
 
 for i in $(seq 1 "$REPEATS"); do

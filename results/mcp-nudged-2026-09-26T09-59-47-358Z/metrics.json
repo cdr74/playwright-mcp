@@ -1,0 +1,64 @@
+{
+  "runId": "mcp-nudged-2026-09-26T09-59-47-358Z",
+  "condition": "mcp",
+  "promptVariant": "nudged",
+  "primerVersion": "v3",
+  "phases": [
+    {
+      "phase": "explore",
+      "model": "claude-sonnet-5",
+      "resolvedModels": [
+        "claude-sonnet-5"
+      ],
+      "sessionId": "674ed4e2-6efe-44de-a8c2-bbc500b1ae08",
+      "inputTokens": 58,
+      "outputTokens": 5595,
+      "cacheCreationInputTokens": 43975,
+      "cacheReadInputTokens": 687762,
+      "costUsd": 0.36951839999999997,
+      "turns": 33,
+      "toolCallCounts": {
+        "mcp__playwright__browser_navigate": 2,
+        "mcp__playwright__browser_snapshot": 9,
+        "mcp__playwright__browser_type": 7,
+        "mcp__playwright__browser_click": 10,
+        "mcp__playwright__browser_wait_for": 2,
+        "mcp__playwright__browser_find": 1,
+        "mcp__tools__write_file": 1
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-26T09:59:47.361Z",
+      "finishedAt": "2026-09-26T10:01:29.820Z",
+      "durationMs": 93280
+    },
+    {
+      "phase": "generate",
+      "model": "claude-sonnet-5",
+      "resolvedModels": [
+        "claude-sonnet-5"
+      ],
+      "sessionId": "70a3b8e7-5b69-4911-aab4-53a8351df40c",
+      "inputTokens": 90,
+      "outputTokens": 15299,
+      "cacheCreationInputTokens": 50311,
+      "cacheReadInputTokens": 1494237,
+      "costUsd": 0.6532614,
+      "turns": 45,
+      "toolCallCounts": {
+        "mcp__tools__write_file": 5,
+        "mcp__tools__run_playwright_test": 5,
+        "mcp__playwright__browser_navigate": 3,
+        "mcp__playwright__browser_snapshot": 7,
+        "mcp__playwright__browser_click": 14,
+        "mcp__playwright__browser_fill_form": 1,
+        "mcp__playwright__browser_wait_for": 2,
+        "mcp__playwright__browser_find": 4,
+        "mcp__playwright__browser_type": 3
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-26T10:01:33.342Z",
+      "finishedAt": "2026-09-26T10:05:53.259Z",
+      "durationMs": 255756
+    }
+  ]
+}

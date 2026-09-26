@@ -1,33 +1,50 @@
 # Results
 
-Test **generation** for one flow, on the realistic app primer (v3).
-Batch run 2026-09-26, log `results/repeat-run-log-20260926T081334Z.txt`.
+Test **generation** for one flow, on the realistic app primer (v3), in
+two batches that differ only in the prompt:
 
-## TL;DR
+| Batch | Date | Log | Prompt |
+|---|---|---|---|
+| **Baseline** | 2026-09-26 | `results/repeat-run-log-20260926T081334Z.txt` | Task + app notes |
+| **Nudged** | 2026-09-26 | `results/repeat-run-log-20260926T095822Z.txt` | Same, plus [`testing-best-practices.md`](testing-best-practices.md) in the code-writing phase |
 
-1. **With realistic app knowledge, MCP costs only ~1.2x as much as
-   Codegen** ($0.51 vs $0.42 per test). That's far below the
-   [inspiring post](https://dreaming.press/posts/playwright-mcp-vs-cli-token-cost-browser-agents.html)'s
-   4x–10x. The raw token gap is ~3x; prompt caching shrinks the dollar
-   gap further.
-2. **MCP is faster and far more direct.** MCP: 3.3 min on average, and its
-   generate phase passed on the **first** test run in 2 of 3 runs.
-   Codegen: 8.4 min and **8.3 test runs** to green, because it debugs an
-   app it can't see.
-3. **They spend money in opposite ways.** MCP pays up front for
-   looking: ~90% of its cost is the explore phase, many cheap turns of
-   re-read context. Codegen pays for guessing: every failed attempt
-   rewrites the whole file, so ~55% of its cost is output tokens.
-4. **Quality is high and about equal:** Codegen 23.3 vs MCP 22.7 out of
-   28, a gap smaller than the spread within either condition. **All six
-   specs pass 5/5 re-runs.** Each condition has its own typical weakness.
-   MCP tends to copy concrete values it saw while exploring into the
-   test (2 of 3 hardcode a date, 1 a first name). Codegen uses more CSS
-   selectors (2 of 3).
-5. **Codegen hits the traps the old, detailed primer used to spell out**
-   (a blank starting page, the double-space name, the `-- Select --`
-   option, the auto-filled To Date). It works each one out from test
-   output, at the cost of time and output tokens, not quality.
+This page records what was measured. Conclusions are still to be drawn.
+
+## Measured facts
+
+| Means per run (n=3) | MCP baseline | Codegen baseline | MCP nudged | Codegen nudged |
+|---|---|---|---|---|
+| Cost | $0.51 | $0.42 | $1.23 | $0.22 |
+| **MCP : Codegen cost** | **1.2x** | | **5.5x** | |
+| Turns | 45 | 18 | 90 | 7 |
+| Test runs to green | 1.3 | 8.3 | 5.0 | 3.0 |
+| Wall clock | 3.3 min | 8.4 min | 7.5 min | 2.7 min |
+| Total tokens processed | 1.16M | 0.38M | 2.96M | 0.12M |
+| Quality (/28, [rubric](quality-rubric.md)) | 22.7 | 23.3 | 24.7 | 26.7 |
+| Specs passing 5/5 re-runs | 3 of 3 | 3 of 3 | 3 of 3 | 3 of 3 |
+
+1. **Baseline:** MCP cost 1.2x Codegen. MCP reached green in 1.3 test
+   runs and Codegen in 8.3. About 90% of MCP's cost was its explore phase;
+   about 55% of Codegen's cost was output tokens (every fix rewrites the
+   whole file).
+2. **Nudged:** the ratio moved to 5.5x, in opposite directions. MCP cost
+   went up 2.4x and Codegen cost went down 47%.
+3. **Where MCP's extra nudged cost went:** the generate phase. The added
+   checkpoint assertions failed (all six nudged runs of both conditions
+   hit the double-space employee name), and MCP then debugged in the live browser: 34–48
+   browser calls per generate phase, against 0 in every baseline run.
+   Generate cost $0.84 on average (baseline $0.05).
+4. **Where Codegen's saving came from:** its first attempt no longer
+   started on a blank page. The best-practices text includes a relative
+   `page.goto('/web/index.php/...')` example, and all three nudged runs
+   navigated from their first attempt (0 of 3 in the baseline).
+5. **Quality rose in both conditions with the nudge** (+2.0 MCP, +3.4
+   Codegen). All 12 specs pass 5/5 re-runs. Nudged specs all use
+   relative URLs (baseline: 1 of 6) and most log a diagnostic when an
+   optional step doesn't happen.
+6. **Hardcoded values copied from exploration appear in MCP specs in
+   both batches.** Baseline: 2 of 3 hardcode a leave date, 1 a first
+   name. Nudged: 1 hardcodes a date, 1 a first name. No Codegen spec does.
 
 ## Setup
 
@@ -44,13 +61,20 @@ Batch run 2026-09-26, log `results/repeat-run-log-20260926T081334Z.txt`.
   [`test-bed-evolution.md`](test-bed-evolution.md) and aren't comparable
   to this page.
 - **Model:** `claude-sonnet-5` (pinned; `resolvedModels` confirms it in
-  every phase). **Repeats:** 3 per condition, with a full app reset
-  before every run. **Prompts:** baseline (not nudged).
-- Checked from the transcripts: every session saw primer v3, none
-  carries repo-context contamination, and there were no permission
+  every phase). **Repeats:** 3 per condition per batch, with a full app
+  reset before every run.
+- **Prompts:** baseline = task + app notes. Nudged = the same, plus
+  [`testing-best-practices.md`](testing-best-practices.md) appended to
+  the phases that write code (MCP generate, Codegen). MCP's explore
+  phase is identical in both batches.
+- Checked from the transcripts: every session saw primer v3, the
+  best-practices text appears in exactly the nudged code-writing phases,
+  none carries repo-context contamination, and there were no permission
   denials.
 
-## Cost and efficiency
+## Baseline batch
+
+### Cost and efficiency
 
 | Run | Cost | Turns | Test runs (F=fail, P=pass) | Wall clock | Total tokens | Output share of cost |
 |---|---|---|---|---|---|---|
@@ -74,7 +98,7 @@ against a Claude Code subscription, `CLAUDE.md` decision 3). Tokens
 include cache reads, which are cheap. That's why the token ratio (3.1x)
 is well above the dollar ratio (1.2x).
 
-### MCP: look first, then write it down once
+#### MCP: look first, then write it down once
 
 The explore phase is 86–91% of MCP's cost. It walks the real form and
 writes a test plan. Given that plan, generate wrote a passing test
@@ -82,7 +106,7 @@ straight away in r1 and r2 (3 turns, $0.04 each). r3 failed once, on an
 ambiguous `getByText('Assign Leave')` that matched two elements, then
 passed.
 
-### Codegen: write plausible code, then debug blind
+#### Codegen: write plausible code, then debug blind
 
 Codegen's 22 failed test runs, by what was actually wrong:
 
@@ -100,7 +124,7 @@ All of these are app facts that primer v2 spelled out or implied, and
 v3 deliberately doesn't. Codegen worked each one out from test output,
 which is exactly what its extra turns and output tokens pay for.
 
-## Quality
+### Quality
 
 Rubric: [`quality-rubric.md`](quality-rubric.md) (7 criteria, 0–4 each,
 /28). Criterion 3 is measured: each spec re-run 5 times, serially,
@@ -133,7 +157,7 @@ What the scores rest on:
 | Success signal | toast | API response (status, id, type, date) | toast + form reset | toast | toast | toast |
 | Other | deprecated `type()` | | | | `networkidle` wait | |
 
-Observations:
+Observations (baseline):
 
 - **MCP copies what it saw.** Two MCP specs hardcode the leave date the
   agent picked in the live calendar, and one hardcodes a first name. We
@@ -153,6 +177,92 @@ Observations:
   re-run can't catch this either.
 - Criterion 5 is the least objective; treat its 3-vs-4 differences as
   low confidence.
+
+## Nudged batch
+
+### Cost and efficiency
+
+| Run | Cost | Turns | Test runs (F=fail, P=pass) | Wall clock | Total tokens | Output share of cost |
+|---|---|---|---|---|---|---|
+| MCP r1 `mcp-nudged-…09-59-47-358Z` | $1.02 (explore $0.37 + gen $0.65) | 78 (33+45) | `FFFFP` | 5.8 min | 2.30M | 20% |
+| MCP r2 `mcp-nudged-…10-11-52-390Z` | $1.21 ($0.40 + $0.81) | 98 (41+57) | `FFFP` | 7.6 min | 3.14M | 19% |
+| MCP r3 `mcp-nudged-…10-25-26-038Z` | $1.46 ($0.41 + $1.05) | 95 (37+58) | `FFFFPP` | 9.2 min | 3.43M | 23% |
+| Codegen r1 `codegen-nudged-…10-07-21-338Z` | $0.19 | 5 | `FP` | 2.2 min | 0.08M | 59% |
+| Codegen r2 `codegen-nudged-…10-21-08-935Z` | $0.16 | 5 | `FP` | 1.9 min | 0.07M | 62% |
+| Codegen r3 `codegen-nudged-…10-37-05-330Z` | $0.32 | 11 | `FFFFP` | 4.1 min | 0.22M | 59% |
+
+| Means | MCP | Codegen | MCP : Codegen |
+|---|---|---|---|
+| Cost | $1.23 | $0.22 | **5.5x** |
+| Turns | 90 | 7 | 12.9x |
+| Test runs to green | 5.0 | 3.0 | 1.7x |
+| Wall clock | 7.5 min | 2.7 min | 2.8x |
+| Total tokens processed | 2.96M | 0.12M | 24x |
+
+**MCP explore** (which never gets the best-practices text) cost $0.39 on
+average, in line with the baseline's $0.45. The whole increase is in
+**generate**: $0.84 on average against $0.05, with 34–48 live-browser
+calls per run against 0 in the baseline.
+
+**Failures, by condition.** All six nudged runs failed on the same new
+checkpoint assertion, one the baseline specs didn't have: `toHaveValue`
+on the employee field right after picking a suggestion, which renders
+the name with a double space. MCP then went back to the browser to
+investigate. Codegen fixed it from the test output, which shows the
+expected and received values side by side. The remaining failures were "Successfully Saved"
+not appearing (MCP 5, Codegen 1), a confirmation-dialog check (MCP 2),
+and ambiguous text locators (MCP 1, Codegen 1).
+
+**Codegen's first attempt navigated** in all three runs, using relative
+`page.goto('/web/index.php/...')` calls. In the baseline, all three
+first attempts started on a blank page. The best-practices text contains
+exactly that path shape as an example for "don't hardcode the base URL".
+
+### Quality
+
+Same rubric and protocol as the baseline: 7 criteria, 0–4 each;
+criterion 3 measured with 5 serial re-runs after a full reset and seed.
+
+| Criterion | MCP r1 | MCP r2 | MCP r3 | CG r1 | CG r2 | CG r3 |
+|---|---|---|---|---|---|---|
+| 1. Selector robustness | 4 | 3 | 4 | 3 | 3 | 3 |
+| 2. Assertions (fail-fast + diagnostics) | 4 | 3 | 4 | 4 | 4 | 4 |
+| 3. Pass reliability, 5 measured runs | 4 (5/5) | 4 (5/5) | 4 (5/5) | 4 (5/5) | 4 (5/5) | 4 (5/5) |
+| 4. Playwright best practices | 4 | 3 | 4 | 4 | 3 | 4 |
+| 5. Line count / structure | 4 | 4 | 3 | 4 | 4 | 4 |
+| 6. Task/spec compliance | 2 | 4 | 4 | 4 | 4 | 4 |
+| 7. Config/data separation | 3 | 4 | 1 | 4 | 4 | 4 |
+| **Total /28** | **25** | **25** | **24** | **27** | **26** | **27** |
+
+**Means: MCP 24.7, Codegen 26.7** (baseline: 22.7 and 23.3).
+
+| Signal | MCP r1 | MCP r2 | MCP r3 | CG r1 | CG r2 | CG r3 |
+|---|---|---|---|---|---|---|
+| Lines | 113 | 125 | 114 | 106 | 114 | 116 |
+| CSS locators (with a comment saying why) | 0 | 1 (yes) | 0 | 1 (yes) | 3 (yes) | 4 (yes) |
+| `expect()` calls | 11 | 16 | 12 | 9 | 14 | 11 |
+| Diagnostic log / annotation | 1 | 0 | 2 | 1 | 1 | 2 |
+| Absolute base URL | no | no | no | no | no | no |
+| Both names generated | **no** (`'TestQA'`) | yes | yes | yes | yes | yes |
+| Leave date | computed weekday | computed weekday | **hardcoded** `2026-10-05` | computed weekday | computed weekday | computed weekday |
+| Other | | deprecated `type()`; asserts API response | | | deprecated `type()` | |
+
+Observations (nudged):
+
+- Every nudged spec navigates with relative URLs, and every CSS locator
+  comes with a comment explaining why no accessible alternative exists.
+  Both are items in the best-practices text.
+- The two MCP habits from the baseline both survived the nudge in one
+  run each: a hardcoded first name (`'TestQA'` again, r1) and a leave
+  date picked during exploration (r3). The best-practices text
+  explicitly says to generate all test data.
+- Four specs format the date with `toISOString()` (UTC), the same latent
+  midnight-to-02:00 issue noted for baseline Codegen r3.
+- Codegen r1 searches the employee field by `firstName.slice(0, 8)`
+  (`"Thomas"` plus two digits of a timestamp), a prefix shared by every
+  employee it creates within roughly a quarter of an hour. That's
+  harmless from a clean reset, a latent risk in a long-lived
+  environment.
 
 ## Compared to the inspiring post
 
@@ -184,11 +294,19 @@ never gets a shell (README, "How the comparison works").
   recorded with every run.
 - Quality criteria 2 and 5 involve judgment; the others rest on the
   objective signals above.
+- **The best-practices text carries more than best practices.** It's fed
+  verbatim, and its opening paragraphs describe the benchmark itself
+  (the baseline-vs-nudged comparison, and that
+  `docs/quality-rubric.md` is "what an agent gets scored against
+  afterward"), so the nudged agents knew they were being scored. Its
+  example `page.goto('/web/index.php/...')` also carries a small piece of
+  app knowledge. Both affect how the nudged numbers should be read.
 
 ## Reproducing
 
 ```bash
 npm run repeat:baseline    # both conditions, 3 repeats, primer v3, app reset before every run
+npm run repeat:nudged      # the same, plus docs/testing-best-practices.md
 ```
 
 Run it from a plain terminal, not inside a Claude Code session. See
