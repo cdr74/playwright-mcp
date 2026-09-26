@@ -436,6 +436,12 @@ never gets a shell (README, "How the comparison works").
   recorded with every run.
 - Quality criteria 2 and 5 involve judgment; the others rest on the
   objective signals above.
+- **Healing:** n=3 per cell, one starting spec, two app updates. The MCP
+  healer saw all 97 tools of Playwright's `playwright-test` server instead
+  of the 11 its definition lists, so its cost is an upper bound for the
+  healer as installed. Both heal conditions could run arbitrary code
+  through the tests they wrote (one used that to dump the page's HTML);
+  test runs started in the run's own directory.
 - **The best-practices text carries more than best practices.** It's fed
   verbatim, and its opening paragraphs describe the benchmark itself
   (the baseline-vs-nudged comparison, and that
@@ -449,6 +455,8 @@ never gets a shell (README, "How the comparison works").
 ```bash
 npm run repeat:baseline    # both conditions, 3 repeats, primer v3, app reset before every run
 npm run repeat:nudged      # the same, plus docs/testing-best-practices.md
+npm run survival           # which specs each app update breaks (no LLM)
+npm run repeat:heal        # healing pilot: 2 app updates x 2 conditions x 3 repeats
 ```
 
 Run it from a plain terminal, not inside a Claude Code session. See
