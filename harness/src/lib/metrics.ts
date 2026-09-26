@@ -21,11 +21,26 @@ export interface PhaseMetrics {
   durationMs: number;
 }
 
+export interface HealMeta {
+  /** app/break.sh break applied before the agent started. */
+  break: string;
+  /** Repo-relative path of the checked-in spec the run started from. */
+  startingSpec: string;
+  /** Sanity check: the starting spec was run once after the break, before the agent. */
+  failedBeforeHeal: boolean;
+  /** Tools the agent got, as registered (for the record; differs by condition and by the edit-tool setting). */
+  tools: string[];
+}
+
 export interface RunMeta {
   runId: string;
-  condition: 'mcp' | 'codegen';
+  /** Generation: 'mcp' | 'codegen'. Healing: 'mcp' (Playwright's healer) | 'artifacts' (test output + error-context only). */
+  condition: 'mcp' | 'codegen' | 'artifacts';
+  /** Absent on runs from before healing existed; those are all 'generate'. */
+  flow?: 'generate' | 'heal';
   promptVariant: 'baseline' | 'nudged';
   primerVersion: PrimerVersion;
+  heal?: HealMeta;
 }
 
 interface RunMetrics extends RunMeta {

@@ -184,7 +184,7 @@ assume some `.md` file describes it and needs a pass.
 4. **v1 scope: test generation only.** Test healing (breaking a selector or
    page structure post-hoc and measuring the cost to fix it) is a deliberate
    phase 2, once generation is solid — see `TODO.md` and decision 15
-   (healing design, agreed 2026-09-26, not built yet).
+   (healing design, agreed 2026-09-26; harness built).
 5. **Target app: confirmed — self-hosted OrangeHRM 5.9** via
    `app/docker-compose.yml` + `app/install.sh` (works with Docker or
    Podman; validated end-to-end with Podman 5.7.0/podman-compose 1.5.0,
@@ -289,7 +289,9 @@ assume some `.md` file describes it and needs a pass.
     `v3` and is compared against the v3 baseline (user decision,
     2026-09-26; it was `v2` before v3 existed). See
     `docs/app-knowledge/README.md` for the version table and rules.
-15. **Healing phase design (agreed 2026-09-26, not built yet).**
+15. **Healing phase design (agreed 2026-09-26; harness built, no heal
+    runs yet).** Implementation: `app/break.sh`, `harness/survival-check.sh`,
+    `harness/src/heal.ts`, `conditions/heal/`, runbook `docs/run-heal.md`.
     - **Breaks: label and DOM changes only.** These are the typical
       maintenance cases. A redesigned user flow is effectively a new
       test, which the generation study already covers. Label changes
@@ -313,7 +315,10 @@ assume some `.md` file describes it and needs a pass.
       with its `playwright-test` MCP server). Chosen deliberately over
       our generation-phase MCP setup because it's what people actually
       use; its tool surface and prompt differ from the generation
-      study. Open details: see `TODO.md` Phase 5.
+      study. In real use it runs as a Claude Code subagent with the
+      built-in `Read`/`Edit`/`Write`; here those become scoped
+      `read_file`/`write_file` (+ optional `edit_file`). Open details:
+      see `TODO.md` Phase 5.
     - **Integrity is scored from the diff, via a rubric** (no
       deliberate real-regression probe): no assertion removed or
       weakened, no step dropped, no `skip`/`fixme`, no locator widened

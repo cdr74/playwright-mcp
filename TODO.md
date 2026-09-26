@@ -580,7 +580,7 @@ thing anyone reproducing this repo would hit again.
       distributions; MCP had one expensive outlier in each development
       batch.
 
-## Phase 5 — Test healing (designed, not built)
+## Phase 5 — Test healing (harness built, not yet run)
 
 Design agreed 2026-09-26: `CLAUDE.md` decision 15.
 
@@ -625,14 +625,40 @@ Design agreed 2026-09-26: `CLAUDE.md` decision 15.
         the app before every spec**, the same as the rubric's
         flakiness protocol. Every spec uses the "Type for hints..."
         placeholder, so that label change should break all of them.
-- [ ] **[DECISION]** Pick the fixed starting spec (likely one of the
-      existing generated specs that uses both a role locator and a CSS
-      locator on the affected elements, so both breaks break it).
-- [ ] Zero-LLM survival check: all generated specs × each break.
-- [ ] `run_playwright_test`: return `error-context.md` on failure
-      (heal condition only; the generation tool stays unchanged).
-- [ ] Heal runner(s) + integrity rubric (`docs/quality-rubric.md`
-      addition or a sibling doc), same `metrics.json` shape.
+- [x] `app/break.sh`: four candidate app updates (`label-assign-button`,
+      `label-employee-hint`, `dom-select`, `dom-autocomplete`), each
+      checked with a browser probe (rendered change, behaviour intact,
+      autocomplete and dropdown still usable).
+- [x] `harness/survival-check.sh` (`npm run survival`): every break ×
+      every primer-v3 spec, full reset per pair, results to
+      `results/survival-<ts>.txt`. First full run in progress.
+- [x] `mcp-tools-server.ts` heal mode, all opt-in via env so the
+      generation tool surface is unchanged (checked: default tool list is
+      still `write_file`, `run_playwright_test`): scoped `read_file`,
+      optional `edit_file` (find-and-replace), per-run Playwright config,
+      `error-context.md` appended on failure. File tools tested through a
+      real MCP client (read, edit, ambiguous-match rejection, `$&`
+      safety, path-traversal guard).
+- [x] `harness/src/heal.ts` (`HEAL_BREAK=<b> npm run heal:mcp` /
+      `heal:artifacts`), `conditions/heal/artifacts-prompt.md` (healer
+      text, steps 1–3 adapted), runbook `docs/run-heal.md`. Aborts
+      before spending tokens if the starting spec still passes after the
+      break. Saves `heal.diff`. **Not yet run end to end** (needs a plain
+      terminal).
+- [x] Draft integrity rubric: `docs/heal-rubric.md` (for review).
+- [ ] **[DECISION]** Pick the fixed starting spec and the pilot label +
+      DOM break, from the survival results. Check it into
+      `fixtures/heal/add-employee-leave.spec.ts`.
+- [ ] **[DECISION]** `edit_file` for both heal conditions or neither?
+      In real use the healer (a Claude Code subagent) edits with the
+      built-in `Edit`, a patch tool; without it every fix is a
+      whole-file rewrite, which dominated Codegen's generation cost.
+- [ ] **[DECISION]** Review `conditions/heal/artifacts-prompt.md` and
+      `docs/heal-rubric.md`.
+- [ ] Smoke-test one heal run per condition (user, plain terminal), then
+      the pilot batch: 2 breaks × 2 conditions × 3 repeats.
+- [ ] Heal repeat script (like `run-repeats.sh`), once the pilot shape
+      is confirmed.
 
 ## Nice-to-haves (not scoped, don't build unprompted)
 

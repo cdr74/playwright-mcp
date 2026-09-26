@@ -17,7 +17,7 @@ tests two ways:
 |---|---|---|---|---|
 | **Create a new test** (add employee → assign leave → verify) | Baseline: task + app notes | 3 runs | 3 runs | ✅ measured |
 | | Nudged: + testing best-practices guidance | 3 runs | 3 runs | ✅ measured |
-| **Heal a test that used to pass** (after a label or DOM change in the app) | | | | 🔜 designed, not built |
+| **Heal a test that used to pass** (after a label or DOM change in the app) | | | | 🛠️ harness built, not yet run |
 
 All measured runs: model `claude-sonnet-5`, app-knowledge primer v3
 (short notes of the kind a tester keeps), one self-hosted OrangeHRM 5.9
@@ -160,7 +160,8 @@ gitignored ([`results/README.md`](results/README.md)).
   change, one DOM change) and measure what it costs to fix it, and
   whether the fix keeps the test honest. Playwright's own MCP-based
   healer vs an agent that only has test output and Playwright's failure
-  snapshot. Designed (`CLAUDE.md` decision 15), not built yet.
+  snapshot. Harness built ([runbook](docs/run-heal.md)); the starting
+  spec and pilot breaks are being chosen.
 
 Details are in [`TODO.md`](TODO.md).
 

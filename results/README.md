@@ -36,6 +36,15 @@ condition, one phase named `"generate"` for comparability). See
   waiting on the automated scorer (`TODO.md` Phase 3) so the field shape
   is set once, not guessed at now and reshaped later.
 
+Healing runs (`heal-mcp-…` / `heal-artifacts-…`) also keep `heal.diff`
+(healed spec vs the starting spec, what the integrity rubric scores), and
+their `metrics.json` carries `flow: "heal"` plus a `heal` block (break,
+starting spec, pre-heal failure check, tools). Generation runs from
+before healing existed have no `flow` field; they're all generation.
+
+`results/survival-<timestamp>.txt` — zero-LLM survival checks: one line
+per (break, spec) pair, `PASS` or `FAIL` plus the first error.
+
 ## `results/raw/<run-id>/` — gitignored, local only
 
 `<phase>-transcript.jsonl` — a copy of that phase's full Claude Code

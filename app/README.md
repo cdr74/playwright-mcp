@@ -91,6 +91,13 @@ conditions use. You don't need a separate step for that though -
 first move (`npm run seed`'s logic, still available standalone too) - see
 `harness/README.md`.
 
+## App updates for the healing study
+
+`break.sh <name>` (`npm run break:app -- <name>`, `--list` for names)
+applies one label or DOM change to the running app, the kind of update
+that breaks a test that used to pass. A normal reset undoes it. See
+`docs/run-heal.md`.
+
 ## Open items
 
 None currently blocking either condition — see `TODO.md` for what's next.

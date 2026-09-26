@@ -12,14 +12,18 @@
     "seed": "tsx harness/src/seed.ts",
     "verify:tools": "playwright --version && playwright-mcp --version",
     "cleanup:app": "app/cleanup.sh",
+    "break:app": "app/break.sh",
     "explore:mcp": "tsx harness/src/explore-mcp.ts",
     "explore:mcp:nudged": "NUDGE_QUALITY=1 tsx harness/src/explore-mcp.ts",
     "generate:mcp": "tsx harness/src/generate-mcp.ts",
     "generate:mcp:nudged": "NUDGE_QUALITY=1 tsx harness/src/generate-mcp.ts",
     "bench:codegen": "tsx harness/src/run-codegen.ts",
     "bench:codegen:nudged": "NUDGE_QUALITY=1 tsx harness/src/run-codegen.ts",
+    "heal:mcp": "tsx harness/src/heal.ts mcp",
+    "heal:artifacts": "tsx harness/src/heal.ts artifacts",
     "repeat:baseline": "harness/run-repeats.sh",
-    "repeat:nudged": "harness/run-repeats.sh --nudged"
+    "repeat:nudged": "harness/run-repeats.sh --nudged",
+    "survival": "harness/survival-check.sh"
   },
   "license": "MIT",
   "dependencies": {

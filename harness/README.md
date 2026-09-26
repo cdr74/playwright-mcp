@@ -24,7 +24,10 @@ decision 3 for the full reasoning and mechanics.
   transcript file afterward.
 - `src/mcp-tools-server.ts` — a small local MCP server (not a client)
   exposing `write_file` and `run_playwright_test`, both scoped to a single
-  run's output directory with a path-traversal guard. Registered via
+  run's output directory with a path-traversal guard. Healing runs also
+  switch on `read_file` / `edit_file`, a per-run Playwright config, and
+  `error-context.md` in failure output, all through env vars; generation
+  runs never set them. Registered via
   `--mcp-config` for every phase of both conditions — never give an agent
   Claude Code's native, unscoped `Write`/`Bash` instead.
 - `src/lib/metrics.ts`, `src/lib/run-id.ts` — per-run `metrics.json`
@@ -52,6 +55,13 @@ decision 3 for the full reasoning and mechanics.
   excluded from `--tools` (see `CLAUDE.md` decision 1). Starts from
   `fixtures/01-add-employee-leave-request.codegen.ts`, see
   `fixtures/README.md`.
+- `src/heal.ts` (`npm run heal:mcp` / `heal:artifacts`, with
+  `HEAL_BREAK=<name>`) — the test-healing flow: applies an app update,
+  checks the starting spec really fails, then runs one healing phase
+  (Playwright's own healer vs a test-output-only agent). See
+  `docs/run-heal.md`.
+- `survival-check.sh` (`npm run survival`) — zero-LLM check of which
+  already-generated specs each app update breaks. See `docs/run-heal.md`.
 - `run-repeats.sh` (`npm run repeat:baseline` / `repeat:nudged`, not
   under `src/` since it's a shell orchestrator, not TypeScript) — runs N
   repeats of one or both conditions, resetting the app before *every*
