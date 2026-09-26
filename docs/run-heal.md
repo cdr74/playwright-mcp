@@ -82,6 +82,7 @@ generation. What the runner (`harness/src/heal.ts`) does:
 | Task message | "This test passed on the previous release of the app and fails after today's app update. Fix it. The test is `tests/add-employee-leave.spec.ts` in your output directory." | same |
 | Test runner | Playwright's `playwright-test` MCP server (`playwright run-test-mcp-server --headless -c <per-run config>`): `test_run`, `test_debug`, `test_list`, and browser tools while a test is paused | Our `run_playwright_test` (same per-run config); on failure it appends each failed test's `error-context.md` page snapshot |
 | File tools | Scoped `read_file`, `write_file`, `edit_file` (find-and-replace patch) | same |
+| Tools actually offered | All 97 tools of the `playwright-test` server (planner, generator, full browser set), not just the 11 in the healer's definition; see the caveat below | as listed |
 | Shell / built-in tools | none | none |
 | Working directory of test runs | the run's output directory | same |
 
@@ -102,6 +103,17 @@ Accepted and documented (user decision 2026-09-26). Test runs start
 in the run's output directory, so relative writes stay inside the run,
 and the runner records every extra file left there as `leftoverFiles`
 in `metrics.json`.
+
+### Caveat: the healer's tool list
+
+Playwright's healer definition lists 11 tools, and installed as a Claude
+Code subagent it only gets those. Here it sees all 97 tools of its MCP
+server, because `claude -p --tools` can't restrict MCP-server tools
+(`CLAUDE.md` decision 3). It therefore pays for more tool definitions in
+context, and can do more (the smoke run used `browser_click` and
+`browser_resume`, which aren't on its list). Kept that way by decision;
+read the MCP condition's cost as an upper bound for the healer as
+installed.
 
 ## 4. The pilot batch
 

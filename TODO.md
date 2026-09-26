@@ -670,6 +670,9 @@ Design agreed 2026-09-26: `CLAUDE.md` decision 15.
       start in the run's output directory (the throwaway test had written
       into the repo root; user decision: accept test code's reach,
       document it, keep relative writes inside the run).
+- [x] **[DECISION]** Healer tool list: run the pilot with all 97 tools of
+      the `playwright-test` server, caveated (its own definition lists 11;
+      a filtering proxy was the alternative).
 - [ ] Then
       the pilot batch (`npm run repeat:heal`): 2 breaks × 2 conditions ×
       3 repeats.

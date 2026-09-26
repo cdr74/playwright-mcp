@@ -335,6 +335,14 @@ assume some `.md` file describes it and needs a pass.
       directory, so relative writes stay inside it, and leftover files
       are recorded in `metrics.json`. Applies to generation too, where
       no agent has used it so far.
+    - **The healer sees all 97 tools of Playwright's `playwright-test`
+      server, not the 11 its own definition lists** (user decision
+      2026-09-26, run as is and caveat). Installed as a real Claude Code
+      subagent it would only get its 11; `claude -p --tools` can't
+      restrict MCP-server tools (decision 3). So in this study the healer
+      carries more tool definitions in context, and has more capability
+      (e.g. `browser_click`, `browser_resume`), than in real use. Report
+      its cost with that caveat.
     - **Integrity is scored from the diff, via a rubric** (no
       deliberate real-regression probe): no assertion removed or
       weakened, no step dropped, no `skip`/`fixme`, no locator widened
