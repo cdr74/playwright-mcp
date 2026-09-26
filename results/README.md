@@ -42,6 +42,9 @@ their `metrics.json` carries `flow: "heal"` plus a `heal` block (break,
 starting spec, pre-heal failure check, tools). Generation runs from
 before healing existed have no `flow` field; they're all generation.
 
+`results/heal-run-log-<timestamp>.txt` — the `RUN_ID`s of one healing
+batch (`npm run repeat:heal`).
+
 `results/survival-<timestamp>.txt` — zero-LLM survival checks: one line
 per (break, spec) pair, `PASS` or `FAIL` plus the first error.
 

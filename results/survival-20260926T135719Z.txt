@@ -1,0 +1,49 @@
+# break run_id result first_error
+label-assign-button codegen-2026-09-26T08-18-58-826Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-assign-button codegen-2026-09-26T08-33-30-390Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-assign-button codegen-2026-09-26T08-51-43-630Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-assign-button codegen-nudged-2026-09-26T10-07-21-338Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-assign-button codegen-nudged-2026-09-26T10-21-08-935Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-assign-button codegen-nudged-2026-09-26T10-37-05-330Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-assign-button mcp-2026-09-26T08-15-01-569Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-assign-button mcp-2026-09-26T08-27-27-503Z FAIL Error: page.waitForResponse: Test timeout of 90000ms exceeded.
+label-assign-button mcp-2026-09-26T08-47-04-742Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-assign-button mcp-nudged-2026-09-26T09-59-47-358Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-assign-button mcp-nudged-2026-09-26T10-11-52-390Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-assign-button mcp-nudged-2026-09-26T10-25-26-038Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-employee-hint codegen-2026-09-26T08-18-58-826Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-employee-hint codegen-2026-09-26T08-33-30-390Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-employee-hint codegen-2026-09-26T08-51-43-630Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-employee-hint codegen-nudged-2026-09-26T10-07-21-338Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-employee-hint codegen-nudged-2026-09-26T10-21-08-935Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-employee-hint codegen-nudged-2026-09-26T10-37-05-330Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-employee-hint mcp-2026-09-26T08-15-01-569Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-employee-hint mcp-2026-09-26T08-27-27-503Z FAIL Error: locator.click: Test timeout of 90000ms exceeded.
+label-employee-hint mcp-2026-09-26T08-47-04-742Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-employee-hint mcp-nudged-2026-09-26T09-59-47-358Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-employee-hint mcp-nudged-2026-09-26T10-11-52-390Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+label-employee-hint mcp-nudged-2026-09-26T10-25-26-038Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+dom-select codegen-2026-09-26T08-18-58-826Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+dom-select codegen-2026-09-26T08-33-30-390Z PASS
+dom-select codegen-2026-09-26T08-51-43-630Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+dom-select codegen-nudged-2026-09-26T10-07-21-338Z PASS
+dom-select codegen-nudged-2026-09-26T10-21-08-935Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+dom-select codegen-nudged-2026-09-26T10-37-05-330Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+dom-select mcp-2026-09-26T08-15-01-569Z PASS
+dom-select mcp-2026-09-26T08-27-27-503Z PASS
+dom-select mcp-2026-09-26T08-47-04-742Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+dom-select mcp-nudged-2026-09-26T09-59-47-358Z PASS
+dom-select mcp-nudged-2026-09-26T10-11-52-390Z FAIL Error: locator.click: Test timeout of 30000ms exceeded.
+dom-select mcp-nudged-2026-09-26T10-25-26-038Z PASS
+dom-autocomplete codegen-2026-09-26T08-18-58-826Z FAIL TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+dom-autocomplete codegen-2026-09-26T08-33-30-390Z PASS
+dom-autocomplete codegen-2026-09-26T08-51-43-630Z PASS
+dom-autocomplete codegen-nudged-2026-09-26T10-07-21-338Z FAIL Error: expect(locator).toBeVisible() failed
+dom-autocomplete codegen-nudged-2026-09-26T10-21-08-935Z PASS
+dom-autocomplete codegen-nudged-2026-09-26T10-37-05-330Z FAIL Error: expect(locator).toBeVisible() failed
+dom-autocomplete mcp-2026-09-26T08-15-01-569Z PASS
+dom-autocomplete mcp-2026-09-26T08-27-27-503Z PASS
+dom-autocomplete mcp-2026-09-26T08-47-04-742Z PASS
+dom-autocomplete mcp-nudged-2026-09-26T09-59-47-358Z PASS
+dom-autocomplete mcp-nudged-2026-09-26T10-11-52-390Z PASS
+dom-autocomplete mcp-nudged-2026-09-26T10-25-26-038Z PASS

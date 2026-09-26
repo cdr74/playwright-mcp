@@ -1,7 +1,9 @@
 # Results
 
 Test **generation** for one flow, on the realistic app primer (v3), in
-two batches that differ only in the prompt:
+two batches that differ only in the prompt, plus the first **healing**
+measurement (which generated specs survive an app update, no LLM
+involved). The generation batches:
 
 | Batch | Date | Log | Prompt |
 |---|---|---|---|
@@ -263,6 +265,26 @@ Observations (nudged):
   employee it creates within roughly a quarter of an hour. That's
   harmless from a clean reset, a latent risk in a long-lived
   environment.
+
+## Healing: which generated specs survive an app update?
+
+The first measurement for the healing flow, with no LLM involved
+(`results/survival-20260926T135719Z.txt`). Each of the 12 primer-v3
+specs above was run once after each of four app updates, from a full
+reset each time ([`run-heal.md`](run-heal.md)).
+
+| App update | Specs that broke |
+|---|---|
+| Button label "Assign" → "Submit" | **12 of 12** |
+| Employee field placeholder "Type for hints..." → "Start typing a name..." | **12 of 12** |
+| CSS classes `oxd-select-*` → `oxd-dropdown-*` (dropdowns) | **6 of 12** |
+| CSS classes `oxd-autocomplete-*` → `oxd-typeahead-*` (employee autocomplete) | **3 of 12** |
+
+Each update broke exactly the specs whose locators depend on what
+changed: the 6 specs that locate the dropdown by `.oxd-select-*` class,
+the 3 that locate suggestions by `.oxd-autocomplete-option`, and every
+spec for the two labels, since all of them find the button and the
+employee field by visible name. No spec survived both kinds of update.
 
 ## Compared to the inspiring post
 

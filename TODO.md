@@ -647,18 +647,23 @@ Design agreed 2026-09-26: `CLAUDE.md` decision 15.
       terminal).
 - [x] Integrity rubric: `docs/heal-rubric.md`, approved 2026-09-26
       (a fix that also improves robustness scores 3 on change size).
-- [ ] **[DECISION]** Pick the fixed starting spec and the pilot label +
-      DOM break, from the survival results. Check it into
-      `fixtures/heal/add-employee-leave.spec.ts`.
+- [x] **First survival check** (`results/survival-20260926T135719Z.txt`,
+      4 breaks × 12 v3 specs): labels broke 12/12 each, `dom-select` 6/12,
+      `dom-autocomplete` 3/12, in each case exactly the specs whose
+      locators depend on the changed label/class.
+- [x] **[DECISION]** Pilot: `label-assign-button` + `dom-select`; starting
+      spec `mcp-nudged-…10-11-52-390Z` → `fixtures/heal/add-employee-leave.spec.ts`
+      (verified: passes unchanged, fails under each break at the expected
+      locator). `harness/run-heal-repeats.sh` (`npm run repeat:heal`)
+      runs the pilot.
 - [x] **[DECISION]** `edit_file` for **both** heal conditions (2026-09-26),
       matching the healer's built-in `Edit` in real use.
 - [x] **[DECISION]** `conditions/heal/artifacts-prompt.md` approved as is
       (fixme escape hatch kept in both). The task message stays ours, not
       Playwright's own "Run all my tests and fix the failing ones".
 - [ ] Smoke-test one heal run per condition (user, plain terminal), then
-      the pilot batch: 2 breaks × 2 conditions × 3 repeats.
-- [ ] Heal repeat script (like `run-repeats.sh`), once the pilot shape
-      is confirmed.
+      the pilot batch (`npm run repeat:heal`): 2 breaks × 2 conditions ×
+      3 repeats.
 
 ## Nice-to-haves (not scoped, don't build unprompted)
 

@@ -51,7 +51,7 @@ for brk in $BREAKS; do
     if out="$(npx playwright test "$spec" --workers=1 --reporter=line 2>&1)"; then
       line="$brk $rid PASS"
     else
-      err="$(echo "$out" | grep -m1 -E 'waiting for|Error:' | sed 's/^ *//' | cut -c1-140)"
+      err="$(echo "$out" | sed 's/\x1b\[[0-9;]*m//g' | grep -m1 -E 'waiting for|Error:' | sed 's/^ *//' | cut -c1-140)"
       line="$brk $rid FAIL $err"
     fi
     echo "$line" | tee -a "$OUT"

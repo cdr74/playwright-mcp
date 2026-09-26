@@ -4,8 +4,12 @@ The test-healing study (`CLAUDE.md` decision 15): a spec that passed on
 the previous app version fails after an app update, and an agent has to
 fix it. This doc pins the inputs: commands, tools, prompts.
 
-**Status:** harness built; the starting spec and the pilot breaks are
-still to be chosen (`TODO.md` Phase 5), so no heal runs exist yet.
+**Status:** harness built and the pilot chosen (below); no heal runs
+exist yet.
+
+**Pilot** (user decision 2026-09-26): breaks `label-assign-button` and
+`dom-select`, starting spec `fixtures/heal/add-employee-leave.spec.ts`,
+2 breaks × 2 conditions × 3 repeats.
 
 ## 0. Prerequisites
 
@@ -41,6 +45,10 @@ harness/survival-check.sh --breaks "dom-select" --runs-from results/repeat-run-l
 For every (break, spec) pair: full reset, seed, break, one run. Writes
 `results/survival-<timestamp>.txt`. Answers "which already-generated
 specs would a given app update break?" at zero token cost.
+
+Result of the first full check (`results/survival-20260926T135719Z.txt`,
+12 primer-v3 specs): each update broke exactly the specs whose locators
+depend on what changed, see `docs/results.md`.
 
 ## 3. One heal run
 
@@ -82,7 +90,16 @@ tools. We swap those for scoped equivalents (the repo convention);
 `edit_file` is the scoped stand-in for `Edit`, and both conditions get it
 (user decision 2026-09-26), so neither pays for whole-file rewrites.
 
-## 4. Scoring
+## 4. The pilot batch
+
+```bash
+npm run repeat:heal       # pilot breaks x both conditions x 3 repeats, reset before every run
+harness/run-heal-repeats.sh --breaks "dom-select" --condition artifacts --repeats 1   # a subset
+```
+
+Logs every `RUN_ID` to `results/heal-run-log-<timestamp>.txt`.
+
+## 5. Scoring
 
 Healed specs are scored with [`heal-rubric.md`](heal-rubric.md)
 (integrity, from `heal.diff`) plus pass rate over 5 re-runs, with the

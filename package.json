@@ -23,6 +23,7 @@
     "heal:artifacts": "tsx harness/src/heal.ts artifacts",
     "repeat:baseline": "harness/run-repeats.sh",
     "repeat:nudged": "harness/run-repeats.sh --nudged",
+    "repeat:heal": "harness/run-heal-repeats.sh",
     "survival": "harness/survival-check.sh"
   },
   "license": "MIT",

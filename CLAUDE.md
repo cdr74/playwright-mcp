@@ -289,8 +289,8 @@ assume some `.md` file describes it and needs a pass.
     `v3` and is compared against the v3 baseline (user decision,
     2026-09-26; it was `v2` before v3 existed). See
     `docs/app-knowledge/README.md` for the version table and rules.
-15. **Healing phase design (agreed 2026-09-26; harness built, no heal
-    runs yet).** Implementation: `app/break.sh`, `harness/survival-check.sh`,
+15. **Healing phase design (agreed 2026-09-26; harness built, pilot
+    chosen, no heal runs yet).** Implementation: `app/break.sh`, `harness/survival-check.sh`,
     `harness/src/heal.ts`, `conditions/heal/`, runbook `docs/run-heal.md`.
     - **Breaks: label and DOM changes only.** These are the typical
       maintenance cases. A redesigned user flow is effectively a new
@@ -322,8 +322,11 @@ assume some `.md` file describes it and needs a pass.
       whole-file rewrites. The non-MCP prompt
       (`conditions/heal/artifacts-prompt.md`: the healer text with steps
       1–3 adapted), our task message and the integrity rubric
-      (`docs/heal-rubric.md`) were approved the same day. Open: the
-      starting spec and pilot breaks (`TODO.md` Phase 5).
+      (`docs/heal-rubric.md`) were approved the same day, as was the
+      pilot: breaks `label-assign-button` + `dom-select`, starting spec
+      `fixtures/heal/add-employee-leave.spec.ts` (copied from
+      `mcp-nudged-…10-11-52-390Z`, no latent date bugs), run with
+      `npm run repeat:heal`.
     - **Integrity is scored from the diff, via a rubric** (no
       deliberate real-regression probe): no assertion removed or
       weakened, no step dropped, no `skip`/`fixme`, no locator widened

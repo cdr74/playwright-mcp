@@ -76,3 +76,18 @@ to `fixtures/01-add-employee-leave-request.codegen.ts`, then fill in below.
     being itself an option tripped up every batch-1 run of *both*
     conditions — `docs/test-bed-evolution.md` §3. Primer v2 spelled it
     out; the realistic v3 deliberately doesn't.)
+
+## Fixture: `heal/add-employee-leave.spec.ts` — the healing study's starting spec
+
+Not a recording: a known-good generated spec, copied unchanged from
+`results/mcp-nudged-2026-09-26T10-11-52-390Z/tests/add-employee-leave.spec.ts`
+(25/28 on the quality rubric, 5/5 re-runs). Both heal conditions start
+from it (`CLAUDE.md` decision 15); the agents aren't told where it came
+from. Chosen by the user on 2026-09-26 from the six v3 specs that fail
+under both pilot app updates, because it has no latent date bugs (local
+weekday date, no `toISOString()`).
+
+Verified on 2026-09-26, each from a full reset: passes on the unchanged
+app; fails under `label-assign-button` at `getByRole('button', { name:
+'Assign' })`; fails under `dom-select` at
+`locator('.oxd-select-text').first()`.

@@ -60,6 +60,8 @@ decision 3 for the full reasoning and mechanics.
   checks the starting spec really fails, then runs one healing phase
   (Playwright's own healer vs a test-output-only agent). See
   `docs/run-heal.md`.
+- `run-heal-repeats.sh` (`npm run repeat:heal`) — the healing pilot:
+  every (break, condition) pair × N repeats, reset before every run.
 - `survival-check.sh` (`npm run survival`) — zero-LLM check of which
   already-generated specs each app update breaks. See `docs/run-heal.md`.
 - `run-repeats.sh` (`npm run repeat:baseline` / `repeat:nudged`, not
