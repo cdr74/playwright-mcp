@@ -107,8 +107,8 @@ assume some `.md` file describes it and needs a pass.
      of Playwright best practices (auto-waiting, no hard sleeps), line
      count, plus two added after real scoring passes - task/spec
      compliance and config/data separation (7 total). See
-     `docs/quality-rubric.md` and `docs/results.md`
-     for the first scores.
+     `docs/quality-rubric.md`, and `docs/test-bed-evolution.md` for
+     the first scores.
 3. **Measurement harness: drives Claude Code (`claude -p`), not the
    Anthropic API directly** — changed from the original plan (billed
    against an existing Claude Code subscription instead of metered API
@@ -233,10 +233,10 @@ assume some `.md` file describes it and needs a pass.
     All runs up to and including that batch used primer v1; compare
     before/after deliberately. The v2 batch showed the primer is the
     largest single factor measured so far: Codegen cost −76%,
-    MCP:Codegen cost ratio 1.16x → 6.3x (`docs/results.md` §A). The primer is fed to the agents verbatim,
-    so don't add benchmark meta-commentary to it (its existing intro
-    paragraph already carries a little — a candidate for trimming, as its
-    own deliberate change).
+    MCP:Codegen cost ratio 1.16x → 6.3x (`docs/test-bed-evolution.md`
+    §A). **Superseded as the baseline by v3 (decision 16).** The primer
+    is fed to the agents verbatim, so it carries no benchmark
+    meta-commentary (v1/v2 still open with some; they're frozen).
 11. **The seed step (`harness/src/seed.ts`) covers more than login**: it
     also does the one-time org setup a fresh OrangeHRM install needs
     before the Leave module works at all (Leave Period, one Leave Type)
@@ -256,7 +256,7 @@ assume some `.md` file describes it and needs a pass.
     should ever need to write a login step.
 12. **Repeat-run count: 3 per condition.** Confirmed after both conditions
     had a first real run to size against (~$2/~10min MCP, ~$0.28/~4min
-    Codegen — see `docs/results.md`), so the count wasn't picked blind.
+    Codegen — see `docs/test-bed-evolution.md`), so the count wasn't picked blind.
     Applies per prompt variant if/when the baseline-vs-nudged comparison
     (`TODO.md`) also gets built — 3 repeats × 2 conditions × 2 variants,
     not 3 repeats total.
@@ -274,14 +274,15 @@ assume some `.md` file describes it and needs a pass.
     fixed setup.** Decided 2026-09-25 after the v1 → v2 change moved the
     MCP:Codegen cost ratio from ~1.2x to ~6.3x — more than anything else
     measured. Each version is a frozen file under `docs/app-knowledge/`
-    (`v1.md`, `v2.md`; never edit a published version, add a new one and
-    register it in `harness/src/lib/primer.ts`). Runs pick one with
-    `PRIMER=<version>` (default `v2`) or `run-repeats.sh --primer`, and
+    (`v1.md`, `v2.md`, `v3.md`; never edit a published version, add a new
+    one and register it in `harness/src/lib/primer.ts`). Runs pick one
+    with `PRIMER=<version>` (default `v3`) or `run-repeats.sh --primer`, and
     record it as `primerVersion` in `metrics.json` (backfilled for every
     earlier run from transcript evidence). **Report every result per
     primer version**; never pool across versions. The nudged batch uses
-    `v2` (user decision). See `docs/app-knowledge/README.md` for the
-    version table and rules.
+    `v3` and is compared against the v3 baseline (user decision,
+    2026-09-26; it was `v2` before v3 existed). See
+    `docs/app-knowledge/README.md` for the version table and rules.
 15. **Healing phase design (agreed 2026-09-26, not built yet).**
     - **Breaks: label and DOM changes only.** These are the typical
       maintenance cases. A redesigned user flow is effectively a new
@@ -313,8 +314,33 @@ assume some `.md` file describes it and needs a pass.
       until it could match the wrong element, smallest diff that does
       the job. Plus the usual pass rate, 5/5 re-runs, cost and
       efficiency.
-    - **Primer: v2 unchanged**, even though it will then describe the
-      old labels. Docs lagging behind the app is realistic.
+    - **Primer: the same for both conditions, in the same slot**
+      (agreed 2026-09-26). Playwright's healer gets its role prompt
+      verbatim, including its `test.fixme()` escape hatch, plus the
+      primer as project context, the way agent definitions run on top of
+      a project's instructions file in practice. The non-MCP condition
+      gets the healer's prompt adapted: browser steps replaced by
+      "read the error-context snapshot". Both get the same task message
+      ("passed on the previous release, fails after today's update").
+      The primer is **v3** (decision 16), unchanged after the break.
+      Docs lagging behind the app is realistic.
+
+16. **Primer v3 = the realistic baseline; v1/v2 results are development
+    history** (decided 2026-09-26). Reviewing v2 against "would a tester
+    actually write this down?": v1/v2 mixed real tester notes with
+    locator-level advice (which real teams keep in code, as helpers, not
+    prose), traps written *after watching agents fail on this exact
+    screen* (so partly an answer key), and our own evidence trail (DB
+    tables, API payloads, repo pointers). v3 keeps only what a tester
+    would write, in a tester's words, and is the default. It covers only
+    the parts of the app this flow touches (a real team's notes would be
+    broader); the user judged that unlikely to change results, and it's
+    listed as a caveat in `docs/results.md`. The create flow
+    gets re-run on v3 and **that** becomes the headline result
+    (`docs/results.md`). v1/v2 batches move to
+    `docs/test-bed-evolution.md`: valuable lessons from building the
+    harness, but not real-world measurements, and kept out of a new
+    reader's main path.
 
 ## Tech stack
 

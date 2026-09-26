@@ -74,5 +74,5 @@ to `fixtures/01-add-employee-leave-request.codegen.ts`, then fill in below.
     cleaning the recording up, that difficulty is itself a real,
     comparable data point. (It was: the `-- Select --` placeholder
     being itself an option tripped up every batch-1 run of *both*
-    conditions, and is documented in app-knowledge primer v2 since —
-    `docs/results.md` §3.)
+    conditions — `docs/test-bed-evolution.md` §3. Primer v2 spelled it
+    out; the realistic v3 deliberately doesn't.)

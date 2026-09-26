@@ -10,7 +10,7 @@ list. **Criteria 6 and 7 are additions**, not part of the original agreed
 axis list — flagging that explicitly per this repo's collaboration model:
 
 - **Criterion 6 (task/spec compliance)** earned its place empirically:
-  scoring the first two real runs (`docs/results.md`) surfaced a case
+  scoring the first two real runs (`docs/test-bed-evolution.md` appendix) surfaced a case
   where an incomplete implementation of the flow spec's "unique, generated
   first *and* last name" requirement directly caused measurable flakiness
   (criterion 3), and none of the original five criteria had a natural
@@ -24,7 +24,7 @@ axis list — flagging that explicitly per this repo's collaboration model:
   `playwright.config.ts`'s `baseURL` — same config available to both,
   one test ignores it. (That N=1 contrast turned out to be noise in batch
   1, where all six specs hardcoded it, then reappeared in batch 2: 3/3
-  Codegen relative, 3/3 MCP absolute — `docs/results.md`.) Criterion 2 was also revised (not just extended)
+  Codegen relative, 3/3 MCP absolute — `docs/test-bed-evolution.md`.) Criterion 2 was also revised (not just extended)
   to fold in two more of those proposed practices — fail-fast checkpoint
   assertions and failure-diagnostic logging — rather than adding two more
   standalone criteria, since both are really about *how* a test asserts,

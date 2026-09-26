@@ -3,7 +3,7 @@
 # clean, known state (app/cleanup.sh + app/install.sh) before *every*
 # individual run - not just once per repeat, and not just once at the
 # start. This matters for real: the Codegen condition's first-run
-# flakiness bug (docs/results.md "Quality") was directly caused by
+# flakiness bug (docs/test-bed-evolution.md appendix) was directly caused by
 # accumulated app state (employees left over from prior runs making the
 # next run's autocomplete search less selective) - resetting between
 # every run is how repeats stay independent measurements instead of a
@@ -15,13 +15,13 @@
 # limitation of testing this from inside Claude Code").
 #
 # Usage:
-#   harness/run-repeats.sh [--condition mcp|codegen|both] [--repeats N] [--nudged] [--primer v1|v2]
+#   harness/run-repeats.sh [--condition mcp|codegen|both] [--repeats N] [--nudged] [--primer v1|v2|v3]
 #
 # Defaults: --condition both --repeats 3 (the confirmed count, see
 # CLAUDE.md decision 12). --nudged runs the baseline-vs-nudged variant
 # (docs/testing-best-practices.md appended - see TODO.md) instead of the
 # unguided baseline. --primer picks the app-knowledge primer version
-# (docs/app-knowledge/<version>.md, default v2 - an explicit experimental
+# (docs/app-knowledge/<version>.md, default v3 - an explicit experimental
 # variable, CLAUDE.md decision 14); it's recorded in every run's
 # metrics.json and in this script's RUN_ID log.
 #
@@ -35,7 +35,7 @@ cd "$REPO_ROOT"
 CONDITION="both"
 REPEATS=3
 SUFFIX=""
-PRIMER="${PRIMER:-v2}"
+PRIMER="${PRIMER:-v3}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -44,7 +44,7 @@ while [[ $# -gt 0 ]]; do
     --nudged) SUFFIX=":nudged"; shift ;;
     --primer) PRIMER="$2"; shift 2 ;;
     -h|--help)
-      echo "Usage: $0 [--condition mcp|codegen|both] [--repeats N] [--nudged] [--primer v1|v2]"
+      echo "Usage: $0 [--condition mcp|codegen|both] [--repeats N] [--nudged] [--primer v1|v2|v3]"
       exit 0 ;;
     *) echo "Unknown argument: $1" >&2; exit 1 ;;
   esac

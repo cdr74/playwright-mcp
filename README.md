@@ -13,44 +13,12 @@ tests two ways:
 
 > ### 📊 Results → **[docs/results.md](docs/results.md)**
 >
-> Short version: **what the agent knows about the app matters more than
-> its tooling.** Adding three paragraphs about app traps to the prompt
-> moved the MCP:Codegen cost ratio from **1.2x to 6.3x**. Test quality is
-> high in both conditions.
-
-## Results at a glance
-
-Two 3-repeat baseline batches (model `sonnet`, flow below), identical
-except for the **app-knowledge primer** both conditions get: v1, then v2
-(v1 plus three app traps every batch-1 run hit).
-
-| Means per run | MCP, v1 | Codegen, v1 | MCP, v2 | Codegen, v2 |
-|---|---|---|---|---|
-| Cost | $0.71 | ≥$0.62* | $0.91 | **$0.15** |
-| Turns | 60 | ≥23* | 73 | **5.7** |
-| Test runs to green | 3.0 | ~11* | 2.3 | 2.3 |
-| Wall clock | 4.1 min | ≥8.8 min* | 4.9 min | **2.0 min** |
-| **MCP : Codegen cost** | **1.16x** | | **6.3x** | |
-| Quality (/28, [rubric](docs/quality-rubric.md)) | 21.7 | 24.0 | 23.3 | **26.3** |
-| Specs passing 5/5 re-runs | 3 of 3 | 2 of 2 finished | 3 of 3 | 3 of 3 |
-
-`*` one batch-1 Codegen run was cut off by a since-fixed timeout; lower
-bounds.
-
-- **Codegen's cost is the price of not knowing the app.** Unable to see
-  the page, it debugs through test output. Once the traps were written
-  down, its cost dropped 76%.
-- **MCP pays for discovery every run.** Even when told about the traps,
-  it checks them live, so its exploration got *longer*.
-- **The [inspiring post](https://dreaming.press/posts/playwright-mcp-vs-cli-token-cost-browser-agents.html)'s
-  4x–10x is reachable only when the non-browsing agent already knows the
-  app.** Prompt caching also keeps the dollar gap far below the token gap
-  (6.3x vs 35x).
-- **Small samples mislead.** A single run said 7x, batch 1 said 1.2x and
-  batch 2 said 6.3x.
-
-Full analysis, per-run tables, cost anatomy, failure taxonomy and caveats
-are in **[docs/results.md](docs/results.md)**.
+> Being re-measured on a realistic baseline: primer v3, the kind of short
+> app notes a real tester would keep. Earlier runs used more detailed
+> primers we wrote while building the harness. They taught us a lot
+> (mainly that **what the agent knows about the app can matter more than
+> its tooling**), but they aren't real-world measurements. That story is
+> in [docs/test-bed-evolution.md](docs/test-bed-evolution.md).
 
 ## Why
 
@@ -85,8 +53,10 @@ that difference is what's being measured.
   knowledge" doc ([`docs/app-knowledge/`](docs/app-knowledge/)) covering
   navigation, forms and known quirks, all observed in the running app. A
   real tester wouldn't start from zero. The primer turned out to be the
-  largest single factor measured, so it's versioned and treated as an
-  experimental variable. Every run records which version it used.
+  largest single factor measured
+  ([how we found out](docs/test-bed-evolution.md)), so it's versioned and
+  every run records which version it used. The current one (v3) is kept
+  deliberately to what a tester would actually write down.
 - **Three axes:** cost (tokens, cache, list-price USD), efficiency
   (turns, tool calls, test runs to green, wall clock) and quality (a
   7-criterion rubric, with flakiness measured by 5 re-runs).
@@ -140,7 +110,7 @@ blocks that when it's done from inside another session
 # Full comparison: both conditions, 3 repeats, app reset before every run (~$3, ~30 min)
 npm run repeat:baseline
 npm run repeat:nudged                      # same, plus docs/testing-best-practices.md
-npm run repeat:baseline -- --primer v1     # older app primer (default: v2)
+npm run repeat:baseline -- --primer v2     # an earlier primer (default: v3)
 
 # Single runs
 npm run explore:mcp                        # prints a RUN_ID
@@ -155,8 +125,10 @@ gitignored ([`results/README.md`](results/README.md)).
 
 ## Status and what's next
 
-- ✅ Test **generation**: both conditions built, two baseline batches
-  run and analysed.
+- ✅ Test **generation**: both conditions built. Two development batches
+  have been run and analysed ([evolution](docs/test-bed-evolution.md)).
+- ⏳ **Realistic baseline** (primer v3): ready to run; it will be the
+  headline result.
 - ⏳ **Nudged** batch (best-practice guidance added to the prompt): wired
   up, not yet run.
 - 🔜 Test **healing**: change the app under a working test (one label

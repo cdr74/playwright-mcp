@@ -4,7 +4,8 @@ Output of benchmark runs, split into what's kept and what isn't.
 Implemented by `harness/src/explore-mcp.ts` / `generate-mcp.ts` (MCP
 condition, two phases) and `harness/src/run-codegen.ts` (Codegen
 condition, one phase named `"generate"` for comparability). See
-`docs/results.md` for the first aggregated write-up across both.
+`docs/results.md` for the headline results and
+`docs/test-bed-evolution.md` for earlier, development-stage runs.
 
 ## `results/<run-id>/` — committed-eligible
 
@@ -14,7 +15,7 @@ condition, one phase named `"generate"` for comparability). See
   exhaust.
 - `metrics.json` — `{ runId, condition, promptVariant, primerVersion, phases: [...] }`
   (`primerVersion`: which `docs/app-knowledge/<version>.md` the run's
-  agents got - `"v1"` or `"v2"`, backfilled for earlier runs from
+  agents got - `"v1"`, `"v2"` or `"v3"` (the realistic baseline), backfilled for earlier runs from
   transcript evidence, `CLAUDE.md` decision 14; never pool results across
   versions. `promptVariant`: `"baseline"` or `"nudged"` - see `TODO.md`
   baseline-vs-nudged decision), one entry per phase (`explore` /
@@ -28,7 +29,7 @@ condition, one phase named `"generate"` for comparability). See
   the agent got blocked from something - a real signal), `startedAt`,
   `finishedAt`, `durationMs`. Doesn't hold quality scores yet -
   `docs/quality-rubric.md` exists and has been applied manually
-  (`docs/results.md`), but wiring scores into `metrics.json` itself is
+  (`docs/test-bed-evolution.md`), but wiring scores into `metrics.json` itself is
   waiting on the automated scorer (`TODO.md` Phase 3) so the field shape
   is set once, not guessed at now and reshaped later.
 

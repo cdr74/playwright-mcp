@@ -55,7 +55,7 @@ starts on them, per `CLAUDE.md`.
       **3**. Deferred twice before this (once before the Codegen runner
       existed, once pending its first real run) so it wasn't picked
       blind — decided once both conditions had real cost/duration numbers
-      to size against (`docs/results.md`). Applies per prompt variant, not
+      to size against (`docs/test-bed-evolution.md`). Applies per prompt variant, not
       just per condition, if the baseline-vs-nudged comparison below also
       gets built (3 × 2 conditions × 2 variants = 12 runs, not 6). See
       `CLAUDE.md` decision 12.
@@ -272,10 +272,10 @@ decisions above) was confirmed to lose no measurement fidelity.
       separation criterion was added, and the assertions criterion
       tightened for fail-fast/diagnostics, after user-proposed additions
       for larger-suite practices. Current totals are out of /28, not the
-      original /24 - see `docs/results.md`. Manual for now, per the
+      original /24 - see `docs/test-bed-evolution.md`. Manual for now, per the
       original plan; automated/LLM-judge pass still a later option, see
       below.
-- [x] First manual scoring pass, both runs from `docs/results.md`
+- [x] First manual scoring pass, both runs from `docs/test-bed-evolution.md`
       (originally MCP 23/24, Codegen 20/24; rescored to MCP 24/28, Codegen
       22/28 after the rubric's criterion-2/7 revisions above - see that doc
       for what changed and why). Criterion 3 (flakiness) was **measured**,
@@ -288,7 +288,7 @@ decisions above) was confirmed to lose no measurement fidelity.
       autocomplete search gets less selective every time the test runs -
       8 "Thomas" employees existed by the time of this scoring pass. A
       literal criterion-6 gap directly caused the criterion-3 flakiness -
-      see `docs/results.md` "Quality" for the full writeup.
+      see `docs/test-bed-evolution.md` "Quality" for the full writeup.
 - [ ] Quality scorer: an automated/LLM-judge pass that runs the rubric
       against a produced spec file without a human doing it by hand. Not
       started - the manual pass above is still the only path today.
@@ -324,7 +324,7 @@ thing anyone reproducing this repo would hit again.
   path in its error so usage can still be recovered. This run's usage
   *was* recovered (dedup by API message id - method validated to match
   two other runs' `metrics.json` exactly): 24 turns, $0.58, ≥10.0 min.
-  Reported in `docs/results.md` as a censored data point, not dropped.
+  Reported in `docs/test-bed-evolution.md` as a censored data point, not dropped.
 
 - **Claude Code was auto-attaching this repo's entire `CLAUDE.md`
   (15,909 chars) plus its auto-memory files to every single benchmark
@@ -485,12 +485,12 @@ thing anyone reproducing this repo would hit again.
 - [x] Ran both conditions once each against the confirmed flow (see the
       first-run entries above under Phase 3). Superseded by the two
       3-repeat batches below.
-- [x] First aggregated write-up: `docs/results.md` - cost (dollar and raw
+- [x] First aggregated write-up: `docs/test-bed-evolution.md` - cost (dollar and raw
       token volume, which tell different stories), efficiency, and a
       qualitative quality read, side by side, with an explicit N=1 caveat
       section. Since rewritten around the repeat batches.
 - [x] Sanity-checked against the inspiring post's ~4x (up to 10x) figure:
-      see `docs/results.md` "How this compares to the inspiring post" -
+      see `docs/test-bed-evolution.md` "How this compares to the inspiring post" -
       raw token volume showed a larger gap (~29x), dollar cost a smaller
       one (~7x), neither straightforwardly confirming or refuting the
       post given it doesn't disclose whether/how it accounted for prompt
@@ -508,7 +508,7 @@ thing anyone reproducing this repo would hit again.
       `results/repeat-run-log-20260925T132116Z.txt`): 3 MCP + 3 Codegen
       runs on the contamination-fixed harness; one Codegen run censored by
       the old 10-min timeout (usage recovered from its transcript, see
-      Gotchas). `docs/results.md` rewritten around it: cost anatomy (MCP
+      Gotchas). `docs/test-bed-evolution.md` rewritten around it: cost anatomy (MCP
       ~80% context cost / many cheap turns vs Codegen ~53% output cost /
       whole-file rewrites), MCP's explore-then-`FP` pattern vs Codegen's
       9–13 blind test iterations, a failure taxonomy, variance, and which
@@ -528,7 +528,7 @@ thing anyone reproducing this repo would hit again.
       ($0.71 → $0.91, exploration got *longer* as it verified the
       documented traps live). MCP:Codegen cost ratio 1.16x → 6.3x.
       Quality rescored with measured flakiness (5x each, reset per spec).
-      Written up as `docs/results.md` §A.
+      Written up as `docs/test-bed-evolution.md` §A.
 - [x] **[DECISION]** The primer is an explicit experimental variable
       (`CLAUDE.md` decision 14). v1 and v2 are frozen files in
       `docs/app-knowledge/` (never edited, new versions get new files),
@@ -538,15 +538,21 @@ thing anyone reproducing this repo would hit again.
       recorded system prompt matched v1 or v2 byte-for-byte; the N=1 pair
       matched v1 except one pre-rename path). Results are reported per
       version, never pooled.
-- [ ] `npm run repeat:nudged` - wiring done, no data yet; **uses app
-      primer v2** (user decision; v2 is the default, so no flag needed).
-      Natural test for the one recurring trap left in batch 2: the
-      confirmation dialog appears asynchronously and
-      `isVisible({ timeout })` doesn't wait for it - Playwright-API
-      knowledge, which is what the nudged primer covers, not app
-      knowledge. Compare against batch 2 (same app primer), not batch 1.
-- [ ] More repeats per cell - n=3 shows a 4x shift but doesn't estimate
-      distributions; MCP has one expensive outlier in each batch.
+- [x] **[DECISION]** Primer v3 = the realistic baseline (`CLAUDE.md`
+      decision 16): only what a real tester would write down. v1/v2
+      batches become development history (`docs/results.md` moved to
+      `docs/test-bed-evolution.md`); `docs/results.md` is now the
+      headline page, waiting on v3 data. v3 is the default primer.
+- [ ] **Run the v3 baseline batch** (`npm run repeat:baseline`, plain
+      terminal, ~$5 / up to an hour), then rescore quality (5x re-runs,
+      reset per spec) and fill in `docs/results.md`.
+- [x] **[DECISION]** Nudged batch primer: **v3**, compared against the
+      v3 baseline (2026-09-26; it was v2 before v3 existed).
+- [ ] `npm run repeat:nudged` (v3 is the default, so no flag). Wiring
+      done, no data yet. Run after the v3 baseline.
+- [ ] More repeats per cell - n=3 shows direction but doesn't estimate
+      distributions; MCP had one expensive outlier in each development
+      batch.
 
 ## Phase 5 — Test healing (designed, not built)
 
@@ -556,21 +562,43 @@ Design agreed 2026-09-26: `CLAUDE.md` decision 15.
       `error-context.md` (page snapshot) on test failure, and bundles
       its own MCP-based healer agent
       (`node_modules/playwright/lib/agents/playwright-test-healer.agent.md`).
-- [ ] **[DECISION]** Open details of the MCP condition (Playwright's
-      healer):
-      - its prompt verbatim, or also add the app primer and the shared
-        task framing the non-MCP condition gets? Verbatim is "what people
-        use"; adding the primer keeps it the same between conditions
-      - it explicitly allows `test.fixme()` and "do the most reasonable
-        thing possible to pass the test". Keep it as is (and let the
-        integrity rubric catch it), or strip it?
-      - its `search`/`edit` tools are VS Code tools; under Claude Code they
-        map to our scoped file tools (plus a scoped read)
-- [ ] Spike: confirm both break mechanisms work on OrangeHRM 5.9. Label:
-      the translation table (Admin → Language Packages → Translate / the
-      `ohrm_i18n_*` tables). DOM: rewrite the served HTML/JS (proxy or
-      patch the built bundle in the container). Pick the concrete label
-      break and DOM break.
+- [x] **[DECISION]** MCP condition details (2026-09-26, `CLAUDE.md`
+      decision 15): the healer's role prompt verbatim (including
+      `test.fixme()`), plus the same primer as project context; the
+      non-MCP condition gets the healer prompt with browser steps swapped
+      for "read the error-context snapshot"; same task message for both.
+      Primer is v3 (decision 16). The healer's VS Code `search`/`edit`
+      tools map to our scoped file tools (+ a scoped read).
+- [x] **Spike (2026-09-26): both break mechanisms work** on OrangeHRM
+      5.9, deterministically, with no rebuild:
+      - **Label:** UI strings live in `ohrm_i18n_lang_string` /
+        `ohrm_i18n_translate` (DB `orangehrm_app`, en_US =
+        `language_id` 4). Update the existing row (e.g. "Assign" →
+        "Submit", `lang_string_id` 576) or insert one where none exists
+        (e.g. "Type for hints..." → "Start typing a name...", id 357),
+        then clear `/var/www/html/src/cache/orangehrm/*` in the app
+        container. Both confirmed rendered.
+      - **DOM:** a consistent `sed s/oxd-select-/oxd-dropdown-/g` over
+        `web/dist/js/chunk-vendors.js` + `web/dist/css/*.css` (like a UI
+        library upgrade renaming a component). Styling and behaviour
+        intact (screenshot-checked), old class gone.
+      - Both are reverted by `npm run cleanup:app` (the DB is a volume
+        that gets removed; `web/dist` is in the image layer, not a
+        volume).
+      - Failures write `error-context.md` (page snapshot) under
+        `test-results/`, with the path printed in the line-reporter
+        output. Playwright's healer server is
+        `playwright run-test-mcp-server -c <config>` (`test_run`,
+        `test_debug`, `test_list` + browser tools while paused).
+      - First survival pass under the DOM break: 10 of 14 specs failed,
+        **but the app hadn't been reset**. At least one failure was
+        leftover data, not the break (a spec searching by `"Thoma"`
+        among dozens of old "Thomas…" employees, seen at once in its
+        error-context snapshot). CSS-locator specs fail on
+        `.oxd-select-text` as intended. **The survival check must reset
+        the app before every spec**, the same as the rubric's
+        flakiness protocol. Every spec uses the "Type for hints..."
+        placeholder, so that label change should break all of them.
 - [ ] **[DECISION]** Pick the fixed starting spec (likely one of the
       existing generated specs that uses both a role locator and a CSS
       locator on the affected elements, so both breaks break it).

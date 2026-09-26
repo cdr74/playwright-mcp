@@ -19,13 +19,13 @@ harness/run-repeats.sh                                # both conditions, 3 repea
 harness/run-repeats.sh --condition mcp                 # MCP only
 harness/run-repeats.sh --condition codegen --repeats 5  # Codegen only, 5 repeats
 harness/run-repeats.sh --nudged                         # the nudged variant instead (docs/testing-best-practices.md)
-harness/run-repeats.sh --primer v1                      # an older app-knowledge primer (default: v2)
+harness/run-repeats.sh --primer v2                      # an earlier app-knowledge primer (default: v3)
 ```
 
 `--primer` selects the app-knowledge primer version
 (`docs/app-knowledge/<version>.md`) both conditions get. It's an explicit
 experimental variable — v1 → v2 moved the MCP:Codegen cost ratio from
-~1.2x to ~6.3x (`docs/results.md` §A) — so it's recorded in every run's
+~1.2x to ~6.3x (`docs/test-bed-evolution.md` §A) — so it's recorded in every run's
 `metrics.json` (`primerVersion`) and in the log below, and results should
 only ever be compared within one version (`CLAUDE.md` decision 14).
 
@@ -34,7 +34,7 @@ For each repeat, for each requested condition, in order: reset the app
 **Resets before every individual run, not once per repeat and not once
 total** — this is deliberate, not excessive caution: the Codegen
 condition's first-run flakiness bug
-(`docs/results.md` "Quality" — an employee-autocomplete search that got
+(`docs/test-bed-evolution.md` appendix — an employee-autocomplete search that got
 less selective as prior runs' employees accumulated in the database) was
 directly caused by exactly the kind of state carryover a lighter reset
 strategy would still permit. A full reset before every run is what
@@ -47,9 +47,9 @@ through terminal scrollback:
 
 ```
 run_id repeat condition variant primer
-mcp-2026-... 1 mcp baseline v2
-codegen-2026-... 1 codegen baseline v2
-mcp-2026-... 2 mcp baseline v2
+mcp-2026-... 1 mcp baseline v3
+codegen-2026-... 1 codegen baseline v3
+mcp-2026-... 2 mcp baseline v3
 ...
 ```
 
@@ -70,13 +70,14 @@ Phase 4 for related automation that hasn't been built yet either).
 
 ## Cost and time, roughly
 
-It depends heavily on the app-knowledge primer (`docs/results.md` §A).
-With the current primer (v2): MCP $0.78–$1.15 and 2.9–6.5 min per
-repeat, Codegen $0.09–$0.20 and 1–3 min per repeat, plus ~80s of app
-reset before each run — a full `--condition both --repeats 3` baseline
-batch is roughly **~$3 and ~30 minutes of wall clock**. With primer v1,
-Codegen was ~4x more expensive and 6.8–10+ min per repeat, and the batch
-took ~45–55 minutes. Variance is large either way (MCP has had one
+It depends heavily on the app-knowledge primer
+(`docs/test-bed-evolution.md` §A), and v3 hasn't been run yet. The two
+development primers bracket it: with v2 (the most detailed) MCP was
+$0.78–$1.15 and 2.9–6.5 min per repeat, Codegen $0.09–$0.20 and 1–3 min,
+so a full `--condition both --repeats 3` batch was **~$3 and ~30
+minutes**. With v1, Codegen was ~4x more expensive and 6.8–10+ min per
+repeat, and the batch took ~45–55 minutes. v3 is shorter than both, so
+expect the v1 end: budget **~$5 and up to an hour**. Variance is large either way (MCP has had one
 outlier run per batch) and is part of what's being measured, not a
 bug.
 

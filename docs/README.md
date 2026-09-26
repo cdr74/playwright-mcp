@@ -5,9 +5,10 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
 - `app-knowledge/` — the "tester knowledge" primer fed to both
   conditions' prompts (app navigation, exact fields/selectors for the
   flow's screens, known app-level quirks — gathered by exploring the
-  running app, not guessed). **Versioned** (`v1.md`, `v2.md`; default v2):
-  the primer is an explicit experimental variable, since v1 → v2 moved
-  results more than anything else measured (`CLAUDE.md` decision 14). Its
+  running app, not guessed). **Versioned** (`v1.md`, `v2.md`, `v3.md`;
+  default v3, the realistic "tester's notes" baseline, `CLAUDE.md`
+  decision 16): the primer is an explicit experimental variable, since
+  v1 → v2 moved results more than anything else measured. Its
   `README.md` has the version table and the rules (never edit a published
   version). See `README.md` "How the comparison works" (app-knowledge primer) for why a
   primer exists at all.
@@ -27,16 +28,16 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
   before *every* individual run, not just once per batch, and logs every
   `RUN_ID` produced. Neither single-run runbook above covers this by
   itself.
-- `results.md` — the current analysis across two 3-repeat baseline
-  batches that differ only in the app-knowledge primer (v1 vs v2): the
-  before/after (the primer moved the MCP:Codegen cost ratio from ~1.2x to
-  ~6.3x), cost anatomy, where each condition spends its effort, variance,
-  7-criterion quality scoring with measured flakiness, harness findings,
-  and the earlier single-run pair as an appendix.
+- `results.md` — **the headline results**: the create flow on the
+  realistic primer v3. Pending the first v3 batch.
+- `test-bed-evolution.md` — development history: the N=1 pair and the
+  two primer-v1/v2 batches, what each taught us (contamination, timeouts,
+  toolset, the primer's weight), full analysis kept as it was. Lessons,
+  not real-world measurements.
 - `quality-rubric.md` — 7-criterion manual scoring rubric for a generated
   test file (5 from `CLAUDE.md` decision 2, plus 2 added and flagged after
   real scoring passes showed a need for them - task/spec compliance and
-  config/data separation). Applied to every run in `docs/results.md`.
+  config/data separation). Applied to every scored run so far (`docs/test-bed-evolution.md`).
   Automated/LLM-judge scoring is a later option, see `TODO.md` Phase 3.
 - `testing-best-practices.md` — agent-facing primer mirroring the rubric
   above, one practice per criterion. Wired in (opt-in, symmetric) via
