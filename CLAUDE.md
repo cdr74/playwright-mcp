@@ -34,6 +34,12 @@ involved in coding mechanics**. In practice:
 - When genuinely unsure whether something is a design decision or an
   implementation detail, ask. Prefer `AskUserQuestion` with concrete options
   over open-ended "what do you think?" questions.
+- **North star for design decisions: "would a tester actually work this
+  way?"** The study models a tester's day with two flows: writing a new
+  test case, and healing a test that used to pass. There's no single
+  "typical tester", but when options are weighed, realism of the working
+  practice beats experimental neatness. When the two conflict, say so
+  explicitly rather than quietly picking one.
 - Don't silently change an already-agreed design (e.g. swapping the target
   app, changing what "Codegen condition" means) — flag it and confirm first.
 
@@ -177,7 +183,8 @@ assume some `.md` file describes it and needs a pass.
      `cwd.replace(/\//g, '-')`, confirmed against this repo's own path.
 4. **v1 scope: test generation only.** Test healing (breaking a selector or
    page structure post-hoc and measuring the cost to fix it) is a deliberate
-   phase 2, once generation is solid — see `TODO.md`.
+   phase 2, once generation is solid — see `TODO.md` and decision 15
+   (healing design, agreed 2026-09-26, not built yet).
 5. **Target app: confirmed — self-hosted OrangeHRM 5.9** via
    `app/docker-compose.yml` + `app/install.sh` (works with Docker or
    Podman; validated end-to-end with Podman 5.7.0/podman-compose 1.5.0,
@@ -275,6 +282,39 @@ assume some `.md` file describes it and needs a pass.
     primer version**; never pool across versions. The nudged batch uses
     `v2` (user decision). See `docs/app-knowledge/README.md` for the
     version table and rules.
+15. **Healing phase design (agreed 2026-09-26, not built yet).**
+    - **Breaks: label and DOM changes only.** These are the typical
+      maintenance cases. A redesigned user flow is effectively a new
+      test, which the generation study already covers. Label changes
+      hurt role/text locators and DOM changes hurt CSS locators, so
+      whether a break is even noticed depends on how a spec finds
+      elements (itself a finding). **Pilot: 1 label + 1 DOM break**, 3
+      repeats per condition; widen only after looking at that data.
+      Breaks are applied to the self-hosted app (not by mutating the
+      test), deterministically, as part of setup.
+    - **Starting spec: one fixed, checked-in, known-good spec**, the
+      same for both conditions, verified to fail under every break.
+      Plus a **zero-LLM "survival" check**: re-run every existing
+      generated spec against each broken app, linking generation-time
+      locator quality to maintenance cost.
+    - **Non-MCP condition:** scoped `write_file` +
+      `run_playwright_test`, whose failure output includes Playwright's
+      `error-context.md` page snapshot (what a professional tester
+      working from the CLI would look at). No browser, no shell.
+    - **MCP condition: Playwright's own bundled healer agent**
+      (`node_modules/playwright/lib/agents/playwright-test-healer.agent.md`,
+      with its `playwright-test` MCP server). Chosen deliberately over
+      our generation-phase MCP setup because it's what people actually
+      use; its tool surface and prompt differ from the generation
+      study. Open details: see `TODO.md` Phase 5.
+    - **Integrity is scored from the diff, via a rubric** (no
+      deliberate real-regression probe): no assertion removed or
+      weakened, no step dropped, no `skip`/`fixme`, no locator widened
+      until it could match the wrong element, smallest diff that does
+      the job. Plus the usual pass rate, 5/5 re-runs, cost and
+      efficiency.
+    - **Primer: v2 unchanged**, even though it will then describe the
+      old labels. Docs lagging behind the app is realistic.
 
 ## Tech stack
 

@@ -548,13 +548,37 @@ thing anyone reproducing this repo would hit again.
 - [ ] More repeats per cell - n=3 shows a 4x shift but doesn't estimate
       distributions; MCP has one expensive outlier in each batch.
 
-## Phase 5 — Test healing (v2, not started)
+## Phase 5 — Test healing (designed, not built)
 
-- [ ] Design a repeatable "break" mechanism (e.g. a deliberately mutated
-      selector/DOM change, or a page structure change in the self-hosted
-      app) that both conditions have to recover from.
-- [ ] Extend the harness with a healing runner sharing the same
-      cost/efficiency/quality metrics.
+Design agreed 2026-09-26: `CLAUDE.md` decision 15.
+
+- [x] Confirmed the installed Playwright (`1.64.0-alpha`) writes
+      `error-context.md` (page snapshot) on test failure, and bundles
+      its own MCP-based healer agent
+      (`node_modules/playwright/lib/agents/playwright-test-healer.agent.md`).
+- [ ] **[DECISION]** Open details of the MCP condition (Playwright's
+      healer):
+      - its prompt verbatim, or also add the app primer and the shared
+        task framing the non-MCP condition gets? Verbatim is "what people
+        use"; adding the primer keeps it the same between conditions
+      - it explicitly allows `test.fixme()` and "do the most reasonable
+        thing possible to pass the test". Keep it as is (and let the
+        integrity rubric catch it), or strip it?
+      - its `search`/`edit` tools are VS Code tools; under Claude Code they
+        map to our scoped file tools (plus a scoped read)
+- [ ] Spike: confirm both break mechanisms work on OrangeHRM 5.9. Label:
+      the translation table (Admin → Language Packages → Translate / the
+      `ohrm_i18n_*` tables). DOM: rewrite the served HTML/JS (proxy or
+      patch the built bundle in the container). Pick the concrete label
+      break and DOM break.
+- [ ] **[DECISION]** Pick the fixed starting spec (likely one of the
+      existing generated specs that uses both a role locator and a CSS
+      locator on the affected elements, so both breaks break it).
+- [ ] Zero-LLM survival check: all generated specs × each break.
+- [ ] `run_playwright_test`: return `error-context.md` on failure
+      (heal condition only; the generation tool stays unchanged).
+- [ ] Heal runner(s) + integrity rubric (`docs/quality-rubric.md`
+      addition or a sibling doc), same `metrics.json` shape.
 
 ## Nice-to-haves (not scoped, don't build unprompted)
 

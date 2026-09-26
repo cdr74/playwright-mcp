@@ -159,9 +159,12 @@ gitignored ([`results/README.md`](results/README.md)).
   run and analysed.
 - ⏳ **Nudged** batch (best-practice guidance added to the prompt): wired
   up, not yet run.
-- 🔜 Test **healing**: break a working test, or change the app under
-  it, and measure what it costs each condition to fix it. Design not
-  started yet.
+- 🔜 Test **healing**: change the app under a working test (one label
+  change, one DOM change) and measure what it costs to fix it, and
+  whether the fix keeps the test honest. We compare Playwright's own
+  MCP-based healer against an agent that only has test output and
+  Playwright's failure snapshot. Designed, not built yet (`CLAUDE.md`
+  decision 15).
 
 Details are in [`TODO.md`](TODO.md).
 
