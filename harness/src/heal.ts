@@ -23,7 +23,7 @@
  * Prints a RUN_ID.
  */
 import 'dotenv/config';
-import { readFile, writeFile, mkdir, copyFile } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, copyFile, readdir } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import path from 'node:path';
@@ -134,13 +134,17 @@ async function main(): Promise<void> {
         TOOLS: ourTools.join(','),
         PW_CONFIG: configPath,
         ERROR_CONTEXT: CONDITION === 'artifacts' ? '1' : '0',
+        TEST_CWD: runDir,
       },
     },
   };
   if (CONDITION === 'mcp') {
+    // Started from the run directory, like our test runner (TEST_CWD), so
+    // relative writes from test code stay inside the run in both conditions.
+    const q = (s: string) => `'${s.replace(/'/g, `'\\''`)}'`;
     mcpServers['playwright-test'] = {
-      command: bin(REPO_ROOT, 'playwright'),
-      args: ['run-test-mcp-server', '--headless', '-c', configPath],
+      command: 'sh',
+      args: ['-c', `cd ${q(runDir)} && exec ${q(bin(REPO_ROOT, 'playwright'))} run-test-mcp-server --headless -c ${q(configPath)}`],
     };
   }
 
@@ -162,13 +166,20 @@ async function main(): Promise<void> {
   });
 
   // The diff is what the integrity rubric is scored on.
-  const diff = await execFileAsync('git', ['diff', '--no-index', '--', HEAL_SPEC, path.join(runDir, SPEC_REL)], {
+  // Repo-relative paths only: results are committed to a public repo.
+  const diff = await execFileAsync('git', ['diff', '--no-index', '--', HEAL_SPEC, path.relative(REPO_ROOT, path.join(runDir, SPEC_REL))], {
     cwd: REPO_ROOT,
   }).then(
     (r) => r.stdout,
     (e: { stdout?: string }) => e.stdout ?? '',
   );
   await writeFile(path.join(runDir, 'heal.diff'), diff, 'utf-8');
+  const expected = new Set([SPEC_REL, 'heal.diff', 'metrics.json']);
+  const leftoverFiles = (await readdir(runDir, { recursive: true, withFileTypes: true }))
+    .filter((e) => e.isFile())
+    .map((e) => path.relative(runDir, path.join(e.parentPath, e.name)))
+    .filter((f) => !expected.has(f))
+    .sort();
 
   const phase = summarizePhase('heal', MODEL, result, startedAt);
   await recordPhaseMetrics(
@@ -179,7 +190,7 @@ async function main(): Promise<void> {
       flow: 'heal',
       promptVariant: 'baseline',
       primerVersion: primer.version,
-      heal: { break: HEAL_BREAK, startingSpec: HEAL_SPEC, failedBeforeHeal, tools: Object.keys(mcpServers).flatMap((s) => (s === 'tools' ? ourTools : [`${s} (all tools)`])) },
+      heal: { break: HEAL_BREAK, startingSpec: HEAL_SPEC, failedBeforeHeal, tools: Object.keys(mcpServers).flatMap((s) => (s === 'tools' ? ourTools : [`${s} (all tools)`])), leftoverFiles },
     },
     phase,
   );
@@ -192,6 +203,7 @@ async function main(): Promise<void> {
   }
   console.log(`    healed test: results/${runId}/${SPEC_REL}`);
   console.log(`    diff: results/${runId}/heal.diff (${diff.split('\n').filter((l) => /^[+-][^+-]/.test(l)).length} changed lines)`);
+  if (leftoverFiles.length) console.warn(`    left behind in tests/: ${leftoverFiles.join(', ')}`);
   console.log(`    agent's final message: ${result.resultText.slice(0, 300)}`);
 }
 

@@ -25,6 +25,12 @@
  *   Playwright's healer brings its own test runner.
  * - PW_CONFIG: Playwright config for run_playwright_test (default: the
  *   repo's playwright.config.ts).
+ * - TEST_CWD: working directory for run_playwright_test (default: the repo
+ *   root). Healing sets it to the run's output directory, so files that
+ *   test code writes with relative paths land inside the run. Test code
+ *   can still write anywhere with an absolute path: the scoping covers
+ *   the tools, not the code the agent puts in a test (CLAUDE.md
+ *   decision 15).
  * - ERROR_CONTEXT=1: on failure, append the error-context.md page snapshot
  *   Playwright writes for each failed test - what a tester working from
  *   the CLI would open next.
@@ -51,6 +57,7 @@ const repoRoot = process.env.REPO_ROOT ?? process.cwd();
 const enabledTools = new Set((process.env.TOOLS ?? 'write_file,run_playwright_test').split(',').map((t) => t.trim()));
 const pwConfig = process.env.PW_CONFIG;
 const includeErrorContext = process.env.ERROR_CONTEXT === '1';
+const testCwd = process.env.TEST_CWD ?? repoRoot;
 
 function resolveScoped(relPath: string): string {
   const resolved = path.resolve(resolvedBase, relPath);
@@ -138,13 +145,13 @@ if (enabledTools.has('edit_file')) server.registerTool(
 );
 
 // Playwright prints "Error Context: <path>/error-context.md" for each failed
-// test; read those files (relative paths are relative to the runner's cwd).
+// test; read those files (relative paths are relative to the test run's cwd).
 async function errorContexts(output: string): Promise<string> {
   const paths = [...output.matchAll(/Error Context: (\S+error-context\.md)/g)].map((m) => m[1]);
   const parts: string[] = [];
   for (const p of [...new Set(paths)]) {
     try {
-      const text = await readFile(path.resolve(repoRoot, p), 'utf-8');
+      const text = await readFile(path.resolve(testCwd, p), 'utf-8');
       parts.push(`--- ${path.basename(path.dirname(p))}/error-context.md ---\n${text}`);
     } catch {
       parts.push(`--- ${p}: could not be read ---`);
@@ -170,7 +177,7 @@ if (enabledTools.has('run_playwright_test')) server.registerTool(
         const { stdout, stderr } = await execFileAsync(
           'npx',
           ['playwright', 'test', resolved, '--reporter=line', ...(pwConfig ? ['--config', pwConfig] : [])],
-          { cwd: repoRoot, timeout: 60_000 },
+          { cwd: testCwd, timeout: 60_000 },
         );
         return { content: [{ type: 'text' as const, text: `PASS\n${(stdout + stderr).slice(-OUTPUT_CHAR_LIMIT)}` }] };
       } catch (runErr) {

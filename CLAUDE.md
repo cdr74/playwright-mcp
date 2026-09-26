@@ -327,6 +327,14 @@ assume some `.md` file describes it and needs a pass.
       `fixtures/heal/add-employee-leave.spec.ts` (copied from
       `mcp-nudged-…10-11-52-390Z`, no latent date bugs), run with
       `npm run repeat:heal`.
+    - **"No shell" covers the agent's tools, not the tests it writes.**
+      A test file is Node.js code and can write anywhere (the first
+      smoke run's non-MCP agent dumped the page HTML to the repo root
+      that way). Accepted and documented rather than sandboxed (user
+      decision 2026-09-26): test runs start in the run's output
+      directory, so relative writes stay inside it, and leftover files
+      are recorded in `metrics.json`. Applies to generation too, where
+      no agent has used it so far.
     - **Integrity is scored from the diff, via a rubric** (no
       deliberate real-regression probe): no assertion removed or
       weakened, no step dropped, no `skip`/`fixme`, no locator widened

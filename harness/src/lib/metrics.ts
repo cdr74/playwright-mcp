@@ -28,8 +28,10 @@ export interface HealMeta {
   startingSpec: string;
   /** Sanity check: the starting spec was run once after the break, before the agent. */
   failedBeforeHeal: boolean;
-  /** Tools the agent got, as registered (for the record; differs by condition and by the edit-tool setting). */
+  /** Tools the agent got, as registered (differs by condition). */
   tools: string[];
+  /** Files the agent left in its run directory besides the healed spec (e.g. debug probes). */
+  leftoverFiles: string[];
 }
 
 export interface RunMeta {

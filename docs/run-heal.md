@@ -83,12 +83,25 @@ generation. What the runner (`harness/src/heal.ts`) does:
 | Test runner | Playwright's `playwright-test` MCP server (`playwright run-test-mcp-server --headless -c <per-run config>`): `test_run`, `test_debug`, `test_list`, and browser tools while a test is paused | Our `run_playwright_test` (same per-run config); on failure it appends each failed test's `error-context.md` page snapshot |
 | File tools | Scoped `read_file`, `write_file`, `edit_file` (find-and-replace patch) | same |
 | Shell / built-in tools | none | none |
+| Working directory of test runs | the run's output directory | same |
 
 In real use, `npx playwright init-agents --loop=claude` installs the
 healer as a Claude Code subagent with the built-in `Read`/`Edit`/`Write`
 tools. We swap those for scoped equivalents (the repo convention);
 `edit_file` is the scoped stand-in for `Edit`, and both conditions get it
 (user decision 2026-09-26), so neither pays for whole-file rewrites.
+
+### What "no shell" does and doesn't mean
+
+The agent's own tools are scoped to the run's output directory, but a
+test file is Node.js code, and both test runners execute whatever the
+agent writes into one. So test code can read and write files anywhere,
+as in any real project (seen in the first smoke run, where the non-MCP
+agent wrote a throwaway test that dumped the page's HTML to a file).
+Accepted and documented (user decision 2026-09-26). Test runs start
+in the run's output directory, so relative writes stay inside the run,
+and the runner records every extra file left there as `leftoverFiles`
+in `metrics.json`.
 
 ## 4. The pilot batch
 

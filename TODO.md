@@ -661,7 +661,16 @@ Design agreed 2026-09-26: `CLAUDE.md` decision 15.
 - [x] **[DECISION]** `conditions/heal/artifacts-prompt.md` approved as is
       (fixme escape hatch kept in both). The task message stays ours, not
       Playwright's own "Run all my tests and fix the failing ones".
-- [ ] Smoke-test one heal run per condition (user, plain terminal), then
+- [x] Smoke test, one `dom-select` run per condition (2026-09-26):
+      both healed with the same one-line fix (`.oxd-select-text` →
+      `.oxd-dropdown-text`). MCP $0.27 / 1.4 min; non-MCP $0.36 / 3.6 min
+      (the accessibility snapshot shows no CSS classes, so it wrote a
+      throwaway test to dump the page HTML). Fixed after it: repo-relative
+      paths in `heal.diff`, `leftoverFiles` recorded, and test runs now
+      start in the run's output directory (the throwaway test had written
+      into the repo root; user decision: accept test code's reach,
+      document it, keep relative writes inside the run).
+- [ ] Then
       the pilot batch (`npm run repeat:heal`): 2 breaks × 2 conditions ×
       3 repeats.
 
