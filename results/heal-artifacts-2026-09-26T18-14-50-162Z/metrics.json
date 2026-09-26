@@ -1,0 +1,47 @@
+{
+  "runId": "heal-artifacts-2026-09-26T18-14-50-162Z",
+  "condition": "artifacts",
+  "flow": "heal",
+  "promptVariant": "baseline",
+  "primerVersion": "v3",
+  "heal": {
+    "break": "dom-select",
+    "startingSpec": "fixtures/heal/add-employee-leave.spec.ts",
+    "failedBeforeHeal": true,
+    "tools": [
+      "read_file",
+      "write_file",
+      "edit_file",
+      "run_playwright_test"
+    ],
+    "leftoverFiles": [
+      "tests/diag.spec.ts"
+    ]
+  },
+  "phases": [
+    {
+      "phase": "heal",
+      "model": "claude-sonnet-5",
+      "resolvedModels": [
+        "claude-sonnet-5"
+      ],
+      "sessionId": "69f65ed8-1299-4cb9-82dc-e7c137c83046",
+      "inputTokens": 24,
+      "outputTokens": 3974,
+      "cacheCreationInputTokens": 25134,
+      "cacheReadInputTokens": 191522,
+      "costUsd": 0.1786284,
+      "turns": 12,
+      "toolCallCounts": {
+        "mcp__tools__read_file": 1,
+        "mcp__tools__run_playwright_test": 5,
+        "mcp__tools__write_file": 2,
+        "mcp__tools__edit_file": 3
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-26T18:15:21.534Z",
+      "finishedAt": "2026-09-26T18:17:05.875Z",
+      "durationMs": 100289
+    }
+  ]
+}

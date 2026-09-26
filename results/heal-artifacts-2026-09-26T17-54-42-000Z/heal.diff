@@ -1,0 +1,30 @@
+diff --git a/fixtures/heal/add-employee-leave.spec.ts b/results/heal-artifacts-2026-09-26T17-54-42-000Z/tests/add-employee-leave.spec.ts
+index 0690d78..f01bb67 100644
+--- a/fixtures/heal/add-employee-leave.spec.ts
++++ b/results/heal-artifacts-2026-09-26T17-54-42-000Z/tests/add-employee-leave.spec.ts
+@@ -71,14 +71,21 @@ test('create employee and assign leave', async ({ page }) => {
+   await expect(employeeInput).toHaveValue(selectedFullName);
+ 
+   // The Leave Type control is a custom widget (div, not a native <select>)
+-  // with no accessible role/name of its own, so we fall back to a CSS
+-  // selector scoped to its container. It's the only such widget on this page.
+-  const leaveTypeSelect = page.locator('.oxd-select-text').first();
++  // with no accessible role/name of its own. The app update changed its
++  // wrapper class name entirely (it's no longer "oxd-select-text" or any
++  // variant of it), so a class-based selector no longer finds it. Its
++  // placeholder text ("-- Select --") is still a reliable way to open it,
++  // but that same text disappears once a value is chosen, so it can't also
++  // be used to verify the result afterwards - instead we confirm the
++  // dropdown closed (its single option is no longer visible), and rely on
++  // the later successful form submission as proof a leave type was set
++  // (the Assign button rejects the form with no leave type selected).
++  const leaveTypeSelect = page.getByText('-- Select --', { exact: true });
+   await leaveTypeSelect.click();
+   const leaveTypeOption = page.getByRole('option', { name: 'Annual Leave' });
+   await expect(leaveTypeOption).toBeVisible();
+   await leaveTypeOption.click();
+-  await expect(leaveTypeSelect).toContainText('Annual Leave');
++  await expect(leaveTypeOption).not.toBeVisible();
+ 
+   const leaveDate = nextWeekdayDate();
+   const dateInputs = page.getByRole('textbox', { name: 'yyyy-mm-dd' });

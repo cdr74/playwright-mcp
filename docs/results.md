@@ -1,9 +1,9 @@
 # Results
 
 Test **generation** for one flow, on the realistic app primer (v3), in
-two batches that differ only in the prompt, plus the first **healing**
-measurement (which generated specs survive an app update, no LLM
-involved). The generation batches:
+two batches that differ only in the prompt, and test **healing**: which
+generated specs survive an app update (no LLM involved), and a pilot of
+two agents fixing a broken spec. The generation batches:
 
 | Batch | Date | Log | Prompt |
 |---|---|---|---|
@@ -47,6 +47,28 @@ This page records what was measured. Conclusions are still to be drawn.
 6. **Hardcoded values copied from exploration appear in MCP specs in
    both batches.** Baseline: 2 of 3 hardcode a leave date, 1 a first
    name. Nudged: 1 hardcodes a date, 1 a first name. No Codegen spec does.
+
+**Healing** (details below):
+
+| Mean per heal run (n=3) | Label, MCP | Label, non-MCP | DOM, MCP | DOM, non-MCP |
+|---|---|---|---|---|
+| Cost | $0.19 | $0.05 | $0.14 | $0.20 |
+| Wall clock | 1.8 min | 0.9 min | 1.4 min | 3.1 min |
+| Healed, 5/5 re-runs | 3 of 3 | 3 of 3 | 3 of 3 | 3 of 3 |
+| Integrity (/20) | 20 | 20 | 19.7 | 18.3 |
+
+7. **Every app update broke exactly the generated specs whose locators
+   depend on what changed** (survival check, 12 specs × 4 updates).
+8. **All 12 heal runs fixed the test, at $0.05–$0.29 per run**, an order
+   of magnitude below generation. 11 of 12 made the minimal one-line
+   fix.
+9. **Label update:** the non-MCP agent was cheapest ($0.05, 5 turns every
+   time); the page snapshot shows the new button name. **DOM update:** the
+   MCP healer was cheaper and steadier ($0.13–$0.15); the page snapshot
+   has no CSS class names, so the non-MCP agent had to dump the page's
+   HTML with a throwaway test, or guess.
+10. **One heal weakened an assertion** (non-MCP, DOM update) and still
+    passes 5/5. Only the diff shows it.
 
 ## Setup
 
@@ -285,6 +307,104 @@ changed: the 6 specs that locate the dropdown by `.oxd-select-*` class,
 the 3 that locate suggestions by `.oxd-autocomplete-option`, and every
 spec for the two labels, since all of them find the button and the
 employee field by visible name. No spec survived both kinds of update.
+
+## Healing pilot: fixing a test after an app update
+
+Batch run 2026-09-26, log `results/heal-run-log-20260926T172426Z.txt`.
+One known-good spec ([`fixtures/heal/`](../fixtures/heal/add-employee-leave.spec.ts))
+is broken by an app update, and an agent fixes it. Two updates × two
+conditions × 3 repeats, a full reset before every run
+([`run-heal.md`](run-heal.md)).
+
+- **Updates:** the submit button's label "Assign" → "Submit" (breaks the
+  spec's `getByRole('button', { name: 'Assign' })`), and the dropdown CSS
+  classes `oxd-select-*` → `oxd-dropdown-*` (breaks its
+  `.oxd-select-text` locator).
+- **MCP:** Playwright's own healer agent, word for word, with its
+  `playwright-test` MCP server (run, debug-pause, then inspect the live
+  page). **It saw all 97 of that server's tools, not the 11 its own
+  definition lists**, so read its cost as an upper bound for the healer
+  as installed.
+- **Non-MCP:** the same healer text with the browser steps replaced by
+  "read the failure output and its page snapshot" (Playwright's
+  `error-context.md`, an accessibility snapshot).
+- Both: patch-style `edit_file`, primer v3 (not updated for the change),
+  the same task message, `claude-sonnet-5`. In every run the spec was
+  confirmed to fail before the agent started; no permission denials.
+
+### Cost and efficiency
+
+| Mean per run (n=3) | Label, MCP | Label, non-MCP | DOM, MCP | DOM, non-MCP |
+|---|---|---|---|---|
+| Cost | $0.19 | **$0.05** | **$0.14** | $0.20 |
+| Cost range | $0.10–$0.25 | $0.05–$0.05 | $0.13–$0.15 | $0.12–$0.29 |
+| Turns | 14 | 5 | 11 | 12 |
+| Test runs | 2.3 | 2.0 | 2.0 | 4.7 |
+| Wall clock | 1.8 min | 0.9 min | 1.4 min | 3.1 min |
+| Total tokens | 0.49M | 0.04M | 0.36M | 0.22M |
+
+| Run | Update | Condition | Cost | Turns | Test runs | Debug / browser calls | Diff | Left behind |
+|---|---|---|---|---|---|---|---|---|
+| `heal-mcp-…17-26-05-434Z` | label | MCP | $0.25 | 18 | 3 | 1 / 11 | 1 line | |
+| `heal-mcp-…17-42-14-464Z` | label | MCP | $0.23 | 17 | 2 | 1 / 11 | 1 line | |
+| `heal-mcp-…18-03-03-654Z` | label | MCP | $0.10 | 8 | 2 | 2 / 1 | 1 line | |
+| `heal-artifacts-…17-30-37-558Z` | label | non-MCP | $0.05 | 5 | 2 | – | 1 line | |
+| `heal-artifacts-…17-47-25-561Z` | label | non-MCP | $0.05 | 5 | 2 | – | 1 line | |
+| `heal-artifacts-…18-07-25-603Z` | label | non-MCP | $0.05 | 5 | 2 | – | 1 line | |
+| `heal-mcp-…17-33-40-606Z` | DOM | MCP | $0.15 | 12 | 2 | 1 / 6 | 1 line | |
+| `heal-mcp-…17-51-15-676Z` | DOM | MCP | $0.14 | 11 | 2 | 1 / 5 | 1 line | |
+| `heal-mcp-…18-10-58-898Z` | DOM | MCP | $0.13 | 11 | 2 | 1 / 5 | 1 line + comment | |
+| `heal-artifacts-…17-38-00-293Z` | DOM | non-MCP | $0.12 | 12 | 4 | – | 1 line + comment | empty `debug-select.spec.ts` |
+| `heal-artifacts-…17-54-42-000Z` | DOM | non-MCP | $0.29 | 12 | 5 | – | **11 lines, assertion weakened** | |
+| `heal-artifacts-…18-14-50-162Z` | DOM | non-MCP | $0.18 | 12 | 5 | – | 1 line + comment | empty `diag.spec.ts` |
+
+**Label update.** The failure output names the missing button, and the
+page snapshot shows a button "Submit" where "Assign" used to be. The
+non-MCP agent fixed it from that in every run: 5 turns, $0.05, 2 test
+runs (fail, fix, pass). The MCP healer followed its prescribed workflow
+every time: run, pause the test in the debugger, inspect the live page,
+fix, re-run. That found the same one-line fix at 2–5x the cost.
+
+**DOM update.** The page snapshot is an accessibility tree, so it
+contains no CSS class names: the non-MCP agent could see that the
+dropdown was still there, but not what it was now called. In two runs
+it wrote a throwaway test that dumped the page's HTML, found
+`oxd-dropdown-text`, fixed the line and emptied the throwaway file
+(its tools can't delete files). In the third it never found the new
+class; see integrity below. The MCP healer queried the paused live page
+(`browser_evaluate`) and found the new class directly, for a consistent
+$0.13–$0.15.
+
+### Integrity and reliability
+
+Scored with [`heal-rubric.md`](heal-rubric.md) (5 criteria, /20) from
+each run's `heal.diff`. Pass reliability: each healed spec re-run 5
+times, serially, after a full reset with the run's app update
+re-applied.
+
+| | Label, MCP | Label, non-MCP | DOM, MCP | DOM, non-MCP |
+|---|---|---|---|---|
+| Healed (passes after the run) | 3 of 3 | 3 of 3 | 3 of 3 | 3 of 3 |
+| 5/5 re-runs | 3 of 3 | 3 of 3 | 3 of 3 | 3 of 3 |
+| Integrity (/20), per run | 20, 20, 20 | 20, 20, 20 | 20, 20, 19 | 19, **17**, 19 |
+| `fixme` / `skip` used | 0 | 0 | 0 | 0 |
+
+A 19 is a one-line fix plus an explanatory comment (criterion 5: 3).
+
+**The one integrity finding** (`heal-artifacts-…17-54-42-000Z`, 17/20).
+Unable to see the new class name, the agent located the dropdown by its
+`-- Select --` placeholder text instead. That text disappears once a
+value is chosen, so it also replaced
+`expect(leaveTypeSelect).toContainText('Annual Leave')` with
+`expect(leaveTypeOption).not.toBeVisible()`, which only proves the
+dropdown closed, not that "Annual Leave" was selected (criterion 1: 2).
+Its new comment also states that the class was changed "entirely (no
+longer `oxd-select-text` or any variant of it)", which isn't true: it's
+`oxd-dropdown-text`. The rubric doesn't score comment accuracy.
+
+This healed spec passes 5/5 re-runs like every other one. A heal that
+quietly tests less looks exactly like a good heal from pass/fail alone;
+only reading the diff shows it.
 
 ## Compared to the inspiring post
 

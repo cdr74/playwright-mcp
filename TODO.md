@@ -580,7 +580,7 @@ thing anyone reproducing this repo would hit again.
       distributions; MCP had one expensive outlier in each development
       batch.
 
-## Phase 5 — Test healing (harness built, not yet run)
+## Phase 5 — Test healing (pilot done)
 
 Design agreed 2026-09-26: `CLAUDE.md` decision 15.
 
@@ -673,9 +673,15 @@ Design agreed 2026-09-26: `CLAUDE.md` decision 15.
 - [x] **[DECISION]** Healer tool list: run the pilot with all 97 tools of
       the `playwright-test` server, caveated (its own definition lists 11;
       a filtering proxy was the alternative).
-- [ ] Then
-      the pilot batch (`npm run repeat:heal`): 2 breaks × 2 conditions ×
-      3 repeats.
+- [x] **Pilot batch** (`results/heal-run-log-20260926T172426Z.txt`, 12
+      runs, all clean): every run healed; all 12 healed specs 5/5 with
+      the break re-applied. Label: non-MCP $0.05 vs MCP $0.19; DOM: MCP
+      $0.14 vs non-MCP $0.20. Integrity 11 × 19–20/20; one non-MCP DOM
+      heal weakened an assertion (17/20) and still passes 5/5. Written
+      up in `docs/results.md`.
+- [ ] **Conclusions** across generation and healing (with the user).
+- [ ] Optional, after conclusions: more app updates / repeats; the
+      healer restricted to its own 11 tools, to size the 97-tool caveat.
 
 ## Nice-to-haves (not scoped, don't build unprompted)
 

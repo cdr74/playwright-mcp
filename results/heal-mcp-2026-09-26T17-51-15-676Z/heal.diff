@@ -1,0 +1,13 @@
+diff --git a/fixtures/heal/add-employee-leave.spec.ts b/results/heal-mcp-2026-09-26T17-51-15-676Z/tests/add-employee-leave.spec.ts
+index 0690d78..a63d7af 100644
+--- a/fixtures/heal/add-employee-leave.spec.ts
++++ b/results/heal-mcp-2026-09-26T17-51-15-676Z/tests/add-employee-leave.spec.ts
+@@ -73,7 +73,7 @@ test('create employee and assign leave', async ({ page }) => {
+   // The Leave Type control is a custom widget (div, not a native <select>)
+   // with no accessible role/name of its own, so we fall back to a CSS
+   // selector scoped to its container. It's the only such widget on this page.
+-  const leaveTypeSelect = page.locator('.oxd-select-text').first();
++  const leaveTypeSelect = page.locator('.oxd-dropdown-text').first();
+   await leaveTypeSelect.click();
+   const leaveTypeOption = page.getByRole('option', { name: 'Annual Leave' });
+   await expect(leaveTypeOption).toBeVisible();

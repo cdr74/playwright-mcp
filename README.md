@@ -18,7 +18,7 @@ tests two ways:
 | **Create a new test** (add employee → assign leave → verify) | Baseline: task + app notes | 3 runs | 3 runs | ✅ measured |
 | | Nudged: + testing best-practices guidance | 3 runs | 3 runs | ✅ measured |
 | **Heal a test that used to pass** (after a label or DOM change in the app) | Survival check: 12 specs × 4 app updates (no LLM) | | | ✅ measured |
-| | Pilot: 2 app updates, 3 repeats | | | 🛠️ ready to run |
+| | Pilot: 2 app updates (label, DOM) | 6 runs | 6 runs | ✅ measured |
 
 All measured runs: model `claude-sonnet-5`, app-knowledge primer v3
 (short notes of the kind a tester keeps), one self-hosted OrangeHRM 5.9
@@ -50,6 +50,23 @@ still to be drawn.
   debugged them in the live browser) and cut Codegen's by about half.
 - In both batches, some MCP specs hardcode values the agent saw while
   exploring (a leave date, a first name). No Codegen spec does.
+
+**Healing** a spec broken by an app update (MCP = Playwright's own
+healer agent; non-MCP = test output plus Playwright's failure snapshot):
+
+| Mean per heal run | Label change, MCP | Label change, non-MCP | DOM change, MCP | DOM change, non-MCP |
+|---|---|---|---|---|
+| Cost | $0.19 | $0.05 | $0.14 | $0.20 |
+| Healed, passes 5/5 re-runs | 3/3 | 3/3 | 3/3 | 3/3 |
+| Integrity (/20, [rubric](docs/heal-rubric.md)) | 20 | 20 | 19.7 | 18.3 |
+
+- Each app update broke exactly the generated specs whose locators
+  depend on what changed.
+- Every heal run fixed the test, 11 of 12 with the minimal one-line
+  change. One (non-MCP, DOM change) weakened an assertion and still
+  passes 5/5.
+- The cheaper condition depended on the change: non-MCP for the label
+  change, MCP for the DOM change.
 
 ## Why
 
@@ -156,14 +173,9 @@ gitignored ([`results/README.md`](results/README.md)).
 
 ## What's next
 
-- **Conclusions** from the two generation batches.
-- **Test healing:** change the app under a working test (one label
-  change, one DOM change) and measure what it costs to fix it, and
-  whether the fix keeps the test honest. Playwright's own MCP-based
-  healer vs an agent that only has test output and Playwright's failure
-  snapshot. Harness built and pilot chosen ([runbook](docs/run-heal.md));
-  first fact: each app update broke exactly the generated specs whose
-  locators depend on what changed.
+- **Conclusions** from the generation batches and the healing pilot.
+- **Test healing beyond the pilot**, if the conclusions call for it:
+  more app updates or repeats ([runbook](docs/run-heal.md)).
 
 Details are in [`TODO.md`](TODO.md).
 

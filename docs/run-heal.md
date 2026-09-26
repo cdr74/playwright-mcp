@@ -4,8 +4,8 @@ The test-healing study (`CLAUDE.md` decision 15): a spec that passed on
 the previous app version fails after an app update, and an agent has to
 fix it. This doc pins the inputs: commands, tools, prompts.
 
-**Status:** harness built and the pilot chosen (below); no heal runs
-exist yet.
+**Status:** pilot run 2026-09-26 (`results/heal-run-log-20260926T172426Z.txt`),
+results in `docs/results.md`.
 
 **Pilot** (user decision 2026-09-26): breaks `label-assign-button` and
 `dom-select`, starting spec `fixtures/heal/add-employee-leave.spec.ts`,

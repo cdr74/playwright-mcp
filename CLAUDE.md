@@ -184,7 +184,7 @@ assume some `.md` file describes it and needs a pass.
 4. **v1 scope: test generation only.** Test healing (breaking a selector or
    page structure post-hoc and measuring the cost to fix it) is a deliberate
    phase 2, once generation is solid — see `TODO.md` and decision 15
-   (healing design, agreed 2026-09-26; harness built).
+   (healing design and pilot, 2026-09-26).
 5. **Target app: confirmed — self-hosted OrangeHRM 5.9** via
    `app/docker-compose.yml` + `app/install.sh` (works with Docker or
    Podman; validated end-to-end with Podman 5.7.0/podman-compose 1.5.0,
@@ -289,8 +289,8 @@ assume some `.md` file describes it and needs a pass.
     `v3` and is compared against the v3 baseline (user decision,
     2026-09-26; it was `v2` before v3 existed). See
     `docs/app-knowledge/README.md` for the version table and rules.
-15. **Healing phase design (agreed 2026-09-26; harness built, pilot
-    chosen, no heal runs yet).** Implementation: `app/break.sh`, `harness/survival-check.sh`,
+15. **Healing phase design (agreed 2026-09-26; pilot run the same day,
+    results in `docs/results.md`).** Implementation: `app/break.sh`, `harness/survival-check.sh`,
     `harness/src/heal.ts`, `conditions/heal/`, runbook `docs/run-heal.md`.
     - **Breaks: label and DOM changes only.** These are the typical
       maintenance cases. A redesigned user flow is effectively a new
