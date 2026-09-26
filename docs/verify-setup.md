@@ -41,7 +41,7 @@ npx playwright codegen http://localhost:8081
 
 Log in and click around a little, then close the window. You should see a
 generated script printed/saved. This is exactly the mechanism the Codegen
-condition's seed fixtures (`fixtures/`) will be recorded with later.
+condition's fixture (`fixtures/`) was recorded with.
 
 ## 3. Playwright MCP
 
@@ -123,7 +123,6 @@ Check `results/<run-id>/tests/add-employee-leave.spec.ts` and
 
 ---
 
-If sections 1-4 work, the environment phase is solid. Sections 5 and 6's
-harnesses have each now completed one full end-to-end run (see `TODO.md`
-Phase 3, `docs/run-mcp-condition.md`, `docs/run-codegen-condition.md`, and
-`docs/results.md` for the first numbers) - both produced passing tests.
+If sections 1-4 work, the environment is solid. Sections 5 and 6 are
+single runs; for the full 3-repeat comparison see `docs/run-repeats.md`,
+and `docs/results.md` for what it has produced so far.

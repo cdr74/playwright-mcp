@@ -24,6 +24,6 @@ target URL, same pattern as `conditions/mcp/`.
 
 `fixtures/01-add-employee-leave-request.codegen.ts` is recorded (see
 `fixtures/README.md` for the exact steps taken and two documented
-deviations from the flow spec), and `npm run bench:codegen` has completed
-a first full run — see `docs/run-codegen-condition.md` for the exact,
-reproducible commands and prompt, and `docs/results.md` for the numbers.
+deviations from the flow spec). See `docs/run-codegen-condition.md` for
+the exact, reproducible commands and prompt, and `docs/results.md` for
+the numbers.

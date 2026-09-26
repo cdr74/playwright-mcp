@@ -9,7 +9,7 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
   the primer is an explicit experimental variable, since v1 → v2 moved
   results more than anything else measured (`CLAUDE.md` decision 14). Its
   `README.md` has the version table and the rules (never edit a published
-  version). See `README.md` "The tester knowledge assumption" for why a
+  version). See `README.md` "How the comparison works" (app-knowledge primer) for why a
   primer exists at all.
 - `verify-setup.md` — step-by-step manual check that the app + Playwright
   + Playwright MCP setup actually works, before building anything on top

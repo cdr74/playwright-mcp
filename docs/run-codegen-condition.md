@@ -125,6 +125,11 @@ Then, what this invokes in `claude -p --output-format json` terms:
   text, verbatim and identical for both conditions]
   ````
 
+  **Nudged variant** (`npm run bench:codegen:nudged` / `NUDGE_QUALITY=1`):
+  identical, plus `\n\n## Testing best practices\n\n` and
+  `docs/testing-best-practices.md` verbatim appended after the app
+  knowledge. `RUN_ID` gets a `codegen-nudged-` prefix.
+
 - **User message**: the flow spec, a heading, then the fixture content
   wrapped in a fenced typescript code block, verbatim as of this writing:
 
@@ -166,7 +171,7 @@ Then, what this invokes in `claude -p --output-format json` terms:
     await page.getByRole('textbox', { name: 'Password' }).fill('PwMcpBench#2026');
     await page.getByRole('button', { name: 'Login' }).click();
     await page.getByRole('link', { name: 'PIM' }).click();
-    await page.getByRole('button', { name: ' Add' }).click();
+    await page.getByRole('button', { name: ' Add' }).click();
     await page.getByRole('textbox', { name: 'First Name' }).click();
     await page.getByRole('textbox', { name: 'First Name' }).fill('Thomas');
     await page.getByRole('textbox', { name: 'First Name' }).press('Tab');
@@ -200,6 +205,9 @@ Then, what this invokes in `claude -p --output-format json` terms:
   ```
   ````
 
+  (The `Add` button's name starts with an icon-font glyph, U+F4FE, which
+  most editors render as blank — it's in the fixture byte-for-byte.)
+
   This fixture block is fixed (checked in, not regenerated per run) unlike
   the MCP condition's test-plan half, which is genuinely different every
   run. See `fixtures/README.md` for the two documented deviations in this
@@ -218,5 +226,5 @@ Same caveat as the MCP condition (`docs/run-mcp-condition.md`): this doc
 pins the *inputs* - prompt text, tool surface, environment, starting app
 state, and the fixture - not the output. LLM generations vary run to run
 even given an identical prompt; that variance is part of what this
-benchmark measures, not noise to eliminate. See `CLAUDE.md`'s open
-repeat-run-count decision in `TODO.md`.
+benchmark measures, not noise to eliminate — which is why results come
+from 3-repeat batches (`CLAUDE.md` decision 12, `docs/run-repeats.md`).

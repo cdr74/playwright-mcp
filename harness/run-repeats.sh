@@ -104,6 +104,10 @@ run_codegen() {
   npm run "bench:codegen${SUFFIX}" 2>&1 | tee "$out_log"
   local run_id; run_id="$(extract_run_id "$out_log")"
   rm -f "$out_log"
+  if [[ -z "$run_id" ]]; then
+    echo "!! Could not parse a RUN_ID from bench:codegen${SUFFIX}'s output (run failed or was killed)." >&2
+    return 1
+  fi
   echo "$run_id $i codegen ${SUFFIX:+nudged}${SUFFIX:-baseline} $PRIMER" >> "$LOG_FILE"
 }
 

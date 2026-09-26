@@ -49,8 +49,8 @@ decision 3 for the full reasoning and mechanics.
 - `src/run-codegen.ts` (`npm run bench:codegen`) — the Codegen condition's single
   phase. Reuses `claude-runner.ts` + `mcp-tools-server.ts`, without
   `playwright-mcp` registered and with Claude Code's native `Bash`
-  excluded from `--tools` (see `CLAUDE.md` decision 1). Runnable now -
-  `fixtures/01-add-employee-leave-request.codegen.ts` is recorded, see
+  excluded from `--tools` (see `CLAUDE.md` decision 1). Starts from
+  `fixtures/01-add-employee-leave-request.codegen.ts`, see
   `fixtures/README.md`.
 - `run-repeats.sh` (`npm run repeat:baseline` / `repeat:nudged`, not
   under `src/` since it's a shell orchestrator, not TypeScript) — runs N

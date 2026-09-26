@@ -310,6 +310,13 @@ phase 1, plus `mcp__tools__run_playwright_test`.
   [same app-knowledge primer content as phase 1 above]
   ````
 
+  **Nudged variant** (`explore:mcp:nudged` then `generate:mcp:nudged` /
+  `NUDGE_QUALITY=1`): this phase only (explore never gets it) appends
+  `\n\n## Testing best practices\n\n` and
+  `docs/testing-best-practices.md` verbatim after the app knowledge. The
+  explore phase still needs the flag to mint an `mcp-nudged-` `RUN_ID`;
+  `generate-mcp.ts` warns if the prefix and flag disagree.
+
 - **User message**, assembled as:
 
   ```
@@ -343,8 +350,9 @@ Produces `results/<run-id>/tests/add-employee-leave.spec.ts`,
   check for a stray `.playwright-mcp/` after a run.
 - **Claude Code auto-attaches this repo's `CLAUDE.md` and auto-memory
   files to every session regardless of `--system-prompt`.** Found by
-  actually inspecting the raw transcripts, not assumed - both baseline
-  runs this project's `docs/results.md` cites were affected. Fixed by
+  actually inspecting the raw transcripts, not assumed - the original N=1
+  pair (`docs/results.md` appendix) was affected; every batch run since
+  is clean. Fixed by
   running `claude -p` from a `cwd` outside this repo (see "Process `cwd`"
   above); `--bare`/`--safe-mode` were tested and ruled out first (API-key
   billing, silently broken `--mcp-config`, respectively). Full
@@ -356,5 +364,5 @@ This doc pins the *inputs*: prompt text, tool surface, environment, and
 starting app state (via the reset in step 1). It does not pin the *output* —
 LLM generations aren't perfectly deterministic even given an identical
 prompt, and that variance (across repeat runs) is itself one of the things
-this benchmark measures, not noise to eliminate. See `CLAUDE.md`'s open
-repeat-run-count decision in `TODO.md`.
+this benchmark measures, not noise to eliminate — which is why results
+come from 3-repeat batches (`CLAUDE.md` decision 12, `docs/run-repeats.md`).

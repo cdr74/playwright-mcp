@@ -1,7 +1,8 @@
 import { defineConfig } from '@playwright/test';
 
 // Used to run harness-generated test files (results/<run-id>/tests/*.spec.ts),
-// via harness/src/lib/run-test-tool.ts and directly with `npx playwright test <path>`.
+// via harness/src/mcp-tools-server.ts's run_playwright_test tool and directly with
+// `npx playwright test <path>`.
 // storageState comes from harness/src/seed.ts - generated tests assume an
 // already-authenticated context and should not write their own login step.
 export default defineConfig({

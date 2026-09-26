@@ -77,9 +77,8 @@ assume some `.md` file describes it and needs a pass.
      and never gets real command-line access despite starting from CLI
      output) — and turns the raw recording into a clean, asserted test,
      iterating on terse test-run output until green. Built
-     (`harness/src/run-codegen.ts`, `npm run bench:codegen`) and has
-     completed a first full run — see `TODO.md` and
-     `docs/run-codegen-condition.md`. **Renamed from "CLI condition" to
+     (`harness/src/run-codegen.ts`, `npm run bench:codegen`), runbook in
+     `docs/run-codegen-condition.md`, results in `docs/results.md`. **Renamed from "CLI condition" to
      "Codegen condition"** after the original name was found to overclaim
      what's tested (README.md "How the comparison works" has the full
      reasoning) — this rename touched every file in the repo, tracked as

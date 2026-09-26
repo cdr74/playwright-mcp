@@ -22,7 +22,9 @@ axis list — flagging that explicitly per this repo's collaboration model:
   while Codegen's correctly uses a relative path
   (`page.goto('/web/index.php/dashboard/index')`) that respects
   `playwright.config.ts`'s `baseURL` — same config available to both,
-  one test ignores it. Criterion 2 was also revised (not just extended)
+  one test ignores it. (That N=1 contrast turned out to be noise in batch
+  1, where all six specs hardcoded it, then reappeared in batch 2: 3/3
+  Codegen relative, 3/3 MCP absolute — `docs/results.md`.) Criterion 2 was also revised (not just extended)
   to fold in two more of those proposed practices — fail-fast checkpoint
   assertions and failure-diagnostic logging — rather than adding two more
   standalone criteria, since both are really about *how* a test asserts,

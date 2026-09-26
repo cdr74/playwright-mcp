@@ -72,7 +72,7 @@ to `fixtures/01-add-employee-leave-request.codegen.ts`, then fill in below.
     Leave", the only leave type that exists. Left unedited; if the
     Codegen condition's agent can't make sense of this sequence when
     cleaning the recording up, that difficulty is itself a real,
-    comparable data point (see `README.md` "How the comparison works" —
-    Codegen's `-- Select --`
-    handling for this same custom dropdown was a documented hurdle for the
-    MCP condition too, in `docs/app-knowledge/`).
+    comparable data point. (It was: the `-- Select --` placeholder
+    being itself an option tripped up every batch-1 run of *both*
+    conditions, and is documented in app-knowledge primer v2 since —
+    `docs/results.md` §3.)
