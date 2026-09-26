@@ -6,7 +6,8 @@
  * - mcp: Playwright's own bundled healer agent - its instructions verbatim
  *   from node_modules as the system prompt, its `playwright-test` MCP server
  *   (test_run / test_debug / browser tools while paused), plus our scoped
- *   file tools in place of the IDE's search/edit.
+ *   read/write/edit file tools in place of Claude Code's Read/Write/Edit,
+ *   which the healer gets when installed as a subagent.
  * - artifacts: the same healer instructions with the browser/debugger steps
  *   swapped for "read the failure output and its page snapshot"
  *   (conditions/heal/artifacts-prompt.md), scoped file tools, and our
@@ -19,7 +20,6 @@
  *
  * Usage: HEAL_BREAK=<app/break.sh name> npm run heal:mcp | heal:artifacts
  *   HEAL_SPEC      starting spec (default fixtures/heal/add-employee-leave.spec.ts)
- *   HEAL_EDIT_TOOL=1  also offer edit_file (find-and-replace), see TODO.md
  * Prints a RUN_ID.
  */
 import 'dotenv/config';
@@ -48,7 +48,6 @@ const AUTH_STATE_PATH = path.resolve('harness/.auth/state.json');
 const REPO_ROOT = process.cwd();
 const HEAL_BREAK = process.env.HEAL_BREAK;
 const HEAL_SPEC = process.env.HEAL_SPEC ?? 'fixtures/heal/add-employee-leave.spec.ts';
-const EDIT_TOOL = process.env.HEAL_EDIT_TOOL === '1';
 const HEALER_AGENT = 'node_modules/playwright/lib/agents/playwright-test-healer.agent.md';
 const SPEC_REL = 'tests/add-employee-leave.spec.ts';
 const TASK_MESSAGE =
@@ -121,7 +120,9 @@ async function main(): Promise<void> {
       : (await readFile('conditions/heal/artifacts-prompt.md', 'utf-8')).trim();
   const systemPrompt = `${conditionPrompt}\n\nTarget application base URL: ${TARGET_APP_URL}\n\n## App knowledge\n\n${primer.text}`;
 
-  const fileTools = ['read_file', 'write_file', ...(EDIT_TOOL ? ['edit_file'] : [])];
+  // Both conditions patch with edit_file, like the healer's Edit in real
+  // use, rather than rewriting the whole file (user decision 2026-09-26).
+  const fileTools = ['read_file', 'write_file', 'edit_file'];
   const ourTools = CONDITION === 'mcp' ? fileTools : [...fileTools, 'run_playwright_test'];
   const mcpServers: Record<string, McpServerConfig> = {
     tools: {

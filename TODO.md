@@ -645,16 +645,16 @@ Design agreed 2026-09-26: `CLAUDE.md` decision 15.
       before spending tokens if the starting spec still passes after the
       break. Saves `heal.diff`. **Not yet run end to end** (needs a plain
       terminal).
-- [x] Draft integrity rubric: `docs/heal-rubric.md` (for review).
+- [x] Integrity rubric: `docs/heal-rubric.md`, approved 2026-09-26
+      (a fix that also improves robustness scores 3 on change size).
 - [ ] **[DECISION]** Pick the fixed starting spec and the pilot label +
       DOM break, from the survival results. Check it into
       `fixtures/heal/add-employee-leave.spec.ts`.
-- [ ] **[DECISION]** `edit_file` for both heal conditions or neither?
-      In real use the healer (a Claude Code subagent) edits with the
-      built-in `Edit`, a patch tool; without it every fix is a
-      whole-file rewrite, which dominated Codegen's generation cost.
-- [ ] **[DECISION]** Review `conditions/heal/artifacts-prompt.md` and
-      `docs/heal-rubric.md`.
+- [x] **[DECISION]** `edit_file` for **both** heal conditions (2026-09-26),
+      matching the healer's built-in `Edit` in real use.
+- [x] **[DECISION]** `conditions/heal/artifacts-prompt.md` approved as is
+      (fixme escape hatch kept in both). The task message stays ours, not
+      Playwright's own "Run all my tests and fix the failing ones".
 - [ ] Smoke-test one heal run per condition (user, plain terminal), then
       the pilot batch: 2 breaks × 2 conditions × 3 repeats.
 - [ ] Heal repeat script (like `run-repeats.sh`), once the pilot shape

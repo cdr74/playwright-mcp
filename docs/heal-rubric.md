@@ -1,7 +1,7 @@
-# Healing rubric (draft)
+# Healing rubric
 
-**Status: draft for review, not yet applied.** Criteria as agreed in
-`CLAUDE.md` decision 15; the 0–4 scales are a proposal.
+Criteria as agreed in `CLAUDE.md` decision 15; scales confirmed
+2026-09-26. Not yet applied to any run.
 
 Scores a healed spec against the spec it started from, using the diff
 the heal runner saves (`results/<run-id>/heal.diff`). The question isn't
@@ -67,12 +67,11 @@ minimal fix is known too.
 - **2:** unrelated refactoring or added waits alongside the fix.
 - **0:** the test rewritten.
 
-## Open points for review
+## Scoring notes
 
-- Should a heal that *also* makes the test more robust (e.g. replacing
-  the broken CSS locator with a role-based one instead of the renamed
-  class) score 4 on criterion 5, or be counted separately as a bonus?
-  The draft treats it as a related change (3), neither penalised nor
-  rewarded.
+- A heal that fixes the break *and* makes the test more robust (e.g.
+  replacing the broken CSS locator with a role-based one instead of the
+  renamed class) scores **3** on criterion 5: a related change, neither
+  penalised nor rewarded. Robustness shows up in the quality rubric.
 - Criterion 3 is binary on purpose. A `fixme` means "not healed",
   whatever the reason.

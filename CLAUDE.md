@@ -317,8 +317,13 @@ assume some `.md` file describes it and needs a pass.
       use; its tool surface and prompt differ from the generation
       study. In real use it runs as a Claude Code subagent with the
       built-in `Read`/`Edit`/`Write`; here those become scoped
-      `read_file`/`write_file` (+ optional `edit_file`). Open details:
-      see `TODO.md` Phase 5.
+      `read_file`/`write_file`/`edit_file`, and **both** conditions get
+      the patch tool (user decision 2026-09-26), so neither pays for
+      whole-file rewrites. The non-MCP prompt
+      (`conditions/heal/artifacts-prompt.md`: the healer text with steps
+      1–3 adapted), our task message and the integrity rubric
+      (`docs/heal-rubric.md`) were approved the same day. Open: the
+      starting spec and pilot breaks (`TODO.md` Phase 5).
     - **Integrity is scored from the diff, via a rubric** (no
       deliberate real-regression probe): no assertion removed or
       weakened, no step dropped, no `skip`/`fixme`, no locator widened

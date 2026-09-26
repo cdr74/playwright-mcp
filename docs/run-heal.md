@@ -73,14 +73,14 @@ generation. What the runner (`harness/src/heal.ts`) does:
 | + appended to both | `Target application base URL: …` and `## App knowledge` + the primer (v3), unchanged after the break | same |
 | Task message | "This test passed on the previous release of the app and fails after today's app update. Fix it. The test is `tests/add-employee-leave.spec.ts` in your output directory." | same |
 | Test runner | Playwright's `playwright-test` MCP server (`playwright run-test-mcp-server --headless -c <per-run config>`): `test_run`, `test_debug`, `test_list`, and browser tools while a test is paused | Our `run_playwright_test` (same per-run config); on failure it appends each failed test's `error-context.md` page snapshot |
-| File tools | Scoped `read_file`, `write_file` (+ `edit_file` with `HEAL_EDIT_TOOL=1`) | same |
+| File tools | Scoped `read_file`, `write_file`, `edit_file` (find-and-replace patch) | same |
 | Shell / built-in tools | none | none |
 
 In real use, `npx playwright init-agents --loop=claude` installs the
 healer as a Claude Code subagent with the built-in `Read`/`Edit`/`Write`
-tools. We swap those for scoped equivalents (the repo convention), and
-`edit_file` is the scoped stand-in for `Edit`. Whether both conditions
-get it is an open decision (`TODO.md`).
+tools. We swap those for scoped equivalents (the repo convention);
+`edit_file` is the scoped stand-in for `Edit`, and both conditions get it
+(user decision 2026-09-26), so neither pays for whole-file rewrites.
 
 ## 4. Scoring
 

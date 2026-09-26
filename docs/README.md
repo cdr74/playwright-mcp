@@ -39,8 +39,8 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
 - `run-heal.md` — runbook for the test-healing flow: the app updates
   ("breaks"), the zero-LLM survival check, and the two heal conditions
   with their exact tools and prompts.
-- `heal-rubric.md` — **draft** integrity rubric for healed specs (is it
-  still the same test?), scored from the heal diff.
+- `heal-rubric.md` — integrity rubric for healed specs (is it still the
+  same test?), scored from the heal diff.
 - `quality-rubric.md` — 7-criterion manual scoring rubric for a generated
   test file (5 from `CLAUDE.md` decision 2, plus 2 added and flagged after
   real scoring passes showed a need for them - task/spec compliance and

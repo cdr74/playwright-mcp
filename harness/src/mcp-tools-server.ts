@@ -19,9 +19,9 @@
  * none of these are set for the generation study, so its tool surface is
  * unchanged:
  * - TOOLS: comma-separated tools to expose (default
- *   "write_file,run_playwright_test"). Healing adds read_file (and
- *   edit_file, a find-and-replace patch like Claude Code's own Edit, if
- *   enabled); the MCP heal condition drops run_playwright_test, since
+ *   "write_file,run_playwright_test"). Healing adds read_file and
+ *   edit_file (a find-and-replace patch like Claude Code's own Edit); the
+ *   MCP heal condition drops run_playwright_test, since
  *   Playwright's healer brings its own test runner.
  * - PW_CONFIG: Playwright config for run_playwright_test (default: the
  *   repo's playwright.config.ts).
