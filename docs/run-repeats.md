@@ -71,13 +71,12 @@ Phase 4 for related automation that hasn't been built yet either).
 ## Cost and time, roughly
 
 It depends heavily on the app-knowledge primer
-(`docs/test-bed-evolution.md` §A), and v3 hasn't been run yet. The two
-development primers bracket it: with v2 (the most detailed) MCP was
-$0.78–$1.15 and 2.9–6.5 min per repeat, Codegen $0.09–$0.20 and 1–3 min,
-so a full `--condition both --repeats 3` batch was **~$3 and ~30
-minutes**. With v1, Codegen was ~4x more expensive and 6.8–10+ min per
-repeat, and the batch took ~45–55 minutes. v3 is shorter than both, so
-expect the v1 end: budget **~$5 and up to an hour**. Variance is large either way (MCP has had one
+(`docs/test-bed-evolution.md` §A). With the default primer (v3): MCP
+$0.47–$0.56 and 2.4–4.4 min per repeat, Codegen $0.41–$0.44 and 6–12 min
+per repeat, plus ~80s of app reset before each run. A full
+`--condition both --repeats 3` batch is roughly **~$3 and ~45 minutes**.
+(With the more detailed development primer v2, Codegen was much cheaper
+and the batch took ~30 minutes.) Variance is large either way (MCP has had one
 outlier run per batch) and is part of what's being measured, not a
 bug.
 

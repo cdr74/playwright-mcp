@@ -1,0 +1,61 @@
+{
+  "runId": "mcp-2026-09-26T08-27-27-503Z",
+  "condition": "mcp",
+  "promptVariant": "baseline",
+  "primerVersion": "v3",
+  "phases": [
+    {
+      "phase": "explore",
+      "model": "claude-sonnet-5",
+      "resolvedModels": [
+        "claude-sonnet-5"
+      ],
+      "sessionId": "3eafb528-7c92-4fb3-bc64-a4d1231dba6a",
+      "inputTokens": 84,
+      "outputTokens": 8137,
+      "cacheCreationInputTokens": 37990,
+      "cacheReadInputTokens": 1053116,
+      "costUsd": 0.4441212,
+      "turns": 45,
+      "toolCallCounts": {
+        "mcp__playwright__browser_navigate": 4,
+        "mcp__playwright__browser_snapshot": 8,
+        "mcp__playwright__browser_type": 10,
+        "mcp__playwright__browser_click": 9,
+        "mcp__playwright__browser_wait_for": 3,
+        "mcp__playwright__browser_find": 2,
+        "mcp__playwright__browser_evaluate": 3,
+        "mcp__playwright__browser_press_key": 2,
+        "mcp__playwright__browser_network_requests": 1,
+        "mcp__playwright__browser_network_request": 1,
+        "mcp__tools__write_file": 1
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-26T08:27:27.504Z",
+      "finishedAt": "2026-09-26T08:31:26.433Z",
+      "durationMs": 234821
+    },
+    {
+      "phase": "generate",
+      "model": "claude-sonnet-5",
+      "resolvedModels": [
+        "claude-sonnet-5"
+      ],
+      "sessionId": "bc2a1132-c150-409d-ac38-c2b22ee4790a",
+      "inputTokens": 6,
+      "outputTokens": 2020,
+      "cacheCreationInputTokens": 4582,
+      "cacheReadInputTokens": 31910,
+      "costUsd": 0.044922000000000004,
+      "turns": 3,
+      "toolCallCounts": {
+        "mcp__tools__write_file": 1,
+        "mcp__tools__run_playwright_test": 1
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-26T08:31:29.744Z",
+      "finishedAt": "2026-09-26T08:32:06.812Z",
+      "durationMs": 27936
+    }
+  ]
+}

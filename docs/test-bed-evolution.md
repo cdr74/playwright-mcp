@@ -16,7 +16,7 @@ measurements of MCP vs Codegen.
 | Batch 1, primer v1 | 3 repeats per condition | Variance matters: n=1 misled. A 10-min timeout was censoring the slowest runs. The MCP tool allow-list had never been enforced. |
 | Full MCP toolset | Adopted as the MCP condition (`CLAUDE.md` decision 13) | "MCP out of the box" is what gets measured. |
 | Batch 2, primer v2 | Primer + three app traps that every batch-1 run had hit | **What the agent is told about the app outweighs its tooling**: cost ratio 1.2x → 6.3x. |
-| Primer v3 | Cut back to what a real tester would actually write down (`CLAUDE.md` decision 16) | v1/v2 were written by us while building the harness, and v2's traps came from watching agents fail on this exact screen, so it worked partly as an answer key. v3 is the baseline for [`results.md`](results.md). |
+| Primer v3 | Cut back to what a real tester would actually write down (`CLAUDE.md` decision 16) | v1/v2 were written by us while building the harness, and v2's traps came from watching agents fail on this exact screen, so it worked partly as an answer key. On v3 the cost ratio is back to **1.2x**, close to v1. v3 is the baseline for [`results.md`](results.md). |
 
 The most important lesson: **how much the agent knows about the app
 decides the size of the gap**, and v2 went further than any real tester's

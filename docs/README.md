@@ -29,7 +29,8 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
   `RUN_ID` produced. Neither single-run runbook above covers this by
   itself.
 - `results.md` — **the headline results**: the create flow on the
-  realistic primer v3. Pending the first v3 batch.
+  realistic primer v3 (cost, efficiency, failure causes, quality with
+  measured flakiness).
 - `test-bed-evolution.md` — development history: the N=1 pair and the
   two primer-v1/v2 batches, what each taught us (contamination, timeouts,
   toolset, the primer's weight), full analysis kept as it was. Lessons,

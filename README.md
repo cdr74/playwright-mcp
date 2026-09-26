@@ -13,12 +13,22 @@ tests two ways:
 
 > ### 📊 Results → **[docs/results.md](docs/results.md)**
 >
-> Being re-measured on a realistic baseline: primer v3, the kind of short
-> app notes a real tester would keep. Earlier runs used more detailed
-> primers we wrote while building the harness. They taught us a lot
-> (mainly that **what the agent knows about the app can matter more than
-> its tooling**), but they aren't real-world measurements. That story is
-> in [docs/test-bed-evolution.md](docs/test-bed-evolution.md).
+> With app notes of the kind a real tester keeps (primer v3), **MCP costs
+> only ~1.2x as much as Codegen** per generated test ($0.51 vs $0.42), is
+> ~2.5x faster, and gets to green almost immediately, while Codegen needs
+> ~8 blind test runs. Test quality is about equal (22.7 vs 23.3 of 28) and
+> all six specs pass 5/5 re-runs.
+
+| Means per run (primer v3, n=3) | MCP | Codegen |
+|---|---|---|
+| Cost | $0.51 | $0.42 |
+| Turns | 45 | 18 |
+| Test runs to green | 1.3 | 8.3 |
+| Wall clock | 3.3 min | 8.4 min |
+| Quality (/28) | 22.7 | 23.3 |
+
+How we got here, including a 6.3x gap that turned out to depend on an
+answer-key-level primer: [docs/test-bed-evolution.md](docs/test-bed-evolution.md).
 
 ## Why
 
@@ -107,7 +117,7 @@ blocks that when it's done from inside another session
 ([`harness/README.md`](harness/README.md)).
 
 ```bash
-# Full comparison: both conditions, 3 repeats, app reset before every run (~$3, ~30 min)
+# Full comparison: both conditions, 3 repeats, app reset before every run (~$3, ~45 min)
 npm run repeat:baseline
 npm run repeat:nudged                      # same, plus docs/testing-best-practices.md
 npm run repeat:baseline -- --primer v2     # an earlier primer (default: v3)
@@ -127,8 +137,8 @@ gitignored ([`results/README.md`](results/README.md)).
 
 - ✅ Test **generation**: both conditions built. Two development batches
   have been run and analysed ([evolution](docs/test-bed-evolution.md)).
-- ⏳ **Realistic baseline** (primer v3): ready to run; it will be the
-  headline result.
+- ✅ **Realistic baseline** (primer v3): run and analysed, the headline
+  result.
 - ⏳ **Nudged** batch (best-practice guidance added to the prompt): wired
   up, not yet run.
 - 🔜 Test **healing**: change the app under a working test (one label

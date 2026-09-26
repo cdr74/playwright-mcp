@@ -1,0 +1,61 @@
+{
+  "runId": "mcp-2026-09-26T08-47-04-742Z",
+  "condition": "mcp",
+  "promptVariant": "baseline",
+  "primerVersion": "v3",
+  "phases": [
+    {
+      "phase": "explore",
+      "model": "claude-sonnet-5",
+      "resolvedModels": [
+        "claude-sonnet-5"
+      ],
+      "sessionId": "2897bcfe-a754-4b0d-b384-fbe9d8b494cb",
+      "inputTokens": 80,
+      "outputTokens": 6304,
+      "cacheCreationInputTokens": 44629,
+      "cacheReadInputTokens": 1215109,
+      "costUsd": 0.4847378000000001,
+      "turns": 43,
+      "toolCallCounts": {
+        "mcp__playwright__browser_navigate": 3,
+        "mcp__playwright__browser_snapshot": 10,
+        "mcp__playwright__browser_fill_form": 2,
+        "mcp__playwright__browser_click": 13,
+        "mcp__playwright__browser_wait_for": 2,
+        "mcp__playwright__browser_type": 4,
+        "mcp__playwright__browser_find": 3,
+        "mcp__playwright__browser_evaluate": 1,
+        "mcp__playwright__browser_press_key": 2,
+        "mcp__playwright__browser_take_screenshot": 1,
+        "mcp__tools__write_file": 1
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-26T08:47:04.744Z",
+      "finishedAt": "2026-09-26T08:49:20.387Z",
+      "durationMs": 131492
+    },
+    {
+      "phase": "generate",
+      "model": "claude-sonnet-5",
+      "resolvedModels": [
+        "claude-sonnet-5"
+      ],
+      "sessionId": "63e94c74-9cfa-4215-9d60-3a258217c1a0",
+      "inputTokens": 10,
+      "outputTokens": 3725,
+      "cacheCreationInputTokens": 6569,
+      "cacheReadInputTokens": 58659,
+      "costUsd": 0.0752778,
+      "turns": 5,
+      "toolCallCounts": {
+        "mcp__tools__write_file": 2,
+        "mcp__tools__run_playwright_test": 2
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-26T08:49:23.720Z",
+      "finishedAt": "2026-09-26T08:50:19.783Z",
+      "durationMs": 52023
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+run_id repeat condition variant primer
+mcp-2026-09-26T08-15-01-569Z 1 mcp baseline v3
+codegen-2026-09-26T08-18-58-826Z 1 codegen baseline v3
+mcp-2026-09-26T08-27-27-503Z 2 mcp baseline v3
+codegen-2026-09-26T08-33-30-390Z 2 codegen baseline v3
+mcp-2026-09-26T08-47-04-742Z 3 mcp baseline v3
+codegen-2026-09-26T08-51-43-630Z 3 codegen baseline v3

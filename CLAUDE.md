@@ -341,9 +341,9 @@ assume some `.md` file describes it and needs a pass.
     would write, in a tester's words, and is the default. It covers only
     the parts of the app this flow touches (a real team's notes would be
     broader); the user judged that unlikely to change results, and it's
-    listed as a caveat in `docs/results.md`. The create flow
-    gets re-run on v3 and **that** becomes the headline result
-    (`docs/results.md`). v1/v2 batches move to
+    listed as a caveat in `docs/results.md`. The create flow was
+    re-run on v3 (2026-09-26) and **that** is the headline result
+    (`docs/results.md`: MCP:Codegen cost 1.2x, quality about equal). v1/v2 batches move to
     `docs/test-bed-evolution.md`: valuable lessons from building the
     harness, but not real-world measurements, and kept out of a new
     reader's main path.

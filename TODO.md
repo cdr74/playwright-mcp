@@ -547,9 +547,14 @@ thing anyone reproducing this repo would hit again.
       the served model recorded per phase as `resolvedModels`
       (backfilled: every earlier run got `claude-sonnet-5`). `CLAUDE.md`
       decision 7.
-- [ ] **Run the v3 baseline batch** (`npm run repeat:baseline`, plain
-      terminal, ~$5 / up to an hour), then rescore quality (5x re-runs,
-      reset per spec) and fill in `docs/results.md`.
+- [x] **v3 baseline batch** (`results/repeat-run-log-20260926T081334Z.txt`,
+      all 6 runs complete, clean). MCP:Codegen cost **1.2x** ($0.51 vs
+      $0.42); MCP 1.3 test runs to green vs Codegen 8.3; wall clock 3.3
+      vs 8.4 min. Quality rescored (5x each, reset per spec): all 5/5,
+      MCP 22.7 vs Codegen 23.3. Written up in `docs/results.md`. Found:
+      2 of 3 MCP specs hardcode a leave date seen while exploring;
+      OrangeHRM accepts past dates, so those tests keep passing but stop
+      testing "future" leave (verified with a past-date probe).
 - [x] **[DECISION]** Nudged batch primer: **v3**, compared against the
       v3 baseline (2026-09-26; it was v2 before v3 existed).
 - [ ] `npm run repeat:nudged` (v3 is the default, so no flag). Wiring

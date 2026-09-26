@@ -1,0 +1,58 @@
+{
+  "runId": "mcp-2026-09-26T08-15-01-569Z",
+  "condition": "mcp",
+  "promptVariant": "baseline",
+  "primerVersion": "v3",
+  "phases": [
+    {
+      "phase": "explore",
+      "model": "claude-sonnet-5",
+      "resolvedModels": [
+        "claude-sonnet-5"
+      ],
+      "sessionId": "8352e4ed-537e-45c8-b66a-d436e1827571",
+      "inputTokens": 70,
+      "outputTokens": 5900,
+      "cacheCreationInputTokens": 47923,
+      "cacheReadInputTokens": 903480,
+      "costUsd": 0.43152799999999997,
+      "turns": 37,
+      "toolCallCounts": {
+        "mcp__playwright__browser_navigate": 2,
+        "mcp__playwright__browser_snapshot": 10,
+        "mcp__playwright__browser_type": 8,
+        "mcp__playwright__browser_click": 8,
+        "mcp__playwright__browser_wait_for": 2,
+        "mcp__playwright__browser_evaluate": 2,
+        "mcp__playwright__browser_press_key": 3,
+        "mcp__tools__write_file": 1
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-26T08:15:01.571Z",
+      "finishedAt": "2026-09-26T08:16:55.594Z",
+      "durationMs": 109680
+    },
+    {
+      "phase": "generate",
+      "model": "claude-sonnet-5",
+      "resolvedModels": [
+        "claude-sonnet-5"
+      ],
+      "sessionId": "081d9dac-fd7f-4762-8140-31c93d47ad85",
+      "inputTokens": 6,
+      "outputTokens": 1655,
+      "cacheCreationInputTokens": 4514,
+      "cacheReadInputTokens": 29343,
+      "costUsd": 0.0404866,
+      "turns": 3,
+      "toolCallCounts": {
+        "mcp__tools__write_file": 1,
+        "mcp__tools__run_playwright_test": 1
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-26T08:16:58.983Z",
+      "finishedAt": "2026-09-26T08:17:34.760Z",
+      "durationMs": 31725
+    }
+  ]
+}
