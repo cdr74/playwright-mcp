@@ -45,12 +45,11 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
 - `quality-rubric.md` — 7-criterion manual scoring rubric for a generated
   test file (5 from `CLAUDE.md` decision 2, plus 2 added and flagged after
   real scoring passes showed a need for them - task/spec compliance and
-  config/data separation). Applied to every scored run so far (`docs/test-bed-evolution.md`).
+  config/data separation). Applied to every scored run (`results.md`,
+  and `test-bed-evolution.md` for the development batches).
   Automated/LLM-judge scoring is a later option, see `TODO.md` Phase 3.
-- `testing-best-practices.md` — agent-facing primer mirroring the rubric
-  above, one practice per criterion. Wired in (opt-in, symmetric) via
-  `NUDGE_QUALITY=1` / the `*:nudged` npm scripts - it's the input half of
-  the baseline-vs-nudged comparison (does explicit guidance change
-  generated quality, and does it change the MCP/Codegen gap?). Run on
-  primer v3; results in `results.md`. Note that it's fed verbatim,
-  including its benchmark-describing intro (see `TODO.md`).
+- `testing-best-practices/` — agent-facing guidance for **nudged** runs,
+  one practice per quality-rubric criterion. Versioned like the primer:
+  `v1` (what the first nudged batch saw, including an intro describing
+  the benchmark) and `v2` (the default: the practices only, no app
+  knowledge). Its `README.md` has the wiring and the version table.

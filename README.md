@@ -16,7 +16,8 @@ end-to-end test, and to **heal** one after an app update, two ways:
 | Flow | Variant | MCP | Codegen | Status |
 |---|---|---|---|---|
 | **Create a new test** (add employee → assign leave → verify) | Baseline: task + app notes | 3 runs | 3 runs | ✅ measured |
-| | Nudged: + testing best-practices guidance | 3 runs | 3 runs | ✅ measured |
+| | Nudged: + testing best-practices guidance (v1) | 3 runs | 3 runs | ✅ measured |
+| | Nudged, clean guidance (v2: no benchmark talk, no app hints) | | | ⏳ to run |
 | **Heal a test that used to pass** (after a label or DOM change in the app) | Survival check: 12 specs × 4 app updates (no LLM) | | | ✅ measured |
 | | Pilot: 2 app updates (label, DOM) | 6 runs | 6 runs | ✅ measured |
 
@@ -176,7 +177,7 @@ blocks that when it's done from inside another session
 ```bash
 # Full comparison: both conditions, 3 repeats, app reset before every run (~$3, ~45 min)
 npm run repeat:baseline
-npm run repeat:nudged                      # same, plus docs/testing-best-practices.md
+npm run repeat:nudged                      # same, plus best-practices guidance (docs/testing-best-practices/)
 npm run repeat:baseline -- --primer v2     # an earlier primer (default: v3)
 
 # Healing
@@ -198,6 +199,8 @@ Each run writes its spec, `metrics.json` and (for MCP) `test-plan.md` to
 
 ## What's next
 
+- **Re-run the nudged batch** with the clean guidance (v2); the first
+  one (v1) told the agents they'd be scored and carried a URL hint.
 - **Conclusions** from the generation batches and the healing pilot.
 - **Test healing beyond the pilot**, if the conclusions call for it:
   more app updates or repeats ([runbook](docs/run-heal.md)).

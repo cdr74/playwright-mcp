@@ -227,7 +227,8 @@ phase 1, plus `mcp__tools__run_playwright_test`.
   **Nudged variant** (`explore:mcp:nudged` then `generate:mcp:nudged` /
   `NUDGE_QUALITY=1`): this phase only (explore never gets it) appends
   `\n\n## Testing best practices\n\n` and
-  `docs/testing-best-practices.md` verbatim after the app knowledge. The
+  `docs/testing-best-practices/<NUDGE>.md` (default `v2`; recorded as
+  `nudgeVersion`) verbatim after the app knowledge. The
   explore phase still needs the flag to mint an `mcp-nudged-` `RUN_ID`;
   `generate-mcp.ts` warns if the prefix and flag disagree.
 

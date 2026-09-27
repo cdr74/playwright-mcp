@@ -15,12 +15,12 @@
 # limitation of testing this from inside Claude Code").
 #
 # Usage:
-#   harness/run-repeats.sh [--condition mcp|codegen|both] [--repeats N] [--nudged] [--primer v1|v2|v3]
+#   harness/run-repeats.sh [--condition mcp|codegen|both] [--repeats N] [--nudged [--nudge v1|v2]] [--primer v1|v2|v3]
 #
 # Defaults: --condition both --repeats 3 (the confirmed count, see
 # CLAUDE.md decision 12). --nudged runs the baseline-vs-nudged variant
-# (docs/testing-best-practices.md appended - see TODO.md) instead of the
-# unguided baseline. --primer picks the app-knowledge primer version
+# (docs/testing-best-practices/<version>.md appended; --nudge picks the
+# version, default v2) instead of the unguided baseline. --primer picks the app-knowledge primer version
 # (docs/app-knowledge/<version>.md, default v3 - an explicit experimental
 # variable, CLAUDE.md decision 14); it's recorded in every run's
 # metrics.json and in this script's RUN_ID log.
@@ -37,6 +37,7 @@ REPEATS=3
 SUFFIX=""
 VARIANT="baseline"
 PRIMER="${PRIMER:-v3}"
+NUDGE="${NUDGE:-v2}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -44,8 +45,9 @@ while [[ $# -gt 0 ]]; do
     --repeats) REPEATS="$2"; shift 2 ;;
     --nudged) SUFFIX=":nudged"; VARIANT="nudged"; shift ;;
     --primer) PRIMER="$2"; shift 2 ;;
+    --nudge) NUDGE="$2"; shift 2 ;;
     -h|--help)
-      echo "Usage: $0 [--condition mcp|codegen|both] [--repeats N] [--nudged] [--primer v1|v2|v3]"
+      echo "Usage: $0 [--condition mcp|codegen|both] [--repeats N] [--nudged [--nudge v1|v2]] [--primer v1|v2|v3]"
       exit 0 ;;
     *) echo "Unknown argument: $1" >&2; exit 1 ;;
   esac
@@ -60,12 +62,18 @@ if [[ ! -f "docs/app-knowledge/$PRIMER.md" ]]; then
   echo "Unknown --primer: $PRIMER (no docs/app-knowledge/$PRIMER.md)" >&2
   exit 1
 fi
-export PRIMER
+export PRIMER NUDGE
+if [[ "$VARIANT" == "nudged" && ! -f "docs/testing-best-practices/$NUDGE.md" ]]; then
+  echo "Unknown --nudge: $NUDGE (no docs/testing-best-practices/$NUDGE.md)" >&2
+  exit 1
+fi
 
 LOG_FILE="results/repeat-run-log-$(date -u +%Y%m%dT%H%M%SZ).txt"
 echo "run_id repeat condition variant primer" > "$LOG_FILE"
 echo "==> Logging RUN_IDs to $LOG_FILE"
-echo "==> Condition: $CONDITION, repeats: $REPEATS, variant: $VARIANT, primer: $PRIMER"
+VARIANT_LABEL="$VARIANT"
+[[ "$VARIANT" == "nudged" ]] && VARIANT_LABEL="nudged ($NUDGE)"
+echo "==> Condition: $CONDITION, repeats: $REPEATS, variant: $VARIANT_LABEL, primer: $PRIMER"
 
 reset_app() {
   echo "==> Resetting app to a clean, known state"

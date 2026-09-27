@@ -8,7 +8,7 @@ two agents fixing a broken spec. The generation batches:
 | Batch | Date | Log | Prompt |
 |---|---|---|---|
 | **Baseline** | 2026-09-26 | `results/repeat-run-log-20260926T081334Z.txt` | Task + app notes |
-| **Nudged** | 2026-09-26 | `results/repeat-run-log-20260926T095822Z.txt` | Same, plus [`testing-best-practices.md`](testing-best-practices.md) in the code-writing phase |
+| **Nudged** | 2026-09-26 | `results/repeat-run-log-20260926T095822Z.txt` | Same, plus best-practices guidance [v1](testing-best-practices/v1.md) in the code-writing phase |
 
 This page records what was measured. Conclusions are still to be drawn.
 
@@ -88,7 +88,7 @@ This page records what was measured. Conclusions are still to be drawn.
   every phase). **Repeats:** 3 per condition per batch, with a full app
   reset before every run.
 - **Prompts:** baseline = task + app notes. Nudged = the same, plus
-  [`testing-best-practices.md`](testing-best-practices.md) appended to
+  best-practices guidance ([v1](testing-best-practices/v1.md)) appended to
   the phases that write code (MCP generate, Codegen). MCP's explore
   phase is identical in both batches.
 - Checked from the transcripts: every session saw primer v3, the
@@ -322,9 +322,10 @@ conditions × 3 repeats, a full reset before every run
   `.oxd-select-text` locator).
 - **MCP:** Playwright's own healer agent, word for word, with its
   `playwright-test` MCP server (run, debug-pause, then inspect the live
-  page). **It saw all 97 of that server's tools, not the 11 its own
-  definition lists**, so read its cost as an upper bound for the healer
-  as installed.
+  page). It saw all 97 of that server's tools, not just the 11 its own
+  definition lists, as it would in a typical IDE setup where nobody
+  restricts tools. Installed as a Claude Code subagent it would get only
+  its 11, so against that setup its cost is an upper bound.
 - **Non-MCP:** the same healer text with the browser steps replaced by
   "read the failure output and its page snapshot" (Playwright's
   `error-context.md`, an accessibility snapshot).
@@ -437,24 +438,29 @@ never gets a shell (README, "How the comparison works").
 - Quality criteria 2 and 5 involve judgment; the others rest on the
   objective signals above.
 - **Healing:** n=3 per cell, one starting spec, two app updates. The MCP
-  healer saw all 97 tools of Playwright's `playwright-test` server instead
-  of the 11 its definition lists, so its cost is an upper bound for the
-  healer as installed. Both heal conditions could run arbitrary code
+  healer saw all 97 tools of Playwright's `playwright-test` server (the
+  typical IDE setup), not the 11 of its own definition (the subagent
+  setup). The non-MCP healer got only what a test run produces
+  automatically; the study measures automatic healing, not a human
+  opening a trace. Both heal conditions could run arbitrary code
   through the tests they wrote (one used that to dump the page's HTML);
   test runs started in the run's own directory.
-- **The best-practices text carries more than best practices.** It's fed
+- **The nudged batch used the first version of the guidance (v1),
+  which carries more than best practices.** It's fed
   verbatim, and its opening paragraphs describe the benchmark itself
   (the baseline-vs-nudged comparison, and that
   `docs/quality-rubric.md` is "what an agent gets scored against
   afterward"), so the nudged agents knew they were being scored. Its
   example `page.goto('/web/index.php/...')` also carries a small piece of
-  app knowledge. Both affect how the nudged numbers should be read.
+  app knowledge. Both affect how the nudged numbers should be read. A
+  clean v2 (the practices only) exists and is to be re-run
+  (`testing-best-practices/README.md`).
 
 ## Reproducing
 
 ```bash
 npm run repeat:baseline    # both conditions, 3 repeats, primer v3, app reset before every run
-npm run repeat:nudged      # the same, plus docs/testing-best-practices.md
+npm run repeat:nudged -- --nudge v1   # the nudged batch as run (v1 guidance; default is now v2)
 npm run survival           # which specs each app update breaks (no LLM)
 npm run repeat:heal        # healing pilot: 2 app updates x 2 conditions x 3 repeats
 ```

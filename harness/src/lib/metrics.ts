@@ -2,6 +2,7 @@ import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { ClaudeRunResult } from './claude-runner.js';
 import type { PrimerVersion } from './primer.js';
+import type { NudgeVersion } from './nudge.js';
 
 export interface PhaseMetrics {
   phase: string;
@@ -41,6 +42,8 @@ export interface RunMeta {
   /** Absent on runs from before healing existed; those are all 'generate'. */
   flow?: 'generate' | 'heal';
   promptVariant: 'baseline' | 'nudged';
+  /** Which docs/testing-best-practices/<version>.md a nudged run got. Absent on baseline runs. */
+  nudgeVersion?: NudgeVersion;
   primerVersion: PrimerVersion;
   heal?: HealMeta;
 }

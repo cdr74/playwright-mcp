@@ -2,6 +2,7 @@
   "runId": "mcp-nudged-2026-09-26T09-59-47-358Z",
   "condition": "mcp",
   "promptVariant": "nudged",
+  "nudgeVersion": "v1",
   "primerVersion": "v3",
   "phases": [
     {

@@ -9,7 +9,7 @@
  * exploration. See conditions/codegen/README.md.
  *
  * Usage: npm run bench:codegen (or bench:codegen:nudged, which appends
- * docs/testing-best-practices.md to the system prompt - see that file's
+ * docs/testing-best-practices/<NUDGE>.md to the system prompt - see that folder's
  * own header for the baseline-vs-nudged comparison this enables)
  * Prints a RUN_ID.
  */
@@ -21,6 +21,7 @@ import { recordPhaseMetrics, summarizePhase } from './lib/metrics.js';
 import { newRunId } from './lib/run-id.js';
 import { seed } from './seed.js';
 import { loadPrimer } from './lib/primer.js';
+import { loadNudge } from './lib/nudge.js';
 import { isolatedCwd, bin } from './lib/isolated-session.js';
 
 const MODEL = process.env.CLAUDE_MODEL ?? DEFAULT_MODEL;
@@ -40,7 +41,7 @@ async function main(): Promise<void> {
   await mkdir(runDir, { recursive: true });
   await mkdir(rawDir, { recursive: true });
 
-  const [primer, systemPromptBase, flowSpec, codegenRecording, testingBestPractices] = await Promise.all([
+  const [primer, systemPromptBase, flowSpec, codegenRecording, nudge] = await Promise.all([
     loadPrimer(),
     readFile('conditions/codegen/system-prompt.md', 'utf-8'),
     readFile(FLOW_PATH, 'utf-8'),
@@ -49,9 +50,9 @@ async function main(): Promise<void> {
         `Could not read codegen fixture at ${FIXTURE_PATH}. Record it first: see fixtures/README.md.`,
       );
     }),
-    NUDGE_QUALITY ? readFile('docs/testing-best-practices.md', 'utf-8') : Promise.resolve(null),
+    NUDGE_QUALITY ? loadNudge() : Promise.resolve(null),
   ]);
-  const nudgeBlock = testingBestPractices ? `\n\n## Testing best practices\n\n${testingBestPractices}` : '';
+  const nudgeBlock = nudge ? `\n\n## Testing best practices\n\n${nudge.text}` : '';
   const systemPrompt = `${systemPromptBase}\n\nTarget application base URL: ${TARGET_APP_URL}\n\n## App knowledge\n\n${primer.text}${nudgeBlock}`;
   const userMessage = `## Flow\n\n${flowSpec}\n\n## Raw codegen recording (starting point - clean this up, don't just wrap it)\n\n\`\`\`typescript\n${codegenRecording}\n\`\`\``;
 
@@ -80,7 +81,13 @@ async function main(): Promise<void> {
   const phase = summarizePhase('generate', MODEL, result, startedAt);
   await recordPhaseMetrics(
     runDir,
-    { runId, condition: 'codegen', promptVariant: NUDGE_QUALITY ? 'nudged' : 'baseline', primerVersion: primer.version },
+    {
+      runId,
+      condition: 'codegen',
+      promptVariant: NUDGE_QUALITY ? 'nudged' : 'baseline',
+      ...(nudge ? { nudgeVersion: nudge.version } : {}),
+      primerVersion: primer.version,
+    },
     phase,
   );
 

@@ -129,7 +129,8 @@ Then, what this invokes in `claude -p --output-format json` terms:
 
   **Nudged variant** (`npm run bench:codegen:nudged` / `NUDGE_QUALITY=1`):
   identical, plus `\n\n## Testing best practices\n\n` and
-  `docs/testing-best-practices.md` verbatim appended after the app
+  `docs/testing-best-practices/<NUDGE>.md` (default `v2`; recorded as
+  `nudgeVersion`) verbatim appended after the app
   knowledge. `RUN_ID` gets a `codegen-nudged-` prefix.
 
 - **User message**: the flow spec, a heading, then the fixture content

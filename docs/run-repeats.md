@@ -18,7 +18,8 @@ not from inside a Claude Code session** (see `harness/README.md`).
 harness/run-repeats.sh                                # both conditions, 3 repeats, baseline
 harness/run-repeats.sh --condition mcp                 # MCP only
 harness/run-repeats.sh --condition codegen --repeats 5  # Codegen only, 5 repeats
-harness/run-repeats.sh --nudged                         # the nudged variant instead (docs/testing-best-practices.md)
+harness/run-repeats.sh --nudged                         # the nudged variant (docs/testing-best-practices/v2.md)
+harness/run-repeats.sh --nudged --nudge v1             # the nudged variant with the first version of the guidance
 harness/run-repeats.sh --primer v2                      # an earlier app-knowledge primer (default: v3)
 ```
 

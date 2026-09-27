@@ -343,7 +343,15 @@ assume some `.md` file describes it and needs a pass.
       restrict MCP-server tools (decision 3). So in this study the healer
       carries more tool definitions in context, and has more capability
       (e.g. `browser_click`, `browser_resume`), than in real use. Report
-      its cost with that caveat.
+      its cost with that caveat. **Not to be fixed** (user, 2026-09-27):
+      a typical user doesn't restrict the tools in their IDE either, so
+      the full toolset is the realistic setup; "upper bound" only holds
+      against the healer installed as a subagent.
+    - **The non-MCP healer gets only what a test run produces
+      automatically** (failure output + `error-context.md`), not a
+      trace viewer or other artifact a human would open (user,
+      2026-09-27): the study measures the cost of *automatic* healing,
+      not healing with human intervention.
     - **Integrity is scored from the diff, via a rubric** (no
       deliberate real-regression probe): no assertion removed or
       weakened, no step dropped, no `skip`/`fixme`, no locator widened
@@ -377,6 +385,18 @@ assume some `.md` file describes it and needs a pass.
     `docs/test-bed-evolution.md`: valuable lessons from building the
     harness, but not real-world measurements, and kept out of a new
     reader's main path.
+
+17. **The testing best-practices guidance is versioned, like the primer**
+    (decided 2026-09-27). `docs/testing-best-practices/v1.md` is what the
+    first nudged batch saw, frozen; it opened with an intro describing
+    the benchmark (including "what an agent gets scored against
+    afterward") and used this app's URL shape as an example. `v2.md` is
+    the seven practices only, word for word, with the example made
+    generic: no benchmark talk, no app knowledge. `NUDGE=<version>` /
+    `run-repeats.sh --nudge` (default `v2`), recorded as `nudgeVersion`
+    in `metrics.json` (backfilled `v1` for the first batch, verified from
+    the transcripts). The nudged batch gets re-run on v2 (primer v3),
+    compared against the same v3 baseline.
 
 ## Tech stack
 

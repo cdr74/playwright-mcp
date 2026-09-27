@@ -9,10 +9,9 @@ starts on them, per `CLAUDE.md`.
 Everything else below is history, kept for the record.
 
 - **Conclusions** across generation and healing, with the user (Phase 5).
-- **[DECISION]** A clean "nudge v2" without the benchmark-describing
-  intro, and a re-run? (Phase 4)
-- More repeats per cell; more app updates for healing; the healer
-  restricted to its own 11 tools to size that caveat (Phases 4 and 5).
+- **Re-run the nudged batch on nudge v2** (`npm run repeat:nudged`, user,
+  plain terminal), then score it and update `docs/results.md`.
+- More repeats per cell; more app updates for healing (Phases 4 and 5).
 - Automated/LLM-judge quality scorer (Phase 3).
 
 ## Decisions (all resolved so far)
@@ -71,7 +70,7 @@ Everything else below is history, kept for the record.
       gets built (3 × 2 conditions × 2 variants = 12 runs, not 6). See
       `CLAUDE.md` decision 12.
 - [x] **[DECISION]** Baseline-vs-nudged quality comparison: **build it,
-      run it later.** `docs/testing-best-practices.md` (mirrors
+      run it later.** `docs/testing-best-practices/v1.md` (mirrors
       `docs/quality-rubric.md`'s 7 criteria one-for-one) is now wired into
       the code-writing phase of both conditions
       (`generate-mcp.ts`/`run-codegen.ts`, not `explore-mcp.ts` - see that
@@ -575,7 +574,8 @@ thing anyone reproducing this repo would hit again.
       cost −47% (its first attempt now navigates, using the nudge's
       relative-`goto` example). Quality up in both (MCP 24.7, Codegen
       26.7); all 12 v3 specs 5/5. Written up in `docs/results.md`.
-- [ ] **[DECISION]** `docs/testing-best-practices.md` is fed verbatim,
+- [x] **[DECISION]** (2026-09-27: yes, as nudge v2, `CLAUDE.md` decision
+      17; v1 frozen as what the first batch saw.) `docs/testing-best-practices/v1.md` is fed verbatim,
       and its opening paragraphs describe the benchmark (including that
       `docs/quality-rubric.md` is "what an agent gets scored against"),
       plus a relative-`goto` example that carries a little app knowledge.
@@ -690,8 +690,11 @@ Design agreed 2026-09-26: `CLAUDE.md` decision 15.
       up in `docs/results.md`.
 - [ ] **Conclusions** across generation (baseline + nudged) and healing,
       with the user.
-- [ ] Optional, after conclusions: more app updates / repeats; the
-      healer restricted to its own 11 tools, to size the 97-tool caveat.
+- [ ] Optional, after conclusions: more app updates / repeats.
+- [x] **[DECISION]** Not doing (user, 2026-09-27): restricting the healer
+      to its 11 tools (a typical user doesn't restrict IDE tools either),
+      and giving the non-MCP healer a human-opened artifact such as the
+      trace (the study measures automatic healing).
 
 ## Nice-to-haves (not scoped, don't build unprompted)
 

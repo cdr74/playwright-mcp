@@ -7,7 +7,7 @@
  *
  * Usage: RUN_ID=<id from explore-mcp.ts> npm run generate:mcp
  * (or generate:mcp:nudged, matching whichever explore:mcp variant minted
- * the RUN_ID - NUDGE_QUALITY appends docs/testing-best-practices.md to
+ * the RUN_ID - NUDGE_QUALITY appends docs/testing-best-practices/<NUDGE>.md to
  * this phase's system prompt, since this is the phase that writes code;
  * see that file's own header for why explore-mcp.ts doesn't also get it)
  */
@@ -18,6 +18,7 @@ import { DEFAULT_MODEL, runClaude } from './lib/claude-runner.js';
 import { readRunMetrics, recordPhaseMetrics, summarizePhase } from './lib/metrics.js';
 import { seed } from './seed.js';
 import { loadPrimer } from './lib/primer.js';
+import { loadNudge } from './lib/nudge.js';
 import { isolatedCwd, bin } from './lib/isolated-session.js';
 
 const MODEL = process.env.CLAUDE_MODEL ?? DEFAULT_MODEL;
@@ -59,22 +60,29 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const [primer, generatePrompt, flowSpec, testingBestPractices] = await Promise.all([
+  const [primer, generatePrompt, flowSpec, nudge] = await Promise.all([
     loadPrimer(),
     readFile('conditions/mcp/generate-prompt.md', 'utf-8'),
     readFile(FLOW_PATH, 'utf-8'),
-    NUDGE_QUALITY ? readFile('docs/testing-best-practices.md', 'utf-8') : Promise.resolve(null),
+    NUDGE_QUALITY ? loadNudge() : Promise.resolve(null),
   ]);
   // explore-mcp.ts already recorded this run's primer; a mismatch here would
   // mean the two phases saw different app knowledge.
-  const recordedPrimer = (await readRunMetrics(runDir))?.primerVersion;
+  const recorded = await readRunMetrics(runDir);
+  if (nudge && recorded?.nudgeVersion && recorded.nudgeVersion !== nudge.version) {
+    console.warn(
+      `    WARNING: explore:mcp recorded nudge ${recorded.nudgeVersion} for this RUN_ID, but NUDGE is ${nudge.version} now - ` +
+      `rerun with NUDGE=${recorded.nudgeVersion} to keep metrics.json accurate.`,
+    );
+  }
+  const recordedPrimer = recorded?.primerVersion;
   if (recordedPrimer && recordedPrimer !== primer.version) {
     console.warn(
       `    WARNING: explore:mcp ran this RUN_ID with primer ${recordedPrimer}, but PRIMER is ${primer.version} now - ` +
       `rerun with PRIMER=${recordedPrimer} to keep both phases on the same primer.`,
     );
   }
-  const nudgeBlock = testingBestPractices ? `\n\n## Testing best practices\n\n${testingBestPractices}` : '';
+  const nudgeBlock = nudge ? `\n\n## Testing best practices\n\n${nudge.text}` : '';
   const systemPrompt = `${generatePrompt}\n\nTarget application base URL: ${TARGET_APP_URL}\n\n## App knowledge\n\n${primer.text}${nudgeBlock}`;
   const userMessage = `## Flow\n\n${flowSpec}\n\n## Test plan (from exploration)\n\n${testPlan}`;
 
@@ -110,7 +118,13 @@ async function main(): Promise<void> {
   const phase = summarizePhase('generate', MODEL, result, startedAt);
   await recordPhaseMetrics(
     runDir,
-    { runId, condition: 'mcp', promptVariant: NUDGE_QUALITY ? 'nudged' : 'baseline', primerVersion: primer.version },
+    {
+      runId,
+      condition: 'mcp',
+      promptVariant: NUDGE_QUALITY ? 'nudged' : 'baseline',
+      ...(nudge ? { nudgeVersion: nudge.version } : {}),
+      primerVersion: primer.version,
+    },
     phase,
   );
 

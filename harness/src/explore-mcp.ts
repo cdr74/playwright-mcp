@@ -17,6 +17,7 @@ import { recordPhaseMetrics, summarizePhase } from './lib/metrics.js';
 import { newRunId } from './lib/run-id.js';
 import { seed } from './seed.js';
 import { DEFAULT_PRIMER, loadPrimer } from './lib/primer.js';
+import { loadNudge } from './lib/nudge.js';
 import { isolatedCwd, bin } from './lib/isolated-session.js';
 
 const MODEL = process.env.CLAUDE_MODEL ?? DEFAULT_MODEL;
@@ -24,8 +25,8 @@ const TARGET_APP_URL = process.env.TARGET_APP_URL ?? 'http://localhost:8081/';
 const AUTH_STATE_PATH = path.resolve('harness/.auth/state.json');
 const REPO_ROOT = process.cwd();
 const FLOW_PATH = process.argv[2] ?? 'flows/01-add-employee-leave-request.md';
-// This phase never injects testing-best-practices.md itself (it writes a
-// prose test plan, not code - see docs/testing-best-practices.md's own
+// This phase never injects the testing best-practices guidance itself (it
+// writes a prose test plan, not code - see docs/testing-best-practices/README.md's
 // header for why only code-writing phases get it), but it still needs to
 // know about nudge mode to mint a RUN_ID with the matching prefix, since
 // generate-mcp.ts reuses whatever RUN_ID this phase produces.
@@ -80,7 +81,15 @@ async function main(): Promise<void> {
   const phase = summarizePhase('explore', MODEL, result, startedAt);
   await recordPhaseMetrics(
     runDir,
-    { runId, condition: 'mcp', promptVariant: NUDGE_QUALITY ? 'nudged' : 'baseline', primerVersion: primer.version },
+    {
+      runId,
+      condition: 'mcp',
+      promptVariant: NUDGE_QUALITY ? 'nudged' : 'baseline',
+      // Recorded here because this phase writes the run-level fields;
+      // generate-mcp.ts is the phase that actually gets the text.
+      ...(NUDGE_QUALITY ? { nudgeVersion: (await loadNudge()).version } : {}),
+      primerVersion: primer.version,
+    },
     phase,
   );
 

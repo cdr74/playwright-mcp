@@ -2,6 +2,7 @@
   "runId": "codegen-nudged-2026-09-26T10-21-08-935Z",
   "condition": "codegen",
   "promptVariant": "nudged",
+  "nudgeVersion": "v1",
   "primerVersion": "v3",
   "phases": [
     {

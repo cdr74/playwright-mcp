@@ -111,9 +111,14 @@ Code subagent it only gets those. Here it sees all 97 tools of its MCP
 server, because `claude -p --tools` can't restrict MCP-server tools
 (`CLAUDE.md` decision 3). It therefore pays for more tool definitions in
 context, and can do more (the smoke run used `browser_click` and
-`browser_resume`, which aren't on its list). Kept that way by decision;
-read the MCP condition's cost as an upper bound for the healer as
-installed.
+`browser_resume`, which aren't on its list). Kept that way by decision
+(user, 2026-09-27): a typical user doesn't restrict the tools in their
+IDE either, so this is the realistic setup; only against the healer
+installed as a subagent is its cost an upper bound.
+
+The non-MCP condition likewise gets only what a test run produces
+automatically: no trace viewer or other artifact a human would open,
+because the study measures automatic healing.
 
 ## 4. The pilot batch
 
