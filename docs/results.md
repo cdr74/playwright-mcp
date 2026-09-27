@@ -504,8 +504,8 @@ The [post](https://dreaming.press/posts/playwright-mcp-vs-cli-token-cost-browser
 claims ~4.2x tokens (up to 10x) for MCP vs CLI on a ~10-step task. With
 realistic app knowledge we measure **3.1x tokens and 1.2x cost**. That's
 in the same direction but smaller, and caching matters. During
-development we did see 6.3x cost and 35x tokens, but only with a primer
-detailed enough to be an answer key for this exact screen
+development we did see 6.3x cost and 35x tokens, but only with notes that
+listed this exact screen's pitfalls in advance
 ([`test-bed-evolution.md`](test-bed-evolution.md)). How much the
 non-browsing agent already knows decides where in that range you land,
 and the post doesn't say what its CLI agent knew.
