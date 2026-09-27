@@ -395,8 +395,9 @@ assume some `.md` file describes it and needs a pass.
     generic: no benchmark talk, no app knowledge. `NUDGE=<version>` /
     `run-repeats.sh --nudge` (default `v2`), recorded as `nudgeVersion`
     in `metrics.json` (backfilled `v1` for the first batch, verified from
-    the transcripts). The nudged batch gets re-run on v2 (primer v3),
-    compared against the same v3 baseline.
+    the transcripts). Re-run on v2 the same weekend: that is the nudged
+    result now (`docs/results.md`); v1 is kept for what its URL example
+    showed (it cut Codegen's cost from $0.50 to $0.22).
 
 ## Tech stack
 

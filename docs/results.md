@@ -1,14 +1,15 @@
 # Results
 
 Test **generation** for one flow, on the realistic app primer (v3), in
-two batches that differ only in the prompt, and test **healing**: which
+batches that differ only in the prompt, and test **healing**: which
 generated specs survive an app update (no LLM involved), and a pilot of
 two agents fixing a broken spec. The generation batches:
 
 | Batch | Date | Log | Prompt |
 |---|---|---|---|
 | **Baseline** | 2026-09-26 | `results/repeat-run-log-20260926T081334Z.txt` | Task + app notes |
-| **Nudged** | 2026-09-26 | `results/repeat-run-log-20260926T095822Z.txt` | Same, plus best-practices guidance [v1](testing-best-practices/v1.md) in the code-writing phase |
+| **Nudged** | 2026-09-27 | `results/repeat-run-log-20260927T085029Z.txt` | Same, plus best-practices guidance [v2](testing-best-practices/v2.md) in the code-writing phase |
+| Nudged, first version | 2026-09-26 | `results/repeat-run-log-20260926T095822Z.txt` | Same, but guidance [v1](testing-best-practices/v1.md), which also described the benchmark and carried a URL hint. Superseded by v2; kept because of what that hint showed |
 
 This page records what was measured. Conclusions are still to be drawn.
 
@@ -16,37 +17,46 @@ This page records what was measured. Conclusions are still to be drawn.
 
 | Means per run (n=3) | MCP baseline | Codegen baseline | MCP nudged | Codegen nudged |
 |---|---|---|---|---|
-| Cost | $0.51 | $0.42 | $1.23 | $0.22 |
-| **MCP : Codegen cost** | **1.2x** | | **5.5x** | |
-| Turns | 45 | 18 | 90 | 7 |
-| Test runs to green | 1.3 | 8.3 | 5.0 | 3.0 |
-| Wall clock | 3.3 min | 8.4 min | 7.5 min | 2.7 min |
-| Total tokens processed | 1.16M | 0.38M | 2.96M | 0.12M |
+| Cost | $0.51 | $0.42 | $1.49 | $0.50 |
+| **MCP : Codegen cost** | **1.2x** | | **3.0x** | |
+| Turns | 45 | 18 | 100 | 16 |
+| Test runs to green | 1.3 | 8.3 | 6.0 | 7.7 |
+| Wall clock | 3.3 min | 8.4 min | 9.6 min | 6.5 min |
+| Total tokens processed | 1.16M | 0.38M | 3.78M | 0.42M |
 | Quality (/28, [rubric](quality-rubric.md)) | 22.7 | 23.3 | 24.7 | 26.7 |
 | Specs passing 5/5 re-runs | 3 of 3 | 3 of 3 | 3 of 3 | 3 of 3 |
+
+"Nudged" is the clean guidance (v2). The first nudged batch (v1) measured
+MCP $1.23 vs Codegen $0.22 (5.5x), quality 24.7 vs 26.7; see fact 4.
 
 1. **Baseline:** MCP cost 1.2x Codegen. MCP reached green in 1.3 test
    runs and Codegen in 8.3. About 90% of MCP's cost was its explore phase;
    about 55% of Codegen's cost was output tokens (every fix rewrites the
    whole file).
-2. **Nudged:** the ratio moved to 5.5x, in opposite directions. MCP cost
-   went up 2.4x and Codegen cost went down 47%.
-3. **Where MCP's extra nudged cost went:** the generate phase. The added
-   checkpoint assertions failed (all six nudged runs of both conditions
-   hit the double-space employee name), and MCP then debugged in the live browser: 34–48
-   browser calls per generate phase, against 0 in every baseline run.
-   Generate cost $0.84 on average (baseline $0.05).
-4. **Where Codegen's saving came from:** its first attempt no longer
-   started on a blank page. The best-practices text includes a relative
-   `page.goto('/web/index.php/...')` example, and all three nudged runs
-   navigated from their first attempt (0 of 3 in the baseline).
-5. **Quality rose in both conditions with the nudge** (+2.0 MCP, +3.4
-   Codegen). All 12 specs pass 5/5 re-runs. Nudged specs all use
-   relative URLs (baseline: 1 of 6) and most log a diagnostic when an
-   optional step doesn't happen.
-6. **Hardcoded values copied from exploration appear in MCP specs in
-   both batches.** Baseline: 2 of 3 hardcode a leave date, 1 a first
-   name. Nudged: 1 hardcodes a date, 1 a first name. No Codegen spec does.
+2. **Nudged:** the ratio moved to 3.0x. MCP's cost went up 2.9x
+   ($0.51 → $1.49); Codegen's went up 18% ($0.42 → $0.50).
+3. **Where MCP's extra cost went:** the generate phase, in both nudged
+   batches. The guidance adds checkpoint assertions, and all 12 nudged
+   runs (both conditions, both versions) failed once on the same new
+   one: the employee field's value, which renders with a double space.
+   MCP then debugged in the live browser: 21–48 browser
+   calls per generate phase across both batches, against 0 in every
+   baseline run. Generate cost $0.81 on average (baseline $0.05).
+4. **One example URL acted as app knowledge.** The first guidance (v1)
+   illustrated "don't hardcode the base URL" with this app's path shape,
+   `page.goto('/web/index.php/...')`. With it, all three Codegen first
+   attempts navigated and Codegen cost $0.22. With the example made
+   generic (v2), all three first attempts started on a blank page again,
+   as in the baseline, and Codegen cost $0.50.
+5. **Quality rose with guidance, in both conditions and both versions**
+   (MCP 22.7 → 24.7, Codegen 23.3 → 26.7, identical means for v1 and
+   v2). All 18 primer-v3 specs pass 5/5 re-runs. Every nudged spec
+   navigates by relative URL (baseline: 1 of 6).
+6. **MCP specs copy values the agent saw while exploring, guidance or
+   not.** Baseline: 2 of 3 hardcode a leave date, 1 a first name. Nudged
+   v1: 1 date, 1 first name. Nudged v2: 2 of 3 hardcode the first name
+   `'TestQA'`, although the guidance says to generate all test data. No
+   Codegen spec does.
 
 **Healing** (details below):
 
@@ -203,6 +213,86 @@ Observations (baseline):
   low confidence.
 
 ## Nudged batch
+
+Clean guidance ([v2](testing-best-practices/v2.md): the seven practices
+only, no benchmark talk, no app knowledge), primer v3,
+`claude-sonnet-5`. Checked from the transcripts: the guidance appears in
+exactly the code-writing phases (MCP generate, Codegen), v1's benchmark
+intro nowhere, no contamination, no permission denials.
+
+### Cost and efficiency
+
+| Run | Cost | Turns | Test runs (F=fail, P=pass) | Wall clock | Total tokens | Output share of cost |
+|---|---|---|---|---|---|---|
+| MCP r1 `mcp-nudged-…08-51-58-174Z` | $1.16 (explore $0.84 + gen $0.33) | 90 (62+28) | `FFP` | 9.7 min | 2.94M | 18% |
+| MCP r2 `mcp-nudged-…09-12-59-068Z` | $1.10 ($0.47 + $0.64) | 83 (39+44) | `FFP` | 6.1 min | 2.51M | 22% |
+| MCP r3 `mcp-nudged-…09-29-42-948Z` | $2.22 ($0.77 + $1.45) | 128 (64+64) | `FFFFFFFFFFPP` | 13.1 min | 5.90M | 22% |
+| Codegen r1 `codegen-nudged-…09-03-19-041Z` | $0.50 | 15 | `FFFFFPP` | 7.2 min | 0.40M | 56% |
+| Codegen r2 `codegen-nudged-…09-21-39-959Z` | $0.51 | 18 | `FFFFFFFP` | 5.7 min | 0.44M | 57% |
+| Codegen r3 `codegen-nudged-…09-44-58-432Z` | $0.48 | 16 | `FFFFPFPP` | 6.6 min | 0.41M | 57% |
+
+| Means | MCP | Codegen | MCP : Codegen |
+|---|---|---|---|
+| Cost | $1.49 | $0.50 | **3.0x** |
+| Turns | 100 | 16 | 6.2x |
+| Test runs to green | 6.0 | 7.7 | 0.8x |
+| Wall clock | 9.6 min | 6.5 min | 1.5x |
+| Total tokens processed | 3.78M | 0.42M | 9.1x |
+
+- **MCP generate** cost $0.81 on average (baseline $0.05), with 21–40
+  live-browser calls per run (baseline 0). MCP r3 is the outlier: 10
+  failed test runs, $1.45 in generate alone.
+- **MCP explore** gets no guidance, so it's the same prompt as the
+  baseline's explore, yet it cost $0.47–$0.84 here against $0.43–$0.48
+  there: run-to-run variance, which n=3 can't separate from anything else.
+- **Codegen's first attempt started on a blank page in all three runs**
+  (no `goto`), as in the baseline, and its failures otherwise follow the
+  baseline pattern: "Successfully Saved" not appearing, the double-space
+  name, the date fields.
+
+### Quality
+
+| Criterion | MCP r1 | MCP r2 | MCP r3 | CG r1 | CG r2 | CG r3 |
+|---|---|---|---|---|---|---|
+| 1. Selector robustness | 3 | 4 | 4 | 3 | 4 | 2 |
+| 2. Assertions (fail-fast + diagnostics) | 3 | 4 | 4 | 4 | 4 | 4 |
+| 3. Pass reliability, 5 measured runs | 4 (5/5) | 4 (5/5) | 4 (5/5) | 4 (5/5) | 4 (5/5) | 4 (5/5) |
+| 4. Playwright best practices | 3 | 4 | 4 | 4 | 4 | 4 |
+| 5. Line count / structure | 4 | 4 | 3 | 4 | 4 | 3 |
+| 6. Task/spec compliance | 2 | 4 | 2 | 4 | 4 | 4 |
+| 7. Config/data separation | 3 | 4 | 3 | 4 | 4 | 4 |
+| **Total /28** | **22** | **28** | **24** | **27** | **28** | **25** |
+
+**Means: MCP 24.7, Codegen 26.7**, the same as with v1 guidance
+(baseline: 22.7 and 23.3). All six pass 5/5.
+
+| Signal | MCP r1 | MCP r2 | MCP r3 | CG r1 | CG r2 | CG r3 |
+|---|---|---|---|---|---|---|
+| Lines | 107 | 136 | 143 | 115 | 113 | 130 |
+| CSS locators | 1 (`.oxd-toast`) | 0 | 0 | 2 (with a comment saying why) | 0 | 6 |
+| `expect()` calls | 12 | 19 | 17 | 11 | 13 | 14 |
+| Diagnostic log / annotation | 0 | 1 | 1 | 1 | 2 | 2 |
+| Absolute base URL | no | no | no | no | no | no |
+| Both names generated | **no** (`'TestQA'`) | yes | **no** (`'TestQA'`) | yes | yes | yes |
+| Leave date | computed weekday | computed weekday | computed weekday | computed weekday | computed weekday | computed weekday |
+| Other | deprecated `type()` x2 | asserts the API response | | | | picks the "first option" of any unset dropdown in a loop |
+
+- Two perfect 28s (MCP r2, Codegen r2), the first in any batch.
+- MCP r1 and r3 both hardcode the first name `'TestQA'`, the same literal
+  as in baseline MCP r1 and nudged-v1 MCP r1.
+- Codegen r3 leans on CSS classes (6 locators) and resolves "any dropdown
+  still showing `-- Select --`" by clicking its first option, which works
+  here but would silently pick the wrong value if the options changed.
+
+## Nudged batch, first version of the guidance (v1)
+
+Superseded by the batch above, and kept because of what it showed. Its
+guidance ([v1](testing-best-practices/v1.md)) opened with an intro
+describing the benchmark (including that the rubric is "what an agent
+gets scored against afterward") and illustrated relative URLs with this
+app's path shape. With that example, Codegen's first attempts navigated
+and its cost fell to $0.22; see fact 4.
+
 
 ### Cost and efficiency
 
@@ -445,22 +535,19 @@ never gets a shell ([`testbed.md`](testbed.md), "Why Codegen and not CLI").
   opening a trace. Both heal conditions could run arbitrary code
   through the tests they wrote (one used that to dump the page's HTML);
   test runs started in the run's own directory.
-- **The nudged batch used the first version of the guidance (v1),
-  which carries more than best practices.** It's fed
-  verbatim, and its opening paragraphs describe the benchmark itself
-  (the baseline-vs-nudged comparison, and that
-  `docs/quality-rubric.md` is "what an agent gets scored against
-  afterward"), so the nudged agents knew they were being scored. Its
-  example `page.goto('/web/index.php/...')` also carries a small piece of
-  app knowledge. Both affect how the nudged numbers should be read. A
-  clean v2 (the practices only) exists and is to be re-run
-  (`testing-best-practices/README.md`).
+- **"Nudged" means the clean guidance (v2).** The first nudged batch
+  used v1, which also told the agents they'd be scored and carried a
+  URL example from this app. The URL example measurably changed
+  Codegen's cost (fact 4). Being told about the scoring made no visible
+  difference to quality (identical means for v1 and v2), but n=3 can't
+  rule out smaller effects.
 
 ## Reproducing
 
 ```bash
 npm run repeat:baseline    # both conditions, 3 repeats, primer v3, app reset before every run
-npm run repeat:nudged -- --nudge v1   # the nudged batch as run (v1 guidance; default is now v2)
+npm run repeat:nudged      # the nudged batch (guidance v2)
+npm run repeat:nudged -- --nudge v1   # the first nudged batch (guidance v1)
 npm run survival           # which specs each app update breaks (no LLM)
 npm run repeat:heal        # healing pilot: 2 app updates x 2 conditions x 3 repeats
 ```

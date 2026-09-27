@@ -1,0 +1,69 @@
+{
+  "runId": "mcp-nudged-2026-09-27T08-51-58-174Z",
+  "condition": "mcp",
+  "promptVariant": "nudged",
+  "nudgeVersion": "v2",
+  "primerVersion": "v3",
+  "phases": [
+    {
+      "phase": "explore",
+      "model": "claude-sonnet-5",
+      "resolvedModels": [
+        "claude-sonnet-5"
+      ],
+      "sessionId": "c6c38f86-d608-4273-b256-d1360d8a2b0c",
+      "inputTokens": 116,
+      "outputTokens": 11830,
+      "cacheCreationInputTokens": 67739,
+      "cacheReadInputTokens": 2237808,
+      "costUsd": 0.8370496000000001,
+      "turns": 62,
+      "toolCallCounts": {
+        "mcp__playwright__browser_navigate": 2,
+        "mcp__playwright__browser_snapshot": 13,
+        "mcp__playwright__browser_type": 10,
+        "mcp__playwright__browser_fill_form": 1,
+        "mcp__playwright__browser_click": 16,
+        "mcp__playwright__browser_wait_for": 2,
+        "mcp__playwright__browser_press_key": 2,
+        "mcp__playwright__browser_network_requests": 3,
+        "mcp__playwright__browser_network_request": 2,
+        "mcp__playwright__browser_find": 6,
+        "mcp__playwright__browser_console_messages": 1,
+        "mcp__playwright__browser_run_code_unsafe": 2,
+        "mcp__tools__write_file": 1
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-27T08:51:58.175Z",
+      "finishedAt": "2026-09-27T08:59:16.155Z",
+      "durationMs": 433501
+    },
+    {
+      "phase": "generate",
+      "model": "claude-sonnet-5",
+      "resolvedModels": [
+        "claude-sonnet-5"
+      ],
+      "sessionId": "76737fee-d951-40ba-a4d5-3b1c6cf8e748",
+      "inputTokens": 50,
+      "outputTokens": 8658,
+      "cacheCreationInputTokens": 30938,
+      "cacheReadInputTokens": 579779,
+      "costUsd": 0.32638780000000006,
+      "turns": 28,
+      "toolCallCounts": {
+        "mcp__tools__write_file": 3,
+        "mcp__tools__run_playwright_test": 3,
+        "mcp__playwright__browser_navigate": 1,
+        "mcp__playwright__browser_snapshot": 5,
+        "mcp__playwright__browser_click": 9,
+        "mcp__playwright__browser_type": 4,
+        "mcp__playwright__browser_press_key": 2
+      },
+      "permissionDenials": 0,
+      "startedAt": "2026-09-27T08:59:19.600Z",
+      "finishedAt": "2026-09-27T09:01:52.077Z",
+      "durationMs": 148281
+    }
+  ]
+}

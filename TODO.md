@@ -9,8 +9,6 @@ starts on them, per `CLAUDE.md`.
 Everything else below is history, kept for the record.
 
 - **Conclusions** across generation and healing, with the user (Phase 5).
-- **Re-run the nudged batch on nudge v2** (`npm run repeat:nudged`, user,
-  plain terminal), then score it and update `docs/results.md`.
 - More repeats per cell; more app updates for healing (Phases 4 and 5).
 - Automated/LLM-judge quality scorer (Phase 3).
 
@@ -582,6 +580,14 @@ thing anyone reproducing this repo would hit again.
       The nudged batch ran with both. Options: keep as-is and caveat it
       (done in `docs/results.md`), or split agent-facing text from the
       human intro (a new "nudge v2", like the primer versions) and re-run.
+- [x] **Nudged batch on guidance v2** (`results/repeat-run-log-20260927T085029Z.txt`,
+      all 6 runs clean; v2 verified in exactly the code-writing phases,
+      no v1 intro anywhere). MCP:Codegen cost **3.0x** ($1.49 vs $0.50);
+      Codegen's first attempts start on a blank page again (0/3 navigate,
+      vs 3/3 with v1's URL example), so v1's cheap Codegen runs came from
+      that app hint. Quality MCP 24.7 / Codegen 26.7, identical to v1; all
+      six 5/5. All 12 nudged runs failed once on the double-space
+      checkpoint. Written up in `docs/results.md` as "the" nudged batch.
 - [x] Fixed `run-repeats.sh` logging the variant as `nudged:nudged`
       (a parameter-expansion slip; `metrics.json` was always right).
       Corrected in the nudged batch's log.

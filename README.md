@@ -79,8 +79,8 @@ that's flaky hasn't won.
 | Flow | Variant | MCP | Non-MCP (Codegen when creating) | Status |
 |---|---|---|---|---|
 | **Create a new test** (add employee → assign leave → verify) | Baseline: task + app notes | 3 runs | 3 runs | ✅ measured |
-| | Nudged: + testing best-practices guidance (v1) | 3 runs | 3 runs | ✅ measured |
-| | Nudged, clean guidance (v2: no benchmark talk, no app hints) | 3 runs | 3 runs | ⏳ running |
+| | Nudged: + testing best-practices guidance | 3 runs | 3 runs | ✅ measured |
+| | (First nudged batch, earlier guidance version with an app hint) | 3 runs | 3 runs | ✅ measured, superseded |
 | **Heal a test that used to pass** (after a label or DOM change in the app) | Survival check: 12 specs × 4 app updates (no LLM) | | | ✅ measured |
 | | Pilot: 2 app updates (label, DOM) | 6 runs | 6 runs | ✅ measured |
 
@@ -99,10 +99,10 @@ still to be drawn.
 
 | | MCP baseline | Codegen baseline | MCP nudged | Codegen nudged |
 |---|---|---|---|---|
-| Cost (list-price equivalent) | $0.51 | $0.42 | $1.23 | $0.22 |
-| **MCP : Codegen cost** | **1.2x** | | **5.5x** | |
-| Test runs until the test passed | 1.3 | 8.3 | 5.0 | 3.0 |
-| Wall clock | 3.3 min | 8.4 min | 7.5 min | 2.7 min |
+| Cost (list-price equivalent) | $0.51 | $0.42 | $1.49 | $0.50 |
+| **MCP : Codegen cost** | **1.2x** | | **3.0x** | |
+| Test runs until the test passed | 1.3 | 8.3 | 6.0 | 7.7 |
+| Wall clock | 3.3 min | 8.4 min | 9.6 min | 6.5 min |
 | Quality score (/28, [rubric](docs/quality-rubric.md)) | 22.7 | 23.3 | 24.7 | 26.7 |
 | Specs passing 5 of 5 re-runs | 3/3 | 3/3 | 3/3 | 3/3 |
 
@@ -110,10 +110,15 @@ still to be drawn.
   after that its test usually passed on the first run. Codegen, which
   can't see the app, needed ~8 test runs, each rewriting the whole file.
 - **Nudged:** guidance on test-writing practices raised quality in both
-  conditions. It raised MCP's cost 2.4x (new assertions failed and MCP
-  debugged them in the live browser) and cut Codegen's by about half.
-- In both batches, some MCP specs hardcode values the agent saw while
-  exploring (a leave date, a first name). No Codegen spec does.
+  conditions. It raised MCP's cost 2.9x (new assertions failed and MCP
+  debugged them in the live browser) and Codegen's by 18%.
+- The first nudged batch used an earlier version of the guidance whose
+  one example URL came from this app. With it, Codegen cost $0.22
+  instead of $0.50: a single hint about the app mattered more than all
+  the best-practice advice.
+- In every batch, some MCP specs hardcode values the agent saw while
+  exploring (a leave date, a first name), even when told not to. No
+  Codegen spec does.
 
 **Healing** a spec broken by an app update (MCP = Playwright's own
 healer agent; non-MCP = test output plus Playwright's failure snapshot):
@@ -170,8 +175,6 @@ To be written in the conclusions session, from the facts above and in
 
 ## What's next
 
-- **Re-run the nudged batch** with the clean guidance (v2); the first
-  one (v1) told the agents they'd be scored and carried a URL hint.
 - **Conclusions** from the generation batches and the healing pilot.
 - **Test healing beyond the pilot**, if the conclusions call for it:
   more app updates or repeats ([runbook](docs/run-heal.md)).
