@@ -11,13 +11,76 @@ end-to-end test, and to **heal** one after an app update, two ways:
   recording and only sees terse `npx playwright test` output, with no live
   page.
 
+## How the testbed works
+
+The agent under test is Claude Code in non-interactive mode, one model
+(`claude-sonnet-5`), against a self-hosted **OrangeHRM 5.9**, a common
+QA practice app, reset to a clean install before every run. Both
+conditions get the same task; only their tools differ, and that
+difference is what's measured.
+
+**Create flow: write a new test.** The task
+([`flows/`](flows/01-add-employee-leave-request.md)): create an
+employee, assign them leave, verify it was recorded.
+
+- **MCP** works in two phases: *explore* the live app through
+  Playwright MCP and write a test plan, then *generate* the test, run it
+  and fix it until it passes, still with the browser at hand.
+- **Codegen** starts from a checked-in `playwright codegen` recording
+  that a human made once (no LLM tokens), and turns it into a clean test.
+  It never sees the app: its only feedback is test output. It has no
+  command line either, only a tool that runs the test.
+
+**Heal flow: fix a test that used to pass.** A known-good test is broken
+by an app update: a renamed button, or renamed CSS classes.
+
+- **MCP** is Playwright's own bundled
+  [healer agent](https://playwright.dev/docs/test-agents), word for word,
+  with its MCP server: run the test, pause at the failure, inspect the
+  live page, fix.
+- **Non-MCP** gets the same healer instructions, but only test output
+  plus the page snapshot Playwright saves on failure (`error-context.md`).
+
+**App knowledge ("primer").** Both conditions get the same short notes
+about the app, the kind a tester would keep (where things are, known
+quirks): [`docs/app-knowledge/v3.md`](docs/app-knowledge/v3.md). How
+much the agent is told turned out to matter more than anything else, so
+the notes are versioned and every run records which version it saw.
+
+**Quality criteria.** Cost alone doesn't decide anything: a cheap test
+that's flaky hasn't won.
+
+- A **generated test** is scored on 7 criteria, 0–4 each (/28): robust
+  locators, meaningful assertions, measured reliability (5 re-runs from
+  a clean app), Playwright best practices, structure, doing what the
+  task asked, and no hardcoded config
+  ([`docs/quality-rubric.md`](docs/quality-rubric.md)).
+- A **healed test** is scored for integrity, /20: assertions and steps
+  kept, not skipped, locators still specific, smallest change
+  ([`docs/heal-rubric.md`](docs/heal-rubric.md)). A test that passes by
+  testing less is a bad heal.
+
+**Terms used below.**
+
+| Term | Meaning |
+|---|---|
+| **Baseline** | Task + app notes, nothing else |
+| **Nudged** | Baseline plus general Playwright best-practices guidance ([`docs/testing-best-practices/`](docs/testing-best-practices/)) in the phase that writes code |
+| **Non-MCP** (healing) | The healer without a browser: test output and Playwright's failure snapshot only |
+| **Survival check** | Re-running existing generated tests after an app update, no LLM: which ones break at all? |
+| **Cost** | What the tokens would cost at list price (runs use a Claude Code subscription) |
+| **Test runs until it passed** | How many times the agent ran the test before it went green |
+
+**→ The full testbed (app, how to run it, what every file is for):
+[docs/testbed.md](docs/testbed.md).**
+
 ## What has been tested so far
 
-| Flow | Variant | MCP | Codegen | Status |
+| Flow | Variant | MCP | Non-MCP (Codegen when creating) | Status |
 |---|---|---|---|---|
 | **Create a new test** (add employee → assign leave → verify) | Baseline: task + app notes | 3 runs | 3 runs | ✅ measured |
 | | Nudged: + testing best-practices guidance (v1) | 3 runs | 3 runs | ✅ measured |
-| | Nudged, clean guidance (v2: no benchmark talk, no app hints) | | | ⏳ to run |
+| | Nudged, clean guidance (v2: no benchmark talk, no app hints) | 3 runs | 3 runs | ⏳ running |
 | **Heal a test that used to pass** (after a label or DOM change in the app) | Survival check: 12 specs × 4 app updates (no LLM) | | | ✅ measured |
 | | Pilot: 2 app updates (label, DOM) | 6 runs | 6 runs | ✅ measured |
 
@@ -69,133 +132,41 @@ healer agent; non-MCP = test output plus Playwright's failure snapshot):
 - The cheaper condition depended on the change: non-MCP for the label
   change, MCP for the DOM change.
 
-## Why
+## Key insights
 
-This project started from
-[this post](https://dreaming.press/posts/playwright-mcp-vs-cli-token-cost-browser-agents.html).
-It claims a ~4x (up to 10x) token gap between MCP and CLI approaches
-(~114K vs ~27K tokens for a ~10-step task), but gives no methodology,
-test app or harness. This repo builds that harness in the open, so anyone
-can check, reproduce or extend the numbers. It also measures quality,
-because a cheap test that's flaky hasn't "won".
+To be written in the conclusions session, from the facts above and in
+[docs/results.md](docs/results.md).
 
-## How the comparison works
+## External references
 
-Two realistic workflows for the same task. The tools differ on purpose;
-that difference is what's being measured.
-
-| | MCP condition | Codegen condition |
-|---|---|---|
-| Input | Task spec + app primer | Task spec + app primer + checked-in `playwright codegen` recording |
-| Tools | Playwright MCP's full browser toolset + scoped `write_file` + scoped `run_playwright_test` | Scoped `write_file` + scoped `run_playwright_test` only. **No** browser, **no** shell |
-| Sees the app via | Live accessibility snapshots | The recording and test-run output |
-| Phases | **explore** (writes `test-plan.md`), then **generate** (writes and iterates on the spec) | One phase: clean up the recording, run, fix, repeat |
-
-- **Identical task spec** for both ([`flows/`](flows/)). This is the
-  controlled variable.
-- **Why "Codegen" and not "CLI":** a human runs `playwright codegen` once,
-  up front, with zero LLM tokens. The agent itself never gets a real
-  command line, only a tool that runs `npx playwright test` inside the
-  run directory. (The tests it writes are Node.js code, though, and can
-  do anything a test can.) How an agent with unrestricted CLI access
-  would behave is a separate question this project doesn't answer.
-- **App-knowledge primer:** both conditions get the same "tester
-  knowledge" doc ([`docs/app-knowledge/`](docs/app-knowledge/)) covering
-  navigation, forms and known quirks, all observed in the running app. A
-  real tester wouldn't start from zero. The primer turned out to be the
-  largest single factor measured
-  ([how we found out](docs/test-bed-evolution.md)), so it's versioned and
-  every run records which version it used. The current one (v3) is kept
-  deliberately to what a tester would actually write down.
-- **Three axes:** cost (tokens, cache, list-price USD), efficiency
-  (turns, tool calls, test runs to green, wall clock) and quality (a
-  7-criterion rubric, with flakiness measured by 5 re-runs).
-- **Mechanism:** each phase is one `claude -p` (Claude Code,
-  non-interactive) call with an explicit system prompt, tool allow-list
-  and MCP config. Tokens and cost come straight from its JSON result.
-  It uses a Claude Code subscription, not metered API calls.
-
-### Healing
-
-A known-good spec ([`fixtures/heal/`](fixtures/heal/add-employee-leave.spec.ts))
-is broken by an app update: a label change or a CSS-class change, applied
-to the running app by [`app/break.sh`](app/break.sh). An agent then has
-to fix it.
-
-| | MCP condition | Non-MCP condition |
-|---|---|---|
-| Agent | Playwright's own bundled healer agent, word for word | The same healer text, with the browser steps replaced by "read the failure output and its page snapshot" |
-| Tools | Playwright's `playwright-test` MCP server (run, pause on error, inspect the live page) + scoped file read/write/patch | Scoped test runner whose failure output includes Playwright's `error-context.md` snapshot + the same file tools. **No** browser, **no** shell |
-| Scored on | Cost and efficiency, pass rate over 5 re-runs, and an **integrity rubric**: is it still the same test? ([`docs/heal-rubric.md`](docs/heal-rubric.md)) | same |
-
-Both get the same app notes and task message. Beforehand, a zero-token
-**survival check** measures which already-generated specs each update
-breaks at all.
-
-The confirmed design decisions, with the reasoning behind them, are in
-[`CLAUDE.md`](CLAUDE.md). The exact prompts are in
-[`docs/run-mcp-condition.md`](docs/run-mcp-condition.md),
-[`docs/run-codegen-condition.md`](docs/run-codegen-condition.md) and
-[`docs/run-heal.md`](docs/run-heal.md).
-
-## Test bed
-
-- **App:** self-hosted **OrangeHRM 5.9** (Docker or Podman,
-  [`app/`](app/)). It's a long-standing QA practice app with multi-page
-  navigation, validated forms, custom dropdowns, date pickers and tables.
-  A pinned local install means no third-party uptime dependency and no
-  drift between runs.
-- **Flow:** create an employee (PIM), assign them leave through the
-  admin **Assign Leave** screen, and verify the result
-  ([`flows/01-add-employee-leave-request.md`](flows/01-add-employee-leave-request.md)).
-- **Out of scope for the agent:** login and one-time Leave module setup.
-  [`harness/src/seed.ts`](harness/src/seed.ts) handles both
-  deterministically before every run.
-- **Reset:** a full app reinstall (~80s) before *every* run, so repeats
-  are independent.
-
-## Getting started
-
-Requires Node, Docker or Podman, and the [`claude`](https://claude.com/claude-code)
-CLI, installed and authenticated (no API key needed).
-
-```bash
-cp .env.example .env
-npm install
-npm run setup           # target app + Playwright browser
-npm run verify:tools    # smoke-check playwright / playwright-mcp
-```
-
-[`docs/verify-setup.md`](docs/verify-setup.md) walks through checking
-the setup by hand.
-
-**Run from a plain terminal, not from inside a Claude Code session.** The
-harness spawns permission-bypassed `claude -p` sessions, and Claude Code
-blocks that when it's done from inside another session
-([`harness/README.md`](harness/README.md)).
-
-```bash
-# Full comparison: both conditions, 3 repeats, app reset before every run (~$3, ~45 min)
-npm run repeat:baseline
-npm run repeat:nudged                      # same, plus best-practices guidance (docs/testing-best-practices/)
-npm run repeat:baseline -- --primer v2     # an earlier primer (default: v3)
-
-# Healing
-npm run survival                           # which generated specs each app update breaks (no LLM)
-npm run repeat:heal                        # healing pilot: 2 app updates x 2 conditions x 3 repeats
-
-# Single runs
-npm run explore:mcp                        # prints a RUN_ID
-RUN_ID=<id> npm run generate:mcp
-npm run bench:codegen
-HEAL_BREAK=dom-select npm run heal:mcp     # or heal:artifacts
-```
-
-Each run writes its spec, `metrics.json` and (for MCP) `test-plan.md` to
-`results/<run-id>/`, heal runs also a `heal.diff`. Full transcripts go to
-`results/raw/`, which is gitignored ([`results/README.md`](results/README.md)).
-[`docs/run-repeats.md`](docs/run-repeats.md) and
-[`docs/run-heal.md`](docs/run-heal.md) cover batches in detail.
+- **The post that started this project:** [Playwright MCP vs the CLI: Why
+  Your Browser Agent Burns 114K Tokens When It Could Use 27K](https://dreaming.press/posts/playwright-mcp-vs-cli-token-cost-browser-agents.html)
+  (Dex Mareno, dreaming.press, July 2026). Cites ~114K vs ~27K tokens
+  (MCP vs CLI) for a ~10-step task, from other people's benchmarks,
+  without methodology, test app or harness of its own.
+- **Microsoft's Playwright CLI:** [microsoft/playwright-cli](https://github.com/microsoft/playwright-cli)
+  README. A browser-driving CLI for coding agents, described as more
+  token-efficient than MCP because it avoids "large tool schemas and
+  verbose accessibility trees", while MCP "remains relevant for […]
+  exploratory automation, self-healing tests, or long-running autonomous
+  workflows". This is very likely the "CLI" the post compares; **our
+  Codegen condition is a different setup** (a recording plus test output,
+  no browser at all).
+- **Where ~114K vs ~27K comes from is unclear.** Articles attribute it
+  differently: to "the Playwright team's own benchmarks"
+  ([TestCollab, Feb 2026](https://testcollab.com/blog/playwright-cli)),
+  to "a recent r/ClaudeAI post"
+  ([DEV Community](https://dev.to/leonting1010/playwright-mcp-burns-114k-tokens-for-one-workflow-heres-why-and-what-to-do-about-it-57k8)),
+  or to a Medium article from February 2026 (the source the post above
+  links). None of them links a benchmark we could check, and we haven't
+  found a primary source.
+- **Playwright's own test agents:** [Playwright Test Agents](https://playwright.dev/docs/test-agents)
+  (planner, generator, healer). Our heal flow's MCP condition is that
+  healer.
+- **Why tool definitions and page state cost tokens:** [Code execution
+  with MCP: building more efficient agents](https://www.anthropic.com/engineering/code-execution-with-mcp)
+  (Anthropic, Nov 2025), on tool definitions and intermediate results
+  filling the context window.
 
 ## What's next
 

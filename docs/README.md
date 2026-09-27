@@ -2,6 +2,9 @@
 
 Longer-form write-ups that don't belong in the top-level `README.md`:
 
+- `testbed.md` — **the testbed in detail**: the app and flow, why the
+  non-MCP generation condition is called Codegen, how a run is measured,
+  setup, every run command, and what each file in the repo is for.
 - `results.md` — **the headline results**: test generation on the
   realistic primer v3 (baseline and nudged batches: cost, efficiency,
   failure causes, quality with measured flakiness) and test healing (the
@@ -15,7 +18,7 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
   decision 16): the primer is an explicit experimental variable, since
   v1 → v2 moved results more than anything else measured. Its
   `README.md` has the version table and the rules (never edit a published
-  version). See `README.md` "How the comparison works" (app-knowledge primer) for why a
+  version). See `README.md` "How the testbed works" for why a
   primer exists at all.
 - `verify-setup.md` — step-by-step manual check that the app + Playwright
   + Playwright MCP setup actually works, before building anything on top

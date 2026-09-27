@@ -10,7 +10,7 @@ excluded from `--tools` (it's a general shell, not scoped to
 `npx playwright test` — see `CLAUDE.md` decision 1). No live browser
 visibility, and no raw command-line access either — despite the
 underlying mechanism being Playwright's CLI tooling, the agent itself
-never gets a shell (see `README.md` "How the comparison works" for why
+never gets a shell (see `docs/testbed.md` ("Why Codegen and not CLI") for why
 this is called "Codegen," not "CLI").
 
 It starts from a checked-in `fixtures/` codegen recording (embedded

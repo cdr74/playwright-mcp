@@ -494,7 +494,7 @@ claims ~114K vs ~27K tokens (~4.2x, "up to 10x") for MCP vs CLI on a
   the *other* side's cost is driven by what that agent doesn't know, not
   by its tooling per se.
 - Our "Codegen" condition isn't exactly what the post calls CLI — the
-  agent never gets a shell (see `README.md` "How the comparison works").
+  agent never gets a shell (see `docs/testbed.md` ("Why Codegen and not CLI")).
 
 ## 9. Recommendations and open questions
 

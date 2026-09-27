@@ -77,7 +77,7 @@ This page records what was measured. Conclusions are still to be drawn.
   ([`flows/`](../flows/01-add-employee-leave-request.md)).
 - **Conditions:** MCP (live browser via playwright-mcp, explore then
   generate) vs Codegen (a checked-in `playwright codegen` recording plus
-  test output only, no browser). See the [README](../README.md#how-the-comparison-works).
+  test output only, no browser). See the [README](../README.md#how-the-testbed-works) and [`testbed.md`](testbed.md).
 - **What the agent knows about the app:** primer **v3**
   ([`app-knowledge/v3.md`](app-knowledge/v3.md)), short notes of the
   kind a tester would actually keep. The earlier, more detailed primers
@@ -420,7 +420,7 @@ non-browsing agent already knows decides where in that range you land,
 and the post doesn't say what its CLI agent knew.
 
 Our Codegen condition also isn't exactly the post's "CLI": the agent
-never gets a shell (README, "How the comparison works").
+never gets a shell ([`testbed.md`](testbed.md), "Why Codegen and not CLI").
 
 ## Caveats
 

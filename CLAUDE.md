@@ -71,7 +71,7 @@ assume some `.md` file describes it and needs a pass.
      test runner) is still MCP's defining shape vs the
      Codegen condition's file-only approach.
    - **Codegen condition** (named for `playwright codegen`, not "CLI" — see
-     `README.md` "How the comparison works" for why): modeled on how a
+     `docs/testbed.md` ("Why Codegen and not CLI") for why): modeled on how a
      human actually uses Playwright's CLI tooling
      — `playwright codegen` first (a human/deterministic recording step,
      **zero LLM tokens**, checked into `fixtures/` so it's reproducible
@@ -87,7 +87,7 @@ assume some `.md` file describes it and needs a pass.
      (`harness/src/run-codegen.ts`, `npm run bench:codegen`), runbook in
      `docs/run-codegen-condition.md`, results in `docs/results.md`. **Renamed from "CLI condition" to
      "Codegen condition"** after the original name was found to overclaim
-     what's tested (README.md "How the comparison works" has the full
+     what's tested (`docs/testbed.md` ("Why Codegen and not CLI") has the full
      reasoning) — this rename touched every file in the repo, tracked as
      a single commit, not a silent drift.
    - Both conditions receive the **identical natural-language task spec**
@@ -194,7 +194,7 @@ assume some `.md` file describes it and needs a pass.
    dropped because that instance isn't reliably reachable as a self-serve
    target anymore. Do not switch the target app again without checking
    first. **Flow: confirmed** ("add employee → assign leave → verify",
-   see `README.md` "Test bed") — may still be adjusted as the
+   see `docs/testbed.md` "The test bed") — may still be adjusted as the
    harness is built and exercised in practice; that's expected iteration,
    not a design change requiring re-confirmation.
 6. **Reset between runs: full reinstall**, not DB snapshot/restore —
