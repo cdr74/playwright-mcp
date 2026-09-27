@@ -6,9 +6,9 @@ Guidance for Claude Code sessions working in this repository.
 
 A reproducible benchmark comparing **token cost, iteration efficiency, and
 output quality** of using **Playwright MCP** vs a **Playwright Codegen-based
-flow** for
-AI-agent-driven test generation (and later, test healing). Full context is
-in `README.md`; task tracking is in `TODO.md`.
+flow** for AI-agent-driven test generation and test healing. Full
+context is in `README.md`, results in `docs/results.md`, task tracking
+in `TODO.md`.
 
 Inspired by https://dreaming.press/posts/playwright-mcp-vs-cli-token-cost-browser-agents.html,
 which cites external numbers (~114K tokens MCP vs ~27K CLI for a ~10-step
@@ -81,7 +81,8 @@ assume some `.md` file describes it and needs a pass.
      (Claude Code's native `Bash` tool is a general shell, not scoped to
      `npx playwright test`, so the Codegen condition must NOT be given it,
      and never gets real command-line access despite starting from CLI
-     output) — and turns the raw recording into a clean, asserted test,
+     output; "no shell" covers its tools, not the test code it writes,
+     see decision 15) — and turns the raw recording into a clean, asserted test,
      iterating on terse test-run output until green. Built
      (`harness/src/run-codegen.ts`, `npm run bench:codegen`), runbook in
      `docs/run-codegen-condition.md`, results in `docs/results.md`. **Renamed from "CLI condition" to

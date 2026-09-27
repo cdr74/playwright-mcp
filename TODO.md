@@ -4,7 +4,18 @@ Tracking for the MCP-vs-Codegen token/quality benchmark. Phased roughly in build
 order. Items marked **[DECISION]** need explicit user sign-off before work
 starts on them, per `CLAUDE.md`.
 
-## Open decisions (unblock these first)
+## Open now
+
+Everything else below is history, kept for the record.
+
+- **Conclusions** across generation and healing, with the user (Phase 5).
+- **[DECISION]** A clean "nudge v2" without the benchmark-describing
+  intro, and a re-run? (Phase 4)
+- More repeats per cell; more app updates for healing; the healer
+  restricted to its own 11 tools to size that caveat (Phases 4 and 5).
+- Automated/LLM-judge quality scorer (Phase 3).
+
+## Decisions (all resolved so far)
 
 - [x] **[DECISION]** Target app: **self-hosted OrangeHRM 5.9** via
       `app/docker-compose.yml` (works with Docker or Podman). The public
@@ -574,8 +585,6 @@ thing anyone reproducing this repo would hit again.
 - [x] Fixed `run-repeats.sh` logging the variant as `nudged:nudged`
       (a parameter-expansion slip; `metrics.json` was always right).
       Corrected in the nudged batch's log.
-- [ ] **Conclusions** from the v3 baseline and nudged batches (with the
-      user).
 - [ ] More repeats per cell - n=3 shows direction but doesn't estimate
       distributions; MCP had one expensive outlier in each development
       batch.
@@ -643,8 +652,8 @@ Design agreed 2026-09-26: `CLAUDE.md` decision 15.
       `heal:artifacts`), `conditions/heal/artifacts-prompt.md` (healer
       text, steps 1–3 adapted), runbook `docs/run-heal.md`. Aborts
       before spending tokens if the starting spec still passes after the
-      break. Saves `heal.diff`. **Not yet run end to end** (needs a plain
-      terminal).
+      break. Saves `heal.diff`. Run end to end since (smoke tests and
+      pilot below).
 - [x] Integrity rubric: `docs/heal-rubric.md`, approved 2026-09-26
       (a fix that also improves robustness scores 3 on change size).
 - [x] **First survival check** (`results/survival-20260926T135719Z.txt`,
@@ -679,7 +688,8 @@ Design agreed 2026-09-26: `CLAUDE.md` decision 15.
       $0.14 vs non-MCP $0.20. Integrity 11 × 19–20/20; one non-MCP DOM
       heal weakened an assertion (17/20) and still passes 5/5. Written
       up in `docs/results.md`.
-- [ ] **Conclusions** across generation and healing (with the user).
+- [ ] **Conclusions** across generation (baseline + nudged) and healing,
+      with the user.
 - [ ] Optional, after conclusions: more app updates / repeats; the
       healer restricted to its own 11 tools, to size the 97-tool caveat.
 

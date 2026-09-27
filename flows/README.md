@@ -9,3 +9,7 @@ controlled variable in the experiment. Both conditions additionally get
 - `01-add-employee-leave-request.md` — v1 flow: add an employee, assign
   them leave, verify it.
 
+The healing study doesn't use a spec from here: it starts from an
+existing test (`fixtures/heal/`) and a fixed task message
+(`docs/run-heal.md`).
+

@@ -1,8 +1,8 @@
 # playwright-mcp: MCP vs Codegen token cost & quality benchmark
 
 A reproducible testbed measuring what it costs, in tokens, iterations and
-resulting test quality, to have an AI agent write Playwright end-to-end
-tests two ways:
+resulting test quality, to have an AI agent **write** a Playwright
+end-to-end test, and to **heal** one after an app update, two ways:
 
 - **MCP**: the agent drives a live browser through
   [Playwright MCP](https://github.com/microsoft/playwright-mcp), step by
@@ -95,8 +95,9 @@ that difference is what's being measured.
 - **Why "Codegen" and not "CLI":** a human runs `playwright codegen` once,
   up front, with zero LLM tokens. The agent itself never gets a real
   command line, only a tool that runs `npx playwright test` inside the
-  run directory. How an agent with unrestricted CLI access would behave
-  is a separate question this project doesn't answer.
+  run directory. (The tests it writes are Node.js code, though, and can
+  do anything a test can.) How an agent with unrestricted CLI access
+  would behave is a separate question this project doesn't answer.
 - **App-knowledge primer:** both conditions get the same "tester
   knowledge" doc ([`docs/app-knowledge/`](docs/app-knowledge/)) covering
   navigation, forms and known quirks, all observed in the running app. A
@@ -113,10 +114,28 @@ that difference is what's being measured.
   and MCP config. Tokens and cost come straight from its JSON result.
   It uses a Claude Code subscription, not metered API calls.
 
+### Healing
+
+A known-good spec ([`fixtures/heal/`](fixtures/heal/add-employee-leave.spec.ts))
+is broken by an app update: a label change or a CSS-class change, applied
+to the running app by [`app/break.sh`](app/break.sh). An agent then has
+to fix it.
+
+| | MCP condition | Non-MCP condition |
+|---|---|---|
+| Agent | Playwright's own bundled healer agent, word for word | The same healer text, with the browser steps replaced by "read the failure output and its page snapshot" |
+| Tools | Playwright's `playwright-test` MCP server (run, pause on error, inspect the live page) + scoped file read/write/patch | Scoped test runner whose failure output includes Playwright's `error-context.md` snapshot + the same file tools. **No** browser, **no** shell |
+| Scored on | Cost and efficiency, pass rate over 5 re-runs, and an **integrity rubric**: is it still the same test? ([`docs/heal-rubric.md`](docs/heal-rubric.md)) | same |
+
+Both get the same app notes and task message. Beforehand, a zero-token
+**survival check** measures which already-generated specs each update
+breaks at all.
+
 The confirmed design decisions, with the reasoning behind them, are in
 [`CLAUDE.md`](CLAUDE.md). The exact prompts are in
-[`docs/run-mcp-condition.md`](docs/run-mcp-condition.md) and
-[`docs/run-codegen-condition.md`](docs/run-codegen-condition.md).
+[`docs/run-mcp-condition.md`](docs/run-mcp-condition.md),
+[`docs/run-codegen-condition.md`](docs/run-codegen-condition.md) and
+[`docs/run-heal.md`](docs/run-heal.md).
 
 ## Test bed
 
@@ -160,16 +179,22 @@ npm run repeat:baseline
 npm run repeat:nudged                      # same, plus docs/testing-best-practices.md
 npm run repeat:baseline -- --primer v2     # an earlier primer (default: v3)
 
+# Healing
+npm run survival                           # which generated specs each app update breaks (no LLM)
+npm run repeat:heal                        # healing pilot: 2 app updates x 2 conditions x 3 repeats
+
 # Single runs
 npm run explore:mcp                        # prints a RUN_ID
 RUN_ID=<id> npm run generate:mcp
 npm run bench:codegen
+HEAL_BREAK=dom-select npm run heal:mcp     # or heal:artifacts
 ```
 
 Each run writes its spec, `metrics.json` and (for MCP) `test-plan.md` to
-`results/<run-id>/`. Full transcripts go to `results/raw/`, which is
-gitignored ([`results/README.md`](results/README.md)).
-[`docs/run-repeats.md`](docs/run-repeats.md) covers batches in detail.
+`results/<run-id>/`, heal runs also a `heal.diff`. Full transcripts go to
+`results/raw/`, which is gitignored ([`results/README.md`](results/README.md)).
+[`docs/run-repeats.md`](docs/run-repeats.md) and
+[`docs/run-heal.md`](docs/run-heal.md) cover batches in detail.
 
 ## What's next
 

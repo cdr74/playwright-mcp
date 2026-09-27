@@ -125,4 +125,4 @@ Check `results/<run-id>/tests/add-employee-leave.spec.ts` and
 
 If sections 1-4 work, the environment is solid. Sections 5 and 6 are
 single runs; for the full 3-repeat comparison see `docs/run-repeats.md`,
-and `docs/results.md` for the results.
+for healing `docs/run-heal.md`, and `docs/results.md` for the results.

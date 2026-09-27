@@ -2,10 +2,15 @@
 
 Longer-form write-ups that don't belong in the top-level `README.md`:
 
+- `results.md` — **the headline results**: test generation on the
+  realistic primer v3 (baseline and nudged batches: cost, efficiency,
+  failure causes, quality with measured flakiness) and test healing (the
+  survival check and the healing pilot, with integrity scores). Facts
+  only so far; conclusions still to come.
 - `app-knowledge/` — the "tester knowledge" primer fed to both
-  conditions' prompts (app navigation, exact fields/selectors for the
-  flow's screens, known app-level quirks — gathered by exploring the
-  running app, not guessed). **Versioned** (`v1.md`, `v2.md`, `v3.md`;
+  conditions' prompts (where things are, known app-level quirks; the
+  current v3 is short tester's notes, the older v1/v2 went down to
+  fields and selectors — all gathered by exploring the running app). **Versioned** (`v1.md`, `v2.md`, `v3.md`;
   default v3, the realistic "tester's notes" baseline, `CLAUDE.md`
   decision 16): the primer is an explicit experimental variable, since
   v1 → v2 moved results more than anything else measured. Its
@@ -28,10 +33,6 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
   before *every* individual run, not just once per batch, and logs every
   `RUN_ID` produced. Neither single-run runbook above covers this by
   itself.
-- `results.md` — **the headline results**: the create flow on the
-  realistic primer v3, baseline and nudged batches (cost, efficiency,
-  failure causes, quality with measured flakiness). Facts only so far;
-  conclusions still to come.
 - `test-bed-evolution.md` — development history: the N=1 pair and the
   two primer-v1/v2 batches, what each taught us (contamination, timeouts,
   toolset, the primer's weight), full analysis kept as it was. Lessons,

@@ -2,8 +2,9 @@
 
 Output of benchmark runs, split into what's kept and what isn't.
 Implemented by `harness/src/explore-mcp.ts` / `generate-mcp.ts` (MCP
-condition, two phases) and `harness/src/run-codegen.ts` (Codegen
-condition, one phase named `"generate"` for comparability). See
+condition, two phases), `harness/src/run-codegen.ts` (Codegen
+condition, one phase named `"generate"` for comparability) and
+`harness/src/heal.ts` (healing, one phase named `"heal"`). See
 `docs/results.md` for the headline results and
 `docs/test-bed-evolution.md` for earlier, development-stage runs.
 
@@ -38,8 +39,11 @@ condition, one phase named `"generate"` for comparability). See
 
 Healing runs (`heal-mcp-…` / `heal-artifacts-…`) also keep `heal.diff`
 (healed spec vs the starting spec, what the integrity rubric scores), and
-their `metrics.json` carries `flow: "heal"` plus a `heal` block (break,
-starting spec, pre-heal failure check, tools). Generation runs from
+their `metrics.json` carries `flow: "heal"`, `condition` `"mcp"`
+(Playwright's healer) or `"artifacts"` (test output + page snapshot),
+plus a `heal` block (break, starting spec, pre-heal failure check,
+tools, and `leftoverFiles`: anything extra the agent left in its run
+directory). Generation runs from
 before healing existed have no `flow` field; they're all generation.
 
 `results/heal-run-log-<timestamp>.txt` — the `RUN_ID`s of one healing
@@ -56,6 +60,7 @@ copied here so it doesn't depend on Claude Code's own session retention).
 Includes raw MCP accessibility-tree snapshots — exactly the bulk this
 project is trying to measure, not something to duplicate into git. Plus
 any Playwright run artifacts (screenshots, videos, trace files, HTML
-reports, under the repo root's own gitignored `test-results/` /
-`playwright-report/`). Useful for debugging a specific run locally. Never
+reports: under the repo root's gitignored `test-results/` /
+`playwright-report/` for generation, under `results/raw/<run-id>/test-results/`
+for heal runs, next to their per-run `playwright.config.ts`). Useful for debugging a specific run locally. Never
 committed — see `.gitignore`.

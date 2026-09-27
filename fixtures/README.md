@@ -1,6 +1,8 @@
 # fixtures/
 
-Checked-in `playwright codegen` recordings that seed the Codegen condition.
+Checked-in starting points: `playwright codegen` recordings that seed
+the Codegen condition, and (under `heal/`) the known-good spec the
+healing study breaks and repairs.
 
 Each fixture is produced **once, deterministically, with zero LLM tokens**
 by a human running `npx playwright codegen <target-url>` and performing the
