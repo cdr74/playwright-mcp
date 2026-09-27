@@ -8,7 +8,6 @@ starts on them, per `CLAUDE.md`.
 
 Everything else below is history, kept for the record.
 
-- **Conclusions** across generation and healing, with the user (Phase 5).
 - More repeats per cell; more app updates for healing (Phases 4 and 5).
 - Automated/LLM-judge quality scorer (Phase 3).
 
@@ -694,8 +693,9 @@ Design agreed 2026-09-26: `CLAUDE.md` decision 15.
       $0.14 vs non-MCP $0.20. Integrity 11 × 19–20/20; one non-MCP DOM
       heal weakened an assertion (17/20) and still passes 5/5. Written
       up in `docs/results.md`.
-- [ ] **Conclusions** across generation (baseline + nudged) and healing,
-      with the user.
+- [x] **Conclusions** (2026-09-27, with the user): seven key insights,
+      README short version + `docs/insights.md` in detail. Framing:
+      raise awareness that it's not "CLI good, MCP bad".
 - [ ] Optional, after conclusions: more app updates / repeats.
 - [x] **[DECISION]** Not doing (user, 2026-09-27): restricting the healer
       to its 11 tools (a typical user doesn't restrict IDE tools either),

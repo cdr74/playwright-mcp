@@ -5,11 +5,14 @@ Longer-form write-ups that don't belong in the top-level `README.md`:
 - `testbed.md` — **the testbed in detail**: the app and flow, why the
   non-MCP generation condition is called Codegen, how a run is measured,
   setup, every run command, and what each file in the repo is for.
+- `insights.md` — **the key insights in detail**: what each one rests
+  on (numbers), what it means, and how far it holds. The README has the
+  short version.
 - `results.md` — **the headline results**: test generation on the
   realistic primer v3 (baseline and nudged batches: cost, efficiency,
   failure causes, quality with measured flakiness) and test healing (the
-  survival check and the healing pilot, with integrity scores). Facts
-  only so far; conclusions still to come.
+  survival check and the healing pilot, with integrity scores). The data
+  behind `insights.md`.
 - `app-knowledge/` — the "tester knowledge" primer fed to both
   conditions' prompts (where things are, known app-level quirks; the
   current v3 is short tester's notes, the older v1/v2 went down to

@@ -11,7 +11,8 @@ two agents fixing a broken spec. The generation batches:
 | **Nudged** | 2026-09-27 | `results/repeat-run-log-20260927T085029Z.txt` | Same, plus best-practices guidance [v2](testing-best-practices/v2.md) in the code-writing phase |
 | Nudged, first version | 2026-09-26 | `results/repeat-run-log-20260926T095822Z.txt` | Same, but guidance [v1](testing-best-practices/v1.md), which also described the benchmark and carried a URL hint. Superseded by v2; kept because of what that hint showed |
 
-This page records what was measured. Conclusions are still to be drawn.
+This page records what was measured. What it suggests is in
+[`insights.md`](insights.md).
 
 ## Measured facts
 

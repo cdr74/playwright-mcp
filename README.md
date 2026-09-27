@@ -94,8 +94,8 @@ of these numbers.
 ## First facts
 
 Means per run, n=3 per cell. Full tables, per-run data, failure analysis
-and caveats: **[docs/results.md](docs/results.md)**. Conclusions are
-still to be drawn.
+and caveats: **[docs/results.md](docs/results.md)**. What they suggest:
+[Key insights](#key-insights) below.
 
 | | MCP baseline | Codegen baseline | MCP nudged | Codegen nudged |
 |---|---|---|---|---|
@@ -139,8 +139,34 @@ healer agent; non-MCP = test output plus Playwright's failure snapshot):
 
 ## Key insights
 
-To be written in the conclusions session, from the facts above and in
-[docs/results.md](docs/results.md).
+Not "CLI good, MCP bad": which approach is cheaper, and by how much,
+depends on what the agent knows, what kind of test work it does, and how
+the tests are written. One app, one flow, one model, n=3; read these as
+direction, not precise ratios. **Details, numbers and limits:
+[docs/insights.md](docs/insights.md).**
+
+1. **The cost gap depends mostly on what the agent already knows.** With
+   a tester's usual notes MCP cost 1.2x the no-browser approach; with an
+   answer key for the screen, 6.3x. "MCP costs 4–10x more" is a
+   statement about context, not about MCP.
+2. **Knowledge replaces looking.** App-specific notes (traps, URLs) save
+   the no-browser approach a lot and MCP almost nothing. Generic
+   best-practice guidance improves quality for both, but costs MCP far
+   more (+190% vs +18%).
+3. **MCP pays up front; the blind approach pays per mistake.** MCP spends
+   ~90% on exploring, then mostly passes first time; Codegen needed ~8
+   test runs, each a full rewrite.
+4. **Quality didn't depend on the tooling.** All 18 generated tests pass
+   5/5; guidance lifted both conditions by 2–3 points.
+5. **How a test finds elements decides which app updates break it.**
+   Label changes broke 12 of 12 tests; CSS changes only those using the
+   renamed classes.
+6. **For healing, the failing locator tells you which tool to reach
+   for.** A renamed label is visible in Playwright's failure snapshot:
+   the no-browser fix cost $0.05. A renamed CSS class isn't: MCP was
+   cheaper and steadier.
+7. **"Passes 5/5" isn't enough to trust an AI-made change.** One heal
+   quietly tested less and still passed every re-run. Review the diff.
 
 ## External references
 
@@ -175,9 +201,14 @@ To be written in the conclusions session, from the facts above and in
 
 ## What's next
 
-- **Conclusions** from the generation batches and the healing pilot.
-- **Test healing beyond the pilot**, if the conclusions call for it:
-  more app updates or repeats ([runbook](docs/run-heal.md)).
+Open questions the insights raise, none of them run yet:
+
+- **Escalation for healing:** a short no-browser attempt, then MCP.
+  Cheaper overall? (insight 6)
+- **Out-of-date notes that contradict the app**, rather than just
+  missing the change (insight 2).
+- **More app updates, repeats, flows and models**, to firm up the
+  ratios.
 
 Details are in [`TODO.md`](TODO.md).
 
